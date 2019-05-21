@@ -3,7 +3,9 @@ var MongoClient = require('mongodb').MongoClient;
 var mongodb;
 
 module.exports = {
-    mongodb: mongodb,
+    getDbConnection: function(){
+        return mongodb;
+    },
     initDbConnection: function(callback) {
         // var connectionUrl;
         // // Create the database connection

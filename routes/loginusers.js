@@ -1,13 +1,15 @@
 const https = require('https');
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
+var mongodb = require('../db/mongo').getDbConnection;
 
 module.exports = function (app) {
 
     //this key is for testing purposes
     var api_key = '66b88c13-ed3c-11e8-a895-0200cd936042';
 
-    app.get('/getotp/:phonenumber:/deviceid', function (req, res) {
+    app.get('/getotp/:phonenumber/:deviceid', function (req, res) {
         console.log('came here');
+        console.log(mongodb());
         if (req.params.phonenumber) {
 
             // Result from isPossibleNumber().

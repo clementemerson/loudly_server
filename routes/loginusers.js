@@ -1,8 +1,8 @@
 const https = require('https');
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 var loginProcess = require('../db/loginprocess');
-var errors = require('./errorstousers');
-var success = require('./successtousers');
+var errors = require('../helpers/errorstousers');
+var success = require('../helpers/successtousers');
 
 module.exports = function (app) {
 
@@ -15,7 +15,6 @@ module.exports = function (app) {
     //3. Sends a reply back to client
     app.get('/getotp/:phonenumber', function (req, res) {
         console.log('came here');
-        console.log(mongodb());
         if (req.params.phonenumber) {
             //phonenumber param is valid
             const number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
@@ -26,18 +25,25 @@ module.exports = function (app) {
                 console.log(otpRequestUrl);
                 https.get(otpRequestUrl, (resp) => {
                     let data = '';
+
+                    // A chunk of data has been recieved.
+                    resp.on('data', (chunk) => {
+                        data += chunk;
+                    });
+
                     resp.on('end', () => {
                         //Got reply from 2factor
                         var response = JSON.parse(data);
                         var loginInfo = {};
                         loginInfo.session_id = response.Details;
-                        loginInfo.phonenumber = phonenumber;
+                        loginInfo.phonenumber = req.params.phonenumber;
                         //insert the data in db
                         //loginProcess.insert(loginInfo);
                         //send reply
-                        res.end(success.sendData(loginInfo.session_id));
+                        res.json(success.sendData(loginInfo.session_id));
                     });
                 }).on("error", (err) => {
+                    console.log('2factor error');
                     //error in 2factor
                     res.json(errors.errorInProcessing);
                 });

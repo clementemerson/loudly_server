@@ -1,48 +1,53 @@
 const https = require('https');
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
-var mongodb = require('../db/mongo').getDbConnection;
+var loginProcess = require('../db/loginprocess');
+var errors = require('./errorstousers');
+var success = require('./successtousers');
 
 module.exports = function (app) {
 
     //this key is for testing purposes
     var api_key = '66b88c13-ed3c-11e8-a895-0200cd936042';
 
-    app.get('/getotp/:phonenumber/:deviceid', function (req, res) {
+    //Comment: 
+    //1. This function gets a phonenumber, verifies it (only an indian number is valid)
+    //2. Stores the required info in db
+    //3. Sends a reply back to client
+    app.get('/getotp/:phonenumber', function (req, res) {
         console.log('came here');
         console.log(mongodb());
         if (req.params.phonenumber) {
-
-            // Result from isPossibleNumber().
+            //phonenumber param is valid
             const number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
             if (phoneUtil.isPossibleNumber(number) && phoneUtil.isValidNumber(number) &&
                 phoneUtil.isValidNumberForRegion(number, 'IN')) {
+                    //phonenumber is valid
                 var otpRequestUrl = 'https://2factor.in/API/V1/' + api_key + '/SMS/' + req.params.phonenumber + '/AUTOGEN/PhoneAuthLoudSpeaker';
                 console.log(otpRequestUrl);
                 https.get(otpRequestUrl, (resp) => {
                     let data = '';
-                    // The whole response has been received. Print out the result.
                     resp.on('end', () => {
+                        //Got reply from 2factor
                         var response = JSON.parse(data);
-                        res.end(data);
+                        var loginInfo = {};
+                        loginInfo.session_id = response.Details;
+                        loginInfo.phonenumber = phonenumber;
+                        //insert the data in db
+                        //loginProcess.insert(loginInfo);
+                        //send reply
+                        res.end(success.sendData(loginInfo.session_id));
                     });
                 }).on("error", (err) => {
-                    var error = {};
-                    error.Status = 'Error';
-                    error.Details = 'Error in OTP Provider';
-                    res.json(error);
+                    //error in 2factor
+                    res.json(errors.errorInProcessing);
                 });
-
             } else {
-                var error = {};
-                error.Status = 'Error';
-                error.Details = 'Invalid phone number';
-                res.json(error);
+                //phonenumber is invalid
+                res.json(errors.invalidPhoneNumber);
             }
         } else {
-            var error = {};
-            error.Status = 'Error';
-            error.Details = 'Invalid Data';
-            res.json(error);
+            //phonenumber param is invalid
+            res.json(errors.invalidData);
         }
     });
 
@@ -67,22 +72,18 @@ module.exports = function (app) {
                 // The whole response has been received. Print out the result.
                 resp.on('end', () => {
                     var response = JSON.parse(data);
-                    res.end(response.Details);
+                    if(response.Details === 'OTP Matched') {
+
+                    }
                 });
 
                 //If matched put an entry in db
                 //If not matched, ask them to click resend
             }).on("error", (err) => {
-                var error = {};
-                error.Status = 'Error';
-                error.Details = 'Error in OTP Provider';
-                res.json(error);
+                res.json(errors.errorInProcessing);
             });
         } else {
-            var error = {};
-            error.Status = 'Error';
-            error.Details = 'Invalid Data';
-            res.json(error);
+            res.json(errors.invalidData);
         }
     });
 }

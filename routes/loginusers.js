@@ -16,8 +16,15 @@ module.exports = function (app) {
     app.get('/getotp/:phonenumber', function (req, res) {
         console.log('came here');
         if (req.params.phonenumber) {
-            //phonenumber param is valid
-            const number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
+            //check phonenumber param is valid
+            var number;
+            try {
+                number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
+            } catch(err) {
+                res.json(errors.invalidData);
+                return;
+            }
+
             if (phoneUtil.isPossibleNumber(number) && phoneUtil.isValidNumber(number) &&
                 phoneUtil.isValidNumberForRegion(number, 'IN')) {
                     //phonenumber is valid

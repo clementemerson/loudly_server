@@ -8,6 +8,8 @@ module.exports = {
         var createdAt = date.toISOString();
         var updatedAt = date.toISOString();
 
+        console.log(mongodb());
+
         mongodb().collection(dbtables.loginProcess).insertOne({
             session_id: data.session_id,
             phonenumber: data.phonenumber,

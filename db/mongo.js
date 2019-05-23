@@ -1,25 +1,23 @@
 //mongo
 var MongoClient = require('mongodb').MongoClient;
-var mongodb;
+var mdb;
+var assert = require('assert');
 
 module.exports = {
-    getDbConnection: function(){
-        return mongodb;
+    getDbConnection: () => {
+        return mdb;
     },
-    initDbConnection: function(callback) {
-        // var connectionUrl;
-        // // Create the database connection
-        // MongoClient.connect(connectionUrl, {
-        //     poolSize: 10
-        //     // other options can go here
-        // }, function (err, db) {
-        //     assert.equal(null, err);
-        //     mongodb = db;
-        //     callback();
-        // }
-        // );
-
-        mongodb = 'Clement';
-        callback();
-    },    
+    initDbConnection: (callback) => {
+        const connectionUrl = 'mongodb://loudly.loudspeakerdev.net:27017';
+        // Create the database connection
+        MongoClient.connect(connectionUrl, {
+            poolSize: 10,
+            useNewUrlParser: true
+            // other options can go here
+        }, function (err, client) {
+            assert.equal(null, err);
+            mdb = client.db('loudly');
+            callback();
+        });
+    },
 };

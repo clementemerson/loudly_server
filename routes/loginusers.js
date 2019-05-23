@@ -1,5 +1,6 @@
 
 var LoginController = require('../controllers/LoginController');
+var jwtController = require('../controllers/jwtController');
 
 const asyncMiddleware = fn =>
   (req, res, next) => {
@@ -22,6 +23,6 @@ module.exports = function (app) {
         asyncMiddleware(LoginController.getExistingUserInfoFromPhoneNumber),
         asyncMiddleware(LoginController.prepareCreateUser),
         asyncMiddleware(LoginController.createUser),
-        LoginController.signjwt,
+        jwtController.signjwt,
     ]);
 }

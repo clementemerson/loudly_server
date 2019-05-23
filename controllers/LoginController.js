@@ -225,18 +225,5 @@ module.exports = {
         }
     },
 
-    signjwt: (req, res, next) => {
-        if (req.body.user_data) {
-            var user_data = req.body.user_data;
-            var user_data_jwt = {
-                user_id: user_data.user_id,
-                user_secret: user_data.user_secret,
-                user_phonenumber: user_data.phonenumber
-            }
-            let token = jwt.sign(user_data_jwt, jwtSecret);
-            res.status(201).send({ token: token });
-        } else {
-            return res.json(errors.errorInProcessing);
-        }
-    }
+    
 }

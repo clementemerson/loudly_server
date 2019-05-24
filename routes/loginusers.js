@@ -1,6 +1,6 @@
 
-var LoginController = require('../controllers/LoginController');
-var jwtController = require('../controllers/jwtController');
+let LoginController = require('../controllers/LoginController');
+let jwtController = require('../controllers/jwtController');
 
 const asyncMiddleware = fn =>
   (req, res, next) => {
@@ -17,7 +17,7 @@ module.exports = function (app) {
         LoginController.getotp
     ]);
 
-    app.get('/verifyotp_login/:sessionid/:otp', [
+    app.post('/signin', [
         LoginController.verifyotp,
         asyncMiddleware(LoginController.getPhoneNumberBySessionId),
         asyncMiddleware(LoginController.getExistingUserInfoFromPhoneNumber),

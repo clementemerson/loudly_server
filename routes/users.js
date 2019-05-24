@@ -1,6 +1,10 @@
+let jwtController = require('../controllers/jwtController');
+let UserController = require('../controllers/UserController');
+
 module.exports = function(app) {
-    app.get('/Users/:id', function (req, res) {
-        console.log(req.params.id);
-        res.end('<h1>Some Title<h1>');
-     });
+    app.post('/users/byphonenumbers', [
+        jwtController.validJWTNeeded,
+        jwtController.validJWTDataNeeded,
+        UserController.getUsersByPhoneNumbers
+    ]);
 }

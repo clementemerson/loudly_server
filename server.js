@@ -1,6 +1,7 @@
 var express = require('express');
-var app = express();
+var serverapp = express();
 var server;
+serverapp.use(express.json())
 
 var mongo = require('./db/mongo');
 
@@ -20,7 +21,7 @@ function recursiveRoutes(folderName) {
         if (stat.isDirectory()) {
             recursiveRoutes(fullName);
         } else if (file.toLowerCase().indexOf('.js')) {
-            require('./' + fullName)(app);
+            require('./' + fullName)(serverapp);
             console.log("require('" + fullName + "')");
         }
     });
@@ -33,7 +34,7 @@ recursiveRoutes('routes'); // Initialize it
 mongo.initDbConnection(initServer);
 
 function initServer() {
-    server = app.listen(listen_to_port, function () {
+    server = serverapp.listen(listen_to_port, function () {
         var host = server.address().address
         var port = server.address().port
         console.log("Example app listening at http://%s:%s", host, port)

@@ -2,30 +2,29 @@ const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance()
 const https = require('https');
 const uuidv4 = require('uuid/v4');
 const cryptoRandomString = require('crypto-random-string');
+var crypto = require('crypto');
 
 var dbTransactions = require('../db/session');
 var loginProcess = require('../db/loginprocess');
-var Users = require('../db/users')
+var Users = require('../db/users');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
 
 
 //this key is for testing purposes
-var api_key = '66b88c13-ed3c-11e8-a895-0200cd936042';
+var api_key = 'c9fb601d-ecf3-11e8-a895-0200cd936042';
 
 module.exports = {
     getotp: (req, res) => {
 
-        console.log('came here');
-        console.log(req.params.phonenumber);
+        console.log('LoginController.getotp');
         if (req.params.phonenumber) {
             //check phonenumber param is valid
             var number;
             try {
                 number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
             } catch (err) {
-                console.log('error');
                 return res.json(errors.invalidData);
             }
 
@@ -54,7 +53,6 @@ module.exports = {
                         return res.json(success.sendData(loginInfo.session_id));
                     });
                 }).on("error", (err) => {
-                    console.log('2factor error');
                     //error in 2factor
                     return res.json(errors.errorInProcessing);
                 });
@@ -69,130 +67,126 @@ module.exports = {
     },
 
     verifyotp: (req, res, next) => {
+        console.log('LoginController.verifyotp');
         try {
-            console.log('verifyotp');
-            if (req.params.sessionid && req.params.otp) {
-                var session_id = req.params.sessionid;
-                var otp_entered_by_user = req.params.otp;
+            console.log(req.body);
+            var session_id = req.body.sessionid;
+            var otp_entered_by_user = req.body.otp;
 
-                var otpRequestUrl = 'https://2factor.in/API/V1/' + api_key + '/SMS/VERIFY/' + session_id + '/' + otp_entered_by_user;
-                console.log(otpRequestUrl);
-                https.get(otpRequestUrl, (resp) => {
-                    let data = '';
+            var otpRequestUrl = 'https://2factor.in/API/V1/' + api_key + '/SMS/VERIFY/' + session_id + '/' + otp_entered_by_user;
+            console.log(otpRequestUrl);
+            https.get(otpRequestUrl, (resp) => {
+                let data = '';
 
-                    // A chunk of data has been recieved.
-                    resp.on('data', (chunk) => {
-                        data += chunk;
-                        console.log(data);
-                    });
-
-                    // The whole response has been received. Print out the result.
-                    resp.on('end', () => {
-                        var response = JSON.parse(data);
-                        if (response.Details === 'OTP Matched') {
-                            req.body = {
-                                session_id: session_id
-                            };
-                            return next();
-                        }
-                    });
-                }).on("error", (err) => {
-                    return res.json(errors.errorInProcessing);
+                // A chunk of data has been recieved.
+                resp.on('data', (chunk) => {
+                    data += chunk;
                 });
-            } else {
-                return res.json(errors.invalidData);
-            }
+
+                // The whole response has been received. Print out the result.
+                resp.on('end', () => {
+                    var response = JSON.parse(data);
+                    console.log(response);
+                    if (response.Details === 'OTP Matched') {
+                        req.body = {
+                            session_id: session_id
+                        };
+                        return next();
+                    } else {
+                        return res.json(errors.errorOTPMismatchOrExpired);
+                    }
+                });
+            }).on("error", (err) => {
+                return res.json(errors.errorInProcessing);
+            });
         } catch (err) {
             return res.json(errors.errorInProcessing);
         }
     },
 
     getPhoneNumberBySessionId: async (req, res, next) => {
+        console.log('LoginController.getPhoneNumberBySessionId');
         try {
-            if (req.body.sessionid) {
-                var session_id = req.body.sessionid;
-                var result = await loginProcess.getOneByOTPSessionId(session_id);
+            var session_id = req.body.session_id;
+            var result = await loginProcess.getOneBySessionId(session_id);
 
-                if (result === null) {
-                    return res.json(errors.errorInProcessing);
-                } else {
-                    req.body = {
-                        phonenumber: result.phonenumber
-                    };
-                    return next();
-                }
-            } else {
-                return res.json(errors.errorInProcessing);
-            }
+            req.body = {
+                session_id: session_id,
+                phonenumber: result.phonenumber
+            };
+            return next();
         } catch (err) {
             return res.json(errors.errorInProcessing);
         }
     },
 
     getExistingUserInfoFromPhoneNumber: async (req, res, next) => {
+        console.log('LoginController.getExistingUserInfoFromPhoneNumber');
         try {
-            if (req.body.phonenumber) {
-                var phonenumber = req.body.phonenumber;
-                var user = await Users.getOneByPhoneNumber(phonenumber);
-                req.body = {
-                    user: user,
-                    phonenumber: phonenumber
-                }
-                return next();
-            } else {
-                return res.json(errors.errorInProcessing);
+            var phonenumber = req.body.phonenumber;
+            var user = await Users.getOneByPhoneNumber(phonenumber);
+
+            req.body = {
+                session_id: req.body.session_id,
+                user: user,
+                phonenumber: phonenumber
             }
+            return next();
         } catch (err) {
             return res.json(errors.errorInProcessing);
         }
     },
 
     prepareCreateUser: async (req, res, next) => {
-        const dbsession = dbTransactions.startSession();
+        console.log('LoginController.prepareCreateUser');
+        var dbsession;
         try {
-            if (req.body.phonenumber) {
-                var phonenumber = req.body.phonenumber;
-                //create user secret and hash
-                var user_secret = cryptoRandomString({ length: 24, type: 'base64' });
-                let salt = crypto.randomBytes(16).toString('base64');
-                let hash = crypto.createHmac('sha512', salt)
-                    .update(user_secret)
-                    .digest("base64");
-                var user_secret_hashed = salt + "$" + hash;
+            dbsession = await dbTransactions.startSession();
+            dbsession.startTransaction();
 
-                var user_data;
-                if (req.body.user === null) {
-                    //Create New User
-                    user_data = {
-                        user_id: uuidv4(),
-                        phonenumber: phonenumber,
-                        user_secret_hashed: user_secret_hashed,
-                        user_secret: user_secret
-                    };
-                    req.body = {
-                        user_data: user_data
-                    }
-                    return next();
-                } else {
+            //delete the entry in loginprocess table
+            await loginProcess.deleteBySessionId(req.body.session_id);
 
-                    //Create New with old userid
-                    var existingUserInfo = req.body.user;
-                    await Users.deleteOldUserInfo(phonenumber);
+            //create user secret and hash
+            var user_secret = cryptoRandomString({ length: 24, type: 'base64' });
+            let salt = crypto.randomBytes(16).toString('base64');
+            let hash = crypto.createHmac('sha512', salt)
+                .update(user_secret)
+                .digest("base64");
+            var user_secret_hashed = salt + "$" + hash;
 
-                    user_data = {
-                        user_id: existingUserInfo.user_id,
-                        phonenumber: phonenumber,
-                        user_secret_hashed: user_secret_hashed,
-                        user_secret: user_secret
-                    };
-                    req.body = {
-                        user_data: user_data,
-                        dbsession: dbsession
-                    }
-                    return next();
+            var user_data;
+            var phonenumber = req.body.phonenumber;
+            if (req.body.user === null) {
+                //Create New User
+                user_data = {
+                    user_id: uuidv4(),
+                    phonenumber: phonenumber,
+                    user_secret_hashed: user_secret_hashed,
+                    user_secret: user_secret
+                };
+                req.body = {
+                    user_data: user_data,
+                    dbsession: dbsession
                 }
+                return next();
             } else {
-                return res.json(errors.errorInProcessing);
+
+                //Create New with old userid
+                var existingUserInfo = req.body.user;
+                await Users.deleteOldUserInfo(phonenumber);
+
+                user_data = {
+                    user_id: existingUserInfo.user_id,
+                    phonenumber: phonenumber,
+                    user_secret_hashed: user_secret_hashed,
+                    user_secret: user_secret
+                };
+                req.body = {
+                    user_data: user_data,
+                    dbsession: dbsession
+                }
+                return next();
             }
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
@@ -201,29 +195,23 @@ module.exports = {
     },
 
     createUser: async (req, res, next) => {
-        var dbsession = req.body.dbsession;
-        if (!dbsession) {
-            dbsession = dbTransactions.startSession();
-        }
-
+        console.log('LoginController.createUser');
+        var dbsession;
         try {
-            if (req.body.user_data) {
-                var user_data = req.body.user_data;
-
-                await Users.insert(user_data);
-                await dbTransactions.commitTransaction(dbsession);
-                return next();
-            } else {
-                if (dbsession) {
-                    await dbTransactions.abortTransaction(dbsession);
-                }
-                return res.json(errors.errorInProcessing);
+            dbsession = req.body.dbsession;
+            if (!dbsession) {
+                dbsession = await dbTransactions.startSession();
+                dbsession.startTransaction();
             }
+
+            var user_data = req.body.user_data;
+
+            await Users.insert(user_data);
+            await dbTransactions.commitTransaction(dbsession);
+            return next();
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
             return res.json(errors.errorInProcessing);
         }
     },
-
-    
 }

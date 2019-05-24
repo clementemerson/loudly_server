@@ -11,4 +11,8 @@ module.exports = {
         Status: 'Error',
         Details: 'Error in processing request'
     },
+    errorOTPMismatchOrExpired: {
+        Status: 'Error',
+        Details: 'OTP Mismatch or Expired'
+    },
 };

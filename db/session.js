@@ -1,4 +1,5 @@
 var mongodb = require('./mongo').getDbConnection;
+var mongoClient = require('./mongo').getDbClient;
 
 module.exports = {
     commitTransaction: async (session) => {
@@ -9,7 +10,7 @@ module.exports = {
         await session.abortTransaction();
         session.endSession();
     },
-    startSession: () => {
-        return mongodb().startSession();
+    startSession: async () => {
+        return await mongoClient().startSession();
     }
 }

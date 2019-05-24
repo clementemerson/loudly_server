@@ -8,8 +8,7 @@ module.exports = {
         var createdAt = date.toISOString();
         var updatedAt = date.toISOString();
 
-        console.log(mongodb());
-
+        console.log('db.loginprocess.insert');
         mongodb().collection(dbtables.loginProcess).insertOne({
             session_id: data.session_id,
             phonenumber: data.phonenumber,
@@ -18,10 +17,11 @@ module.exports = {
         });
     },
     //-------------------------------------------------------------------------
-    getOneByOTPSessionId: function (session_id) {
+    getOneBySessionId: async (session_id) => {
         return new Promise(
             function (resolve, reject) {
                 try {
+                    console.log('db.loginprocess.getOneBySessionId');
                     mongodb().collection(dbtables.loginProcess)
                         .find({ session_id: session_id })
                         .toArray(function (err, data) {
@@ -29,7 +29,6 @@ module.exports = {
                                 reject(err);
                             } else {
                                 if (data[0]) {
-                                    console.log('getByOTPSessionId - data', data);
                                     resolve(data[0]);
                                 } else {
                                     resolve(null);
@@ -41,5 +40,20 @@ module.exports = {
                 }
             }
         )
-    }
+    },
+    //-------------------------------------------------------------------------
+    deleteBySessionId: async (session_id) => {
+        return new Promise(
+            function (resolve, reject) {
+                try {
+                    console.log('db.loginprocess.deleteBySessionId');
+                    mongodb().collection(dbtables.loginProcess)
+                        .deleteMany({ session_id: session_id });
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            }
+        )
+    },
 };

@@ -11,7 +11,7 @@ module.exports = {
                     var createdAt = date.toISOString();
                     var updatedAt = date.toISOString();
 
-                    mongodb().collection(dbtables.loginProcess).insertOne({
+                    mongodb().collection(dbtables.Users).insertOne({
                         user_id: data.user_id,
                         phonenumber: data.phonenumber,
                         user_secret: data.user_secret_hashed,
@@ -37,7 +37,6 @@ module.exports = {
                                 reject(err);
                             } else {
                                 if (data[0]) {
-                                    console.log('getByOTPSessionId - data', data);
                                     resolve(data[0]);
                                 } else {
                                     resolve(null);
@@ -51,17 +50,33 @@ module.exports = {
         );
     },
     //-------------------------------------------------------------------------
-    deleteOldUserInfo: function (phonenumber) {
+    deleteOldUserInfo: async (phonenumber) => {
+        await mongodb().collection(dbtables.Users)
+            .deleteMany({ phonenumber: phonenumber });
+    },
+    //-------------------------------------------------------------------------
+    getUsersByPhoneNumbers: function (phoneNumbers) {
         return new Promise(
             function (resolve, reject) {
                 try {
                     mongodb().collection(dbtables.Users)
-                        .deleteMany({ phonenumber: phonenumber });
-                    resolve();
+                        .find({ phonenumber: { $in: phoneNumbers } },
+                            { user_id: 1, phonenumber: 1 })
+                        .toArray(function (err, data) {
+                            if (err) {
+                                reject(err);
+                            } else {
+                                if (data) {
+                                    resolve(data);
+                                } else {
+                                    resolve(null);
+                                }
+                            }
+                        });
                 } catch (err) {
                     reject(err);
                 }
             }
         );
-    }
+    },
 };

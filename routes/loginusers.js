@@ -21,8 +21,7 @@ module.exports = function (app) {
         LoginController.verifyotp,
         asyncMiddleware(LoginController.getPhoneNumberBySessionId),
         asyncMiddleware(LoginController.getExistingUserInfoFromPhoneNumber),
-        asyncMiddleware(LoginController.prepareCreateUser),
-        asyncMiddleware(LoginController.createUser),
+        asyncMiddleware(LoginController.createUserInfo),
         jwtController.signjwt,
     ]);
 }

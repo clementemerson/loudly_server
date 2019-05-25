@@ -3,27 +3,40 @@ var mongodb = require('./mongo').getDbConnection;
 var dbtables = require('./dbtables');
 
 module.exports = {
-    insert: function (data) {
-        return new Promise(
-            function (resolve, reject) {
-                try {
-                    var date = new Date();
-                    var createdAt = date.toISOString();
-                    var updatedAt = date.toISOString();
+    insert: async (data) => {
+        let date = new Date();
+        let createdAt = date.toISOString();
+        let updatedAt = date.toISOString();
 
-                    mongodb().collection(dbtables.Users).insertOne({
-                        user_id: data.user_id,
-                        phonenumber: data.phonenumber,
-                        user_secret: data.user_secret_hashed,
-                        createdAt: createdAt,
-                        updatedAt: updatedAt
-                    });
-                    resolve();
-                } catch (err) {
-                    reject(err);
-                }
-            }
-        );
+        mongodb().collection(dbtables.Users).insertOne({
+            user_id: data.user_id,
+            phonenumber: data.phonenumber,
+            user_secret: data.user_secret_hashed,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        });
+    },
+    //-------------------------------------------------------------------------
+    insertInfo: async (data) => {
+        let date = new Date();
+        let createdAt = date.toISOString();
+        let updatedAt = date.toISOString();
+
+        let existingUsers = await mongodb().collection(dbtables.UsersInfo)
+            .find({ user_id: data.user_id })
+            .toArray();
+
+        if (!existingUsers[0]) {
+            await mongodb().collection(dbtables.UsersInfo)
+                .insertOne({
+                    user_id: data.user_id,
+                    name: '~',
+                    statusmsg: 'I vote on Looudly',
+                    createdAt: createdAt,
+                    updatedAt: updatedAt
+                });
+        }
+
     },
     //-------------------------------------------------------------------------
     getOneByPhoneNumber: function (phonenumber) {
@@ -78,5 +91,11 @@ module.exports = {
                 }
             }
         );
+    },
+
+    getUserInfoByUserIds: async (user_ids) => {
+        return await mongodb().collection(dbtables.UsersInfo)
+            .find({ user_id: { $in: user_ids } })
+            .toArray();
     },
 };

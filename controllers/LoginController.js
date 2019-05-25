@@ -137,81 +137,79 @@ module.exports = {
         }
     },
 
-    prepareCreateUser: async (req, res, next) => {
+    createUserInfo: async (req, res, next) => {
         console.log('LoginController.prepareCreateUser');
         var dbsession;
         try {
             dbsession = await dbTransactions.startSession();
             dbsession.startTransaction();
 
-            //delete the entry in loginprocess table
-            await loginProcess.deleteBySessionId(req.body.session_id);
+            await privateFunctions.prepareCreateUser(req);
+            await privateFunctions.createUser(req.body.user_data);
+            await privateFunctions.createUserInfo(req.body.user_data);
 
-            //create user secret and hash
-            var user_secret = cryptoRandomString({ length: 24, type: 'base64' });
-            let salt = crypto.randomBytes(16).toString('base64');
-            let hash = crypto.createHmac('sha512', salt)
-                .update(user_secret)
-                .digest("base64");
-            var user_secret_hashed = salt + "$" + hash;
-
-            var user_data;
-            var phonenumber = req.body.phonenumber;
-            if (req.body.user === null) {
-                //Create New User
-                user_data = {
-                    user_id: uuidv4(),
-                    phonenumber: phonenumber,
-                    user_secret_hashed: user_secret_hashed,
-                    user_secret: user_secret
-                };
-                req.body = {
-                    user_data: user_data,
-                    dbsession: dbsession
-                }
-                return next();
-            } else {
-
-                //Create New with old userid
-                var existingUserInfo = req.body.user;
-                await Users.deleteOldUserInfo(phonenumber);
-
-                user_data = {
-                    user_id: existingUserInfo.user_id,
-                    phonenumber: phonenumber,
-                    user_secret_hashed: user_secret_hashed,
-                    user_secret: user_secret
-                };
-                req.body = {
-                    user_data: user_data,
-                    dbsession: dbsession
-                }
-                return next();
-            }
-        } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return res.json(errors.errorInProcessing);
-        }
-    },
-
-    createUser: async (req, res, next) => {
-        console.log('LoginController.createUser');
-        var dbsession;
-        try {
-            dbsession = req.body.dbsession;
-            if (!dbsession) {
-                dbsession = await dbTransactions.startSession();
-                dbsession.startTransaction();
-            }
-
-            var user_data = req.body.user_data;
-
-            await Users.insert(user_data);
             await dbTransactions.commitTransaction(dbsession);
             return next();
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
             return res.json(errors.errorInProcessing);
         }
+    },
+}
+
+privateFunctions = {
+    prepareCreateUser: async (req) => {
+        console.log('LoginController.prepareCreateUser');
+
+        //delete the entry in loginprocess table
+        await loginProcess.deleteBySessionId(req.body.session_id);
+
+        //create user secret and hash
+        var user_secret = cryptoRandomString({ length: 24, type: 'base64' });
+        let salt = crypto.randomBytes(16).toString('base64');
+        let hash = crypto.createHmac('sha512', salt)
+            .update(user_secret)
+            .digest("base64");
+        var user_secret_hashed = salt + "$" + hash;
+
+        var user_data;
+        var phonenumber = req.body.phonenumber;
+        if (req.body.user === null) {
+            //Create New User
+            user_data = {
+                user_id: uuidv4(),
+                phonenumber: phonenumber,
+                user_secret_hashed: user_secret_hashed,
+                user_secret: user_secret
+            };
+            req.body = {
+                user_data: user_data
+            }
+        } else {
+
+            //Create New with old userid
+            var existingUserInfo = req.body.user;
+            await Users.deleteOldUserInfo(phonenumber);
+
+            user_data = {
+                user_id: existingUserInfo.user_id,
+                phonenumber: phonenumber,
+                user_secret_hashed: user_secret_hashed,
+                user_secret: user_secret
+            };
+            req.body = {
+                user_data: user_data
+            }
+        }
+    },
+
+    createUser: async (user_data) => {
+        console.log('LoginController.createUser');
+        await Users.insert(user_data);
+    },
+
+    createUserInfo: async (user_data) => {
+        console.log('LoginController.createUserInfo');
+        await Users.insertInfo(user_data);
     },
 }

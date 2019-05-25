@@ -24,6 +24,7 @@ module.exports = {
         console.log(user_ids);
 
         let userinfos = await Users.getUserInfoByUserIds(user_ids);
+        console.log(userinfos);
         return userinfos;
     }
 }

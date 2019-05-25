@@ -47,15 +47,16 @@ wss.on('connection', async (ws, req) => {
 
 async function toEvent(ws) {
   let message = JSON.parse(ws.data);
+  var reply;
   switch (message.module) {
-    case users:
-      UsersModuleHandlers.handle(message);
+    case 'users':
+      reply = await UsersModuleHandlers.handle(message);
       break;
-    case groups:
-      GroupsModuleHandlers.handle(message);
+    case 'groups':
+      reply = await GroupsModuleHandlers.handle(message);
       break;
-    case polls:
-      PollsModuleHandlers.handle(message);
+    case 'polls':
+      reply = await PollsModuleHandlers.handle(message);
       break;
     default:
       break;
@@ -64,7 +65,7 @@ async function toEvent(ws) {
   console.log(message.event);
   console.log(message.phoneNumbers);
   let userInfos = await UserController.getUsersFromPhoneNumbers(message.phoneNumbers);
-  connections[ws.target.jwtDetails.user_id].send(JSON.stringify(userInfos));
+  connections[ws.target.jwtDetails.user_id].send(JSON.stringify(reply));
 }
 
 //Init connection with DB

@@ -32,6 +32,7 @@ module.exports = {
                     user_id: data.user_id,
                     name: '~',
                     statusmsg: 'I vote on Looudly',
+                    phonenumber: data.phonenumber,
                     createdAt: createdAt,
                     updatedAt: updatedAt
                 });

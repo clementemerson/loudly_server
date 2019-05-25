@@ -1,5 +1,5 @@
 module.exports = {
-    handle: (message) => {
+    handle: async (message) => {
 
     }
 }

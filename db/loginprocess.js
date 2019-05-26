@@ -43,17 +43,8 @@ module.exports = {
     },
     //-------------------------------------------------------------------------
     deleteBySessionId: async (session_id) => {
-        return new Promise(
-            function (resolve, reject) {
-                try {
-                    console.log('db.loginprocess.deleteBySessionId');
-                    mongodb().collection(dbtables.loginProcess)
-                        .deleteMany({ session_id: session_id });
-                    resolve();
-                } catch (err) {
-                    reject(err);
-                }
-            }
-        )
+        console.log('db.loginprocess.deleteBySessionId');
+        await mongodb().collection(dbtables.loginProcess)
+            .deleteMany({ session_id: session_id });
     },
 };

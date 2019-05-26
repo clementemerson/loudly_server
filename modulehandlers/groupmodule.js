@@ -2,6 +2,7 @@ let GroupController = require('../controllers/GroupController');
 
 module.exports = {
     handle: async (message) => {
+        console.log('groups module');
         var reply;
         switch (message.event) {
             case 'create':

@@ -44,26 +44,30 @@ wss.on('connection', async (ws, req) => {
 });
 
 async function toEvent(ws) {
-  let message = JSON.parse(ws.data);
-  message.user_id = ws.target.jwtDetails.user_id;
-  var reply;
-  switch (message.module) {
-    case 'users':
-      reply = await UsersModuleHandlers.handle(message);
-      break;
-    case 'groups':
-      reply = await GroupsModuleHandlers.handle(message);
-      break;
-    case 'polls':
-      reply = await PollsModuleHandlers.handle(message);
-      break;
-    default:
-      break;
+  try {
+    let message = JSON.parse(ws.data);
+    console.log(message);
+    message.user_id = ws.target.jwtDetails.user_id;
+    var reply;
+    switch (message.module) {
+      case 'users':
+        reply = await UsersModuleHandlers.handle(message);
+        break;
+      case 'groups':
+        reply = await GroupsModuleHandlers.handle(message);
+        break;
+      case 'polls':
+        reply = await PollsModuleHandlers.handle(message);
+        break;
+      default:
+        break;
+    }
+
+    console.log(reply);
+    connections.getConnections()[ws.target.jwtDetails.user_id].send(JSON.stringify(reply));
+  } catch (err) {
+    console.log(err);
   }
-  console.log(message.module);
-  console.log(message.event);
-  console.log(message.phoneNumbers);
-  connections.getConnections()[ws.target.jwtDetails.user_id].send(JSON.stringify(reply));
 }
 
 //Init connection with DB

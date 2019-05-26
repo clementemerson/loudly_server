@@ -45,8 +45,10 @@ module.exports = {
         try {
             let user_secret = req.jwtDetails.user_secret;
             let phonenumber = req.jwtDetails.user_phonenumber;
+            console.log(req.jwtDetails);
 
             let user = await Users.getOneByPhoneNumber(phonenumber);
+            console.log(user.user_secret);
             let user_secret_splited = user.user_secret.split('$');
 
             let hash = crypto.createHmac('sha512', user_secret_splited[0])
@@ -58,6 +60,7 @@ module.exports = {
             }
             return true;
         } catch (err) {
+            console.log(err);
             return false;
         }
     },

@@ -3,6 +3,7 @@ var Polls = require('../db/polls');
 
 module.exports = {
     create: async (message) => {
+        console.log('PollController.create');
         //TODO: nothing
         var data = {};
 
@@ -15,6 +16,7 @@ module.exports = {
     },
 
     vote: async (message) => {
+        console.log('PollController.vote');
         //TODO: update pollresult and groupPollResult
         //TODO: create entries in transaction tables
         var data = {};
@@ -27,6 +29,7 @@ module.exports = {
     },
 
     shareToGroup: async (message) => {
+        console.log('PollController.shareToGroup');
         //TODO: if the poll is already shared to the group then do not proceed
         //TODO: create entries in transaction tables
         var data = {};

@@ -151,6 +151,7 @@ module.exports = {
             await dbTransactions.commitTransaction(dbsession);
             return next();
         } catch (err) {
+            console.log(err);
             await dbTransactions.abortTransaction(dbsession);
             return res.json(errors.errorInProcessing);
         }
@@ -174,7 +175,7 @@ privateFunctions = {
 
         var user_data;
         var phonenumber = req.body.phonenumber;
-        if (req.body.user === null) {
+        if (!req.body.user) {
             //Create New User
             user_data = {
                 user_id: uuidv4(),

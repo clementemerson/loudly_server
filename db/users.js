@@ -4,6 +4,7 @@ var dbtables = require('./dbtables');
 
 module.exports = {
     insert: async (data) => {
+        console.log('db.users.insert');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -18,6 +19,7 @@ module.exports = {
     },
     //-------------------------------------------------------------------------
     insertInfo: async (data) => {
+        console.log('db.users.insertInfo');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -41,18 +43,22 @@ module.exports = {
     },
     //-------------------------------------------------------------------------
     getOneByPhoneNumber: async (phonenumber) => {
-        return await mongodb().collection(dbtables.Users)
+        console.log('db.users.getOneByPhoneNumber');
+        let users = await mongodb().collection(dbtables.Users)
             .find({ phonenumber: phonenumber })
             .toArray();
-
+            console.log(users);
+        return users[0];
     },
     //-------------------------------------------------------------------------
     deleteOldUserInfo: async (phonenumber) => {
+        console.log('db.users.deleteOldUserInfo');
         await mongodb().collection(dbtables.Users)
             .deleteMany({ phonenumber: phonenumber });
     },
     //-------------------------------------------------------------------------
     getUsersByPhoneNumbers: async (phoneNumbers) => {
+        console.log('db.users.getUsersByPhoneNumbers');
         return await mongodb().collection(dbtables.Users)
             .find({ phonenumber: { $in: phoneNumbers } },
                 { user_id: 1, phonenumber: 1 })
@@ -61,6 +67,7 @@ module.exports = {
     },
 
     getUserInfoByUserIds: async (user_ids) => {
+        console.log('db.users.getUserInfoByUserIds');
         return await mongodb().collection(dbtables.UsersInfo)
             .find({ user_id: { $in: user_ids } })
             .toArray();

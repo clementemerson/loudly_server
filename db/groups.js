@@ -3,6 +3,7 @@ var dbtables = require('./dbtables');
 
 module.exports = {
     create: async (data) => {
+        console.log('db.groups.create');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -18,6 +19,7 @@ module.exports = {
     },
 
     changeTitle: async (data) => {
+        console.log('db.groups.changeTitle');
         let date = new Date();
         let updatedAt = date.toISOString();
 
@@ -30,6 +32,7 @@ module.exports = {
     },
 
     changeDesc: async (data) => {
+        console.log('db.groups.changeDesc');
         let date = new Date();
         let updatedAt = date.toISOString();
 
@@ -42,18 +45,21 @@ module.exports = {
     },
 
     delete: async (data) => {
+        console.log('db.groups.delete');
         await mongodb().collection(dbtables.GroupInfo).remove({
             id: data.id
         });
     },
 
     getGroupsInfo: async (data) => {
+        console.log('db.groups.getGroupsInfo');
         await mongodb().collection(dbtables.GroupInfo)
             .find({ id: { $in: data.groupids } })
             .toArray();
     },
 
     addUser: async (data) => {
+        console.log('db.groups.addUser');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -69,6 +75,7 @@ module.exports = {
     },
 
     changeUserPermission: async (data) => {
+        console.log('db.groups.changeUserPermission');
         let date = new Date();
         let updatedAt = date.toISOString();
 
@@ -85,6 +92,7 @@ module.exports = {
     },
 
     removeUser: async (data) => {
+        console.log('db.groups.removeUser');
         await mongodb().collection(dbtables.GroupUsers).remove({
             groupid: data.groupid,
             user_id: data.user_id
@@ -92,12 +100,14 @@ module.exports = {
     },
 
     getUsers: async (data) => {
+        console.log('db.groups.getUsers');
         return await mongodb().collection(dbtables.GroupUsers)
             .find({ groupid: { $in: data.groupids } })
             .toArray();
     },
 
     getPolls: async (data) => {
+        console.log('db.groups.getPolls');
         await mongodb().collection(dbtables.GroupPolls)
             .find({ groupid: data.groupid })
             .toArray();

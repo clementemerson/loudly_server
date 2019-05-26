@@ -3,6 +3,7 @@ var dbtables = require('./dbtables');
 
 module.exports = {
     create: async (data) => {
+        console.log('db.polls.create');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -18,6 +19,7 @@ module.exports = {
     },
 
     vote: async (data) => {
+        console.log('db.polls.vote');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -32,6 +34,7 @@ module.exports = {
     },
 
     shareToGroup: async (data) => {
+        console.log('db.polls.shareToGroup');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();

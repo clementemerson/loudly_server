@@ -3,6 +3,7 @@ let Groups = require('../db/groups');
 
 module.exports = {
     create: async (message) => {
+        console.log('GroupController.create');
         //TODO: nothing
         var data = {};
 
@@ -15,6 +16,7 @@ module.exports = {
     },
 
     changeTitle: async (message) => {
+        console.log('GroupController.changeTitle');
         //TODO: create entries in transaction tables
         var data = {};
 
@@ -26,6 +28,7 @@ module.exports = {
     },
 
     changeDesc: async (message) => {
+        console.log('GroupController.changeDesc');
         //TODO: create entries in transaction tables
         var data = {};
 
@@ -37,6 +40,7 @@ module.exports = {
     },
 
     delete: async (message) => {
+        console.log('GroupController.delete');
         //TODO: create entries in transaction tables
         var data = {};
 
@@ -47,6 +51,7 @@ module.exports = {
     },
 
     getGroupsInfo: async (message) => {
+        console.log('GroupController.getGroupsInfo');
         //TODO: nothing
         var data = {};
 
@@ -56,6 +61,7 @@ module.exports = {
     },
 
     addUser: async (message) => {
+        console.log('GroupController.addUser');
         //TODO: create entries in transaction tables
         var data = {};
 
@@ -68,6 +74,7 @@ module.exports = {
     },
 
     changeUserPermission: async (message) => {
+        console.log('GroupController.changeUserPermission');
         //TODO: create entries in transaction tables
         var data = {};
 
@@ -79,6 +86,7 @@ module.exports = {
     },
 
     removeUser: async (message) => {
+        console.log('GroupController.removeUser');
         //TODO: create entries in transaction tables
         var data = {};
 
@@ -89,6 +97,7 @@ module.exports = {
     },
 
     getUsersOfGroups: async (message) => {
+        console.log('GroupController.getUsersOfGroups');
         //TODO: nothing
         var data = {};
 
@@ -98,6 +107,7 @@ module.exports = {
     },
 
     getPolls: async (message) => {
+        console.log('GroupController.getPolls');
         //TODO: nothing
         var data = {};
 

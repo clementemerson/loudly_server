@@ -3,6 +3,7 @@ const https = require('https');
 const WebSocket = require('ws');
 var url = require('url');
 var mongo = require('./db/mongo');
+let connections = require('./websockets/connections');
 
 let jwtController = require('./controllers/jwtController');
 let UserController = require('./controllers/UserController');
@@ -18,9 +19,6 @@ const server = https.createServer({
 });
 const wss = new WebSocket.Server({ server });
 
-
-var connections = {};
-
 wss.on('connection', async (ws, req) => {
   console.log('2');
   var queryURL = url.parse(req.url, true);
@@ -29,7 +27,7 @@ wss.on('connection', async (ws, req) => {
     let validData = await jwtController.validateJwtData(req);
     if (validData == true) {
       ws.jwtDetails = req.jwtDetails;
-      connections[ws.jwtDetails.user_id] = ws;
+      connections.getConnections()[ws.jwtDetails.user_id] = ws;
     } else {
       console.log('Data not valid');
       ws.close();
@@ -47,6 +45,7 @@ wss.on('connection', async (ws, req) => {
 
 async function toEvent(ws) {
   let message = JSON.parse(ws.data);
+  message.user_id = ws.target.jwtDetails.user_id;
   var reply;
   switch (message.module) {
     case 'users':
@@ -64,8 +63,7 @@ async function toEvent(ws) {
   console.log(message.module);
   console.log(message.event);
   console.log(message.phoneNumbers);
-  let userInfos = await UserController.getUsersFromPhoneNumbers(message.phoneNumbers);
-  connections[ws.target.jwtDetails.user_id].send(JSON.stringify(reply));
+  connections.getConnections()[ws.target.jwtDetails.user_id].send(JSON.stringify(reply));
 }
 
 //Init connection with DB

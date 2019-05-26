@@ -8,7 +8,7 @@ module.exports = {
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
 
-        mongodb().collection(dbtables.Users).insertOne({
+        await mongodb().collection(dbtables.Users).insertOne({
             user_id: data.user_id,
             phonenumber: data.phonenumber,
             user_secret: data.user_secret_hashed,
@@ -40,28 +40,11 @@ module.exports = {
 
     },
     //-------------------------------------------------------------------------
-    getOneByPhoneNumber: function (phonenumber) {
-        return new Promise(
-            function (resolve, reject) {
-                try {
-                    mongodb().collection(dbtables.Users)
-                        .find({ phonenumber: phonenumber })
-                        .toArray(function (err, data) {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                if (data[0]) {
-                                    resolve(data[0]);
-                                } else {
-                                    resolve(null);
-                                }
-                            }
-                        });
-                } catch (err) {
-                    reject(err);
-                }
-            }
-        );
+    getOneByPhoneNumber: async (phonenumber) => {
+        return await mongodb().collection(dbtables.Users)
+            .find({ phonenumber: phonenumber })
+            .toArray();
+
     },
     //-------------------------------------------------------------------------
     deleteOldUserInfo: async (phonenumber) => {
@@ -69,29 +52,12 @@ module.exports = {
             .deleteMany({ phonenumber: phonenumber });
     },
     //-------------------------------------------------------------------------
-    getUsersByPhoneNumbers: function (phoneNumbers) {
-        return new Promise(
-            function (resolve, reject) {
-                try {
-                    mongodb().collection(dbtables.Users)
-                        .find({ phonenumber: { $in: phoneNumbers } },
-                            { user_id: 1, phonenumber: 1 })
-                        .toArray(function (err, data) {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                if (data) {
-                                    resolve(data);
-                                } else {
-                                    resolve(null);
-                                }
-                            }
-                        });
-                } catch (err) {
-                    reject(err);
-                }
-            }
-        );
+    getUsersByPhoneNumbers: async (phoneNumbers) => {
+        return await mongodb().collection(dbtables.Users)
+            .find({ phonenumber: { $in: phoneNumbers } },
+                { user_id: 1, phonenumber: 1 })
+            .toArray();
+
     },
 
     getUserInfoByUserIds: async (user_ids) => {

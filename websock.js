@@ -13,10 +13,16 @@ let GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
 
+// const server = https.createServer({
+//   cert: fs.readFileSync('/Users/Coder/local-ssl/localhost.crt'),
+//   key: fs.readFileSync('/Users/Coder/local-ssl/localhost.key')
+// });
+
 const server = https.createServer({
-  cert: fs.readFileSync('/Users/Coder/local-ssl/localhost.crt'),
-  key: fs.readFileSync('/Users/Coder/local-ssl/localhost.key')
+  cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
+  key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
 });
+
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', async (ws, req) => {

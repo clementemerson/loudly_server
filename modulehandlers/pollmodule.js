@@ -5,7 +5,7 @@ module.exports = {
         var reply;
         switch (message.event) {
             case 'create':
-                reply = await PollController.getUsersFromPhoneNumbers(message);
+                reply = await PollController.create(message);
                 break;
             case 'vote':
                 reply = await PollController.vote(message);

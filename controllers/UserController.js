@@ -29,12 +29,4 @@ module.exports = {
         let groups = await Groups.getGroupsOfUser(message.user_id);
         return groups;
     },
-    getGroupsInfo: async (message) => {
-        let groupInfos = await Groups.getInfo(message.groupids);
-        return groupInfos;
-    },
-    getUsersOfGroups: async (message) => {
-        let usersOfGroups = await Groups.getUsers(message.groupids);
-        return usersOfGroups;
-    },
 }

@@ -31,6 +31,12 @@ module.exports = {
             case 'removeUser':
                 reply = await GroupController.removeUser(message);
                 break;
+            case 'getGroupsInfo':
+                reply = await GroupController.getGroupsInfo(message);
+                break;
+            case 'getUsersOfGroups':
+                reply = await GroupController.getUsersOfGroups(message);
+                break;
             case 'getPolls':
                 reply = await GroupController.getPolls(message);
                 break;

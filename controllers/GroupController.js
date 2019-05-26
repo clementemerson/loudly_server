@@ -42,11 +42,57 @@ module.exports = {
         await Groups.delete(data);
     },
 
-    getDetails: async (message) => {
+    getGroupsInfo: async (message) => {
         var data = {};
 
-        data.id = message.data.id;
+        data.groupids = message.data.groupids;
 
-        return await Groups.getDetails(data);
+        return await Groups.getGroupsInfo(data);
+    },
+
+    addUser: async (message) => {
+        var data = {};
+
+        data.groupid = message.data.groupid;
+        data.user_id = message.data.user_id;
+        data.addedby = message.user_id;
+        data.permission = message.data.permission;
+
+        return await Groups.addUser(data);
+    },
+
+    changeUserPermission: async (message) => {
+        var data = {};
+
+        data.groupid = message.data.groupid;
+        data.user_id = message.data.user_id;
+        data.permission = message.data.permission;
+
+        return await Groups.changeUserPermission(data);
+    },
+
+    removeUser: async (message) => {
+        var data = {};
+
+        data.groupid = message.data.groupid;
+        data.user_id = message.data.user_id;
+
+        return await Groups.removeUser(data);
+    },
+
+    getUsersOfGroups: async (message) => {
+        var data = {};
+
+        data.groupids = message.data.groupids;
+
+        return await Groups.getUsers(data);
+    },
+
+    getPolls: async (message) => {
+        var data = {};
+
+        data.groupid = message.data.groupid;
+
+        return await Groups.getPolls(data);
     }
 }

@@ -10,9 +10,6 @@ module.exports = {
             case 'vote':
                 reply = await PollController.vote(message);
                 break;
-            case 'delete':
-                reply = await PollController.delete(message);
-                break;
             case 'shareToGroup':
                 reply = await PollController.shareToGroup(message);
                 break;

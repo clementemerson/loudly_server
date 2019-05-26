@@ -1,30 +1,40 @@
-var success = require('../helpers/successtousers');
-var Users = require('../db/users');
+const uuidv4 = require('uuid/v4');
+var Polls = require('../db/polls');
 
 module.exports = {
-    getUsersByPhoneNumbers: async (req, res) => {
-        let phoneNumbers = req.body.phoneNumbers;
+    create: async (message) => {
+        //TODO: nothing
+        var data = {};
 
-        let users = await Users.getUsersByPhoneNumbers(phoneNumbers);
-        var user_ids = [];
-        users.forEach(oneUser => {
-            user_ids.push(oneUser.user_id);
-        });
-        console.log(user_ids);
+        data.id = uuidv4();
+        data.title = message.data.title;
+        data.options = message.data.options;
+        data.createdby = message.user_id;
 
-        let userinfos = await Users.getUserInfoByUserIds(user_ids);
-        res.status(200).send({ userslist: userinfos });
+        return await Polls.create(data);
     },
-    getUsersFromPhoneNumbers: async (phoneNumbers) => {
-        let users = await Users.getUsersByPhoneNumbers(phoneNumbers);
-        var user_ids = [];
-        users.forEach(oneUser => {
-            user_ids.push(oneUser.user_id);
-        });
-        console.log(user_ids);
 
-        let userinfos = await Users.getUserInfoByUserIds(user_ids);
-        console.log(userinfos);
-        return userinfos;
-    }
+    vote: async (message) => {
+        //TODO: update pollresult and groupPollResult
+        //TODO: create entries in transaction tables
+        var data = {};
+
+        data.pollid = message.data.pollid;
+        data.user_id = message.user_id;
+        data.optionindex = message.data.optionindex;
+
+        return await Polls.vote(data);
+    },
+
+    shareToGroup: async (message) => {
+        //TODO: if the poll is already shared to the group then do not proceed
+        //TODO: create entries in transaction tables
+        var data = {};
+
+        data.pollid = message.data.pollid;
+        data.groupid = message.data.groupid;
+        data.sharedby = message.user_id;
+
+        return await Polls.shareToGroup(data);
+    },
 }

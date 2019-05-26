@@ -3,6 +3,7 @@ let Groups = require('../db/groups');
 
 module.exports = {
     create: async (message) => {
+        //TODO: nothing
         var data = {};
 
         data.id = uuidv4();
@@ -14,6 +15,7 @@ module.exports = {
     },
 
     changeTitle: async (message) => {
+        //TODO: create entries in transaction tables
         var data = {};
 
         data.id = message.data.id;
@@ -24,6 +26,7 @@ module.exports = {
     },
 
     changeDesc: async (message) => {
+        //TODO: create entries in transaction tables
         var data = {};
 
         data.id = message.data.id;
@@ -34,6 +37,7 @@ module.exports = {
     },
 
     delete: async (message) => {
+        //TODO: create entries in transaction tables
         var data = {};
 
         data.id = message.data.id;
@@ -43,6 +47,7 @@ module.exports = {
     },
 
     getGroupsInfo: async (message) => {
+        //TODO: nothing
         var data = {};
 
         data.groupids = message.data.groupids;
@@ -51,6 +56,7 @@ module.exports = {
     },
 
     addUser: async (message) => {
+        //TODO: create entries in transaction tables
         var data = {};
 
         data.groupid = message.data.groupid;
@@ -62,6 +68,7 @@ module.exports = {
     },
 
     changeUserPermission: async (message) => {
+        //TODO: create entries in transaction tables
         var data = {};
 
         data.groupid = message.data.groupid;
@@ -72,6 +79,7 @@ module.exports = {
     },
 
     removeUser: async (message) => {
+        //TODO: create entries in transaction tables
         var data = {};
 
         data.groupid = message.data.groupid;
@@ -81,6 +89,7 @@ module.exports = {
     },
 
     getUsersOfGroups: async (message) => {
+        //TODO: nothing
         var data = {};
 
         data.groupids = message.data.groupids;
@@ -89,6 +98,7 @@ module.exports = {
     },
 
     getPolls: async (message) => {
+        //TODO: nothing
         var data = {};
 
         data.groupid = message.data.groupid;

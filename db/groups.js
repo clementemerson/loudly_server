@@ -3,7 +3,6 @@ var dbtables = require('./dbtables');
 
 module.exports = {
     create: async (data) => {
-
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();

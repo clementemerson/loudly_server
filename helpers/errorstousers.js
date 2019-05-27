@@ -1,4 +1,8 @@
 module.exports = {
+    unknownError: {
+        Status: 'Error',
+        Details: 'Unknown Error'
+    },
     invalidData: {
         Status: 'Error',
         Details: 'Invalid Data'
@@ -15,4 +19,8 @@ module.exports = {
         Status: 'Error',
         Details: 'OTP Mismatch or Expired'
     },
+    errorPollAlreadyInGroup: {
+        Status: 'Error',
+        Details:'Poll already available in the group'
+    }
 };

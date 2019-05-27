@@ -142,7 +142,6 @@ module.exports = {
         var dbsession;
         try {
             dbsession = await dbTransactions.startSession();
-            dbsession.startTransaction();
 
             await privateFunctions.prepareCreateUser(req);
             await privateFunctions.createUser(req.body.user_data);

@@ -1,5 +1,7 @@
-var success = require('../helpers/successtousers');
 var Users = require('../db/users');
+
+var errors = require('../helpers/errorstousers');
+var success = require('../helpers/successtousers');
 
 module.exports = {
     getUsersByPhoneNumbers: async (req, res) => {
@@ -18,19 +20,26 @@ module.exports = {
     },
     getUsersFromPhoneNumbers: async (message) => {
         console.log('UserController.getUsersFromPhoneNumbers');
-        let users = await Users.getUsersByPhoneNumbers(message.phoneNumbers);
-        var user_ids = [];
-        users.forEach(oneUser => {
-            user_ids.push(oneUser.user_id);
-        });
+        try {
+            let users = await Users.getUsersByPhoneNumbers(message.phoneNumbers);
+            var user_ids = [];
+            users.forEach(oneUser => {
+                user_ids.push(oneUser.user_id);
+            });
 
-        console.log(user_ids);
-        let userinfos = await Users.getUserInfoByUserIds(user_ids);
-        return userinfos;
+            let userinfos = await Users.getUserInfoByUserIds(user_ids);
+            return success.sendData(userinfos);
+        } catch (err) {
+            return errors.unknownError;
+        }
     },
     getGroups: async (message) => {
         console.log('UserController.getGroups');
-        let groups = await Groups.getGroupsOfUser(message.user_id);
-        return groups;
+        try {
+            let groups = await Groups.getGroupsOfUser(message.user_id);
+            return success.sendData(groups);
+        } catch (err) {
+            return errors.unknownError;
+        }
     },
 }

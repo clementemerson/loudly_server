@@ -11,6 +11,8 @@ module.exports = {
         session.endSession();
     },
     startSession: async () => {
-        return await mongoClient().startSession();
+        let session = await mongoClient().startSession();
+        session.startTransaction();
+        return session;
     }
 }

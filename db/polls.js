@@ -11,6 +11,8 @@ module.exports = {
         await mongodb().collection(dbtables.PollInfo).insertOne({
             id: data.id,
             title: data.title,
+            issecret: data.issecret,
+            canbeshared: data.canbeshared,
             createdby: data.createdby,
             options: data.options,
             createdAt: createdAt,
@@ -18,7 +20,7 @@ module.exports = {
         });
     },
 
-    vote: async (data) => {
+    saveVote: async (data) => {
         console.log('db.polls.vote');
         let date = new Date();
         let createdAt = date.toISOString();
@@ -47,4 +49,14 @@ module.exports = {
             updatedAt: updatedAt
         });
     },
+
+    isGroupHasPoll: async (data) => {
+        console.log('db.polls.isGroupHasPoll');
+        let polls = await mongodb().collection(dbtables.GroupPolls)
+        .find({
+            pollid: data.pollid,
+            groupid: data.groupid
+        }).toArray();
+        return polls[0];
+    }
 }

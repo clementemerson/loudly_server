@@ -1,6 +1,9 @@
 const uuidv4 = require('uuid/v4');
 var Polls = require('../db/polls');
+let Groups = require('../db/groups');
 var dbTransactions = require('../db/session');
+
+let connections = require('./websockets/connections');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
@@ -39,25 +42,34 @@ module.exports = {
             data.pollid = message.data.pollid;
             data.user_id = message.user_id;
             data.optionindex = message.data.optionindex;
+            data.secretvote = message.data.secretvote;
 
             let poll = Polls.getPollInfo(data);
+            if (poll) {
 
-            let updatePollResult = Polls.updatePollResult(data);
-            let updatePollVoterList = Polls.updatePollVoterList(data);
-            var updatePollPublicVotes;
-            if (poll.issecret != true) {
-                updatePollPublicVotes = Polls.saveVote(data);
+                let updatePollResult = Polls.updatePollResult(data);
+                let updatePollVoterList = Polls.updatePollVoterList(data);
+                var updatePollPublicVotes;
+                if (poll.issecret != true && data.secretvote != true) {
+                    updatePollPublicVotes = Polls.saveVote(data);
+                } else {
+                    data.user_id = 'secret_voter';
+                }
+
+                let resUpdatePollResult = await updatePollResult;
+                await updatePollVoterList;
+                if (updatePollPublicVotes) {
+                    await updatePollPublicVotes;
+                }
+
+                await dbTransactions.commitTransaction(dbsession);
+
+                let voters = await Polls.getVotersList(data);
+                connections.inform(voters, data);
+            } else {
+                await dbTransactions.abortTransaction(dbsession);
+                return errors.errorPollNotAvailable;
             }
-
-            let resUpdatePollResult = await updatePollResult;
-            await updatePollVoterList;
-            if (updatePollPublicVotes) {
-                await updatePollPublicVotes;
-            }
-
-            await dbTransactions.commitTransaction(dbsession);
-
-            //TODO: send notification to all online users of the poll (async)
             return success.successVoted;
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
@@ -83,6 +95,12 @@ module.exports = {
                 await dbTransactions.commitTransaction(dbsession);
 
                 //TODO: send notification to all online users of the group (async)
+                const groups = {
+                    groupids: [data.groupid]
+                };
+
+                let groupUsers = await Groups.getUsers(groups);
+                connections.inform(groupUsers, data);
                 return success.successPollShared;
             } else {
                 await dbTransactions.abortTransaction(dbsession);

@@ -76,7 +76,7 @@ module.exports = {
             data.id = message.data.id;
             data.deleteby = message.user_id;
 
-            await Groups.delete(data);
+            await Groups.delete(data);  //mark as deleted
             //TODO: delete usersofgroup
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async) ... 
@@ -115,13 +115,18 @@ module.exports = {
             data.addedby = message.user_id;
             data.permission = message.data.permission;
 
-            //TODO: check for ADMIN permission
-            await Groups.addUser(data);
-            //TODO: create entries in transaction tables
-            //TODO: Notify all the online users of the group (async)
+            const isAdmin = await Groups.isAdmin(data);
+            if (isAdmin == true) {
+                await Groups.addUser(data);
+                //TODO: create entries in transaction tables
+                //TODO: Notify all the online users of the group (async)
 
-            await dbTransactions.commitTransaction(dbsession);
-            return success.userAddedToGroup;
+                await dbTransactions.commitTransaction(dbsession);
+                return success.userAddedToGroup;
+            } else {
+                await dbTransactions.abortTransaction(dbsession);
+                return error.errorNotAnAdminUser;
+            }
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
             return errors.unknownError;
@@ -138,13 +143,18 @@ module.exports = {
             data.user_id = message.data.user_id;
             data.permission = message.data.permission;
 
-            //TODO: check for ADMIN permission
-            await Groups.changeUserPermission(data);
-            //TODO: create entries in transaction tables
-            //TODO: Notify all the online users of the group (async)
+            const isAdmin = await Groups.isAdmin(data);
+            if (isAdmin == true) {
+                await Groups.changeUserPermission(data);
+                //TODO: create entries in transaction tables
+                //TODO: Notify all the online users of the group (async)
 
-            await dbTransactions.commitTransaction(dbsession);
-            return success.userPermissionChangedInGroup;
+                await dbTransactions.commitTransaction(dbsession);
+                return success.userPermissionChangedInGroup;
+            } else {
+                await dbTransactions.abortTransaction(dbsession);
+                return error.errorNotAnAdminUser;
+            }            
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
             return errors.unknownError;
@@ -160,13 +170,18 @@ module.exports = {
             data.groupid = message.data.groupid;
             data.user_id = message.data.user_id;
 
-            //TODO: check for ADMIN permission
-            await Groups.removeUser(data);
-            //TODO: create entries in transaction tables
-            //TODO: Notify all the online users of the group (async)
+            const isAdmin = await Groups.isAdmin(data);
+            if (isAdmin == true) {
+                await Groups.removeUser(data);
+                //TODO: create entries in transaction tables
+                //TODO: Notify all the online users of the group (async)
 
-            await dbTransactions.commitTransaction(dbsession);
-            return success.userRemovedFromGroup;
+                await dbTransactions.commitTransaction(dbsession);
+                return success.userRemovedFromGroup;
+            } else {
+                await dbTransactions.abortTransaction(dbsession);
+                return error.errorNotAnAdminUser;
+            }        
         } catch (err) {
             await dbTransactions.abortTransaction(dbsession);
             return errors.unknownError;

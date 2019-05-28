@@ -22,5 +22,13 @@ module.exports = {
     errorPollAlreadyInGroup: {
         Status: 'Error',
         Details:'Poll already available in the group'
-    }
+    },
+    errorNotAnAdminUser: {
+        Status: 'Error',
+        Details: "You're NOT an Admin user"
+    },
+    errorPollNotAvailable: {
+        Status: 'Error',
+        Details: 'Poll not available'
+    },
 };

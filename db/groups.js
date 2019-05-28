@@ -108,8 +108,24 @@ module.exports = {
 
     getPolls: async (data) => {
         console.log('db.groups.getPolls');
-        await mongodb().collection(dbtables.GroupPolls)
+        return await mongodb().collection(dbtables.GroupPolls)
             .find({ groupid: data.groupid })
             .toArray();
     },
+
+    isAdmin: async (data) => {
+        console.log('db.groups.isAdmin');
+        let adminUser = await mongodb().collection(dbtables.GroupPolls)
+            .find({
+                groupid: data.groupid,
+                user_id: data.user_id,
+                permission: 'ADMIN'
+            })
+            .toArray();
+        
+        if(adminUser[0])
+            return true;
+        else
+            return false;
+    }
 }

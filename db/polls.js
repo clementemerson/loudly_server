@@ -53,10 +53,26 @@ module.exports = {
     isGroupHasPoll: async (data) => {
         console.log('db.polls.isGroupHasPoll');
         let polls = await mongodb().collection(dbtables.GroupPolls)
-        .find({
-            pollid: data.pollid,
-            groupid: data.groupid
-        }).toArray();
+            .find({
+                pollid: data.pollid,
+                groupid: data.groupid
+            }).toArray();
         return polls[0];
+    },
+
+    getPollInfo: async (data) => {
+        console.log('db.polls.getPollInfo');
+        let polls = await mongodb().collection(dbtables.PollInfo)
+            .find({
+                pollid: data.pollid
+            }).toArray();
+        return polls[0];
+    },
+
+    getVotersList: async (data) => {
+        console.log('db.polls.getVotersList');
+        return await mongodb().collection(dbtables.PollVoters)
+            .find({ pollid: data.pollid },
+                { user_id: 1 }).toArray();
     }
 }

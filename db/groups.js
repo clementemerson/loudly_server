@@ -26,8 +26,10 @@ module.exports = {
         await mongodb().collection(dbtables.GroupInfo).update(
             { id: data.id },
             {
-                name: data.name,
-                updatedAt: updatedAt
+                $set: {
+                    name: data.name,
+                    updatedAt: updatedAt
+                }
             });
     },
 
@@ -39,8 +41,10 @@ module.exports = {
         await mongodb().collection(dbtables.GroupInfo).update(
             { id: data.id },
             {
-                desc: data.desc,
-                updatedAt: updatedAt
+                $set: {
+                    desc: data.desc,
+                    updatedAt: updatedAt
+                }
             });
     },
 
@@ -85,8 +89,10 @@ module.exports = {
                 user_id: data.user_id
             },
             {
-                permission: data.permission,
-                updatedAt: updatedAt
+                $set: {
+                    permission: data.permission,
+                    updatedAt: updatedAt
+                }
             }
         );
     },
@@ -122,8 +128,8 @@ module.exports = {
                 permission: 'ADMIN'
             })
             .toArray();
-        
-        if(adminUser[0])
+
+        if (adminUser[0])
             return true;
         else
             return false;

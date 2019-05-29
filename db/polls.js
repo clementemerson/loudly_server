@@ -21,7 +21,7 @@ module.exports = {
     },
 
     saveVote: async (data) => {
-        console.log('db.polls.vote');
+        console.log('db.polls.saveVote');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -74,5 +74,34 @@ module.exports = {
         return await mongodb().collection(dbtables.PollVoters)
             .find({ pollid: data.pollid },
                 { user_id: 1 }).toArray();
-    }
+    },
+
+    updatePollVoterList: async (data) => {
+        console.log('db.polls.updatePollVoterList');
+        let date = new Date();
+        let createdAt = date.toISOString();
+        let updatedAt = date.toISOString();
+
+        return await mongodb().collection(dbtables.PollVoters).insertOne({
+            pollid: data.pollid,
+            user_id: data.user_id,
+            votetype: data.votetype,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        });
+    },
+
+    updatePollResult: async (data) => {
+        console.log('db.polls.updatePollResult');
+        let date = new Date();
+        let updatedAt = date.toISOString();
+
+        return await mongodb().collection(dbtables.PollInfo).update(
+            { pollid: data.pollid },
+            { 
+                //$inc: { 'options' + '' + '' : 1 },
+                $set: { updatedAt: updatedAt }
+            }
+        );
+    },
 }

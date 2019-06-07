@@ -1,6 +1,10 @@
 const uuidv4 = require('uuid/v4');
-let Groups = require('../db/groups');
+
 var dbTransactions = require('../db/session');
+
+let GroupUsers = require('../db/groupusers');
+let GroupInfo = require('../db/groupinfo');
+let GroupPolls = require('../db/grouppolls');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
@@ -16,7 +20,8 @@ module.exports = {
             data.desc = message.data.desc;
             data.createdby = message.createdby;
 
-            await Groups.create(data);
+            await GroupInfo.create(data);
+            //TODO: Add createdby user as ADMIN
             return success.groupCreated;
         } catch (err) {
             return errors.unknownError;
@@ -33,7 +38,7 @@ module.exports = {
             data.name = message.data.name;
             data.changedby = message.user_id;
 
-            await Groups.changeTitle(data);
+            await GroupInfo.changeTitle(data);
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
 
@@ -55,7 +60,7 @@ module.exports = {
             data.desc = message.data.desc;
             data.changedby = message.user_id;
 
-            await Groups.changeDesc(data);
+            await GroupInfo.changeDesc(data);
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
 
@@ -76,7 +81,7 @@ module.exports = {
             data.id = message.data.id;
             data.deleteby = message.user_id;
 
-            await Groups.delete(data);  //mark as deleted
+            await GroupInfo.delete(data);  //mark as deleted
             //TODO: delete usersofgroup
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async) ... 
@@ -97,7 +102,7 @@ module.exports = {
 
             data.groupids = message.data.groupids;
 
-            let groupsInfo = await Groups.getGroupsInfo(data);
+            let groupsInfo = await GroupInfo.getGroupsInfo(data);
             return success.sendData(groupsInfo);
         } catch (err) {
             return errors.unknownError;
@@ -115,9 +120,9 @@ module.exports = {
             data.addedby = message.user_id;
             data.permission = message.data.permission;
 
-            const isAdmin = await Groups.isAdmin(data);
+            const isAdmin = await GroupUsers.isAdmin(data);
             if (isAdmin == true) {
-                await Groups.addUser(data);
+                await GroupUsers.addUser(data);
                 //TODO: create entries in transaction tables
                 //TODO: Notify all the online users of the group (async)
 
@@ -143,9 +148,9 @@ module.exports = {
             data.user_id = message.data.user_id;
             data.permission = message.data.permission;
 
-            const isAdmin = await Groups.isAdmin(data);
+            const isAdmin = await GroupUsers.isAdmin(data);
             if (isAdmin == true) {
-                await Groups.changeUserPermission(data);
+                await GroupUsers.changeUserPermission(data);
                 //TODO: create entries in transaction tables
                 //TODO: Notify all the online users of the group (async)
 
@@ -170,9 +175,9 @@ module.exports = {
             data.groupid = message.data.groupid;
             data.user_id = message.data.user_id;
 
-            const isAdmin = await Groups.isAdmin(data);
+            const isAdmin = await GroupUsers.isAdmin(data);
             if (isAdmin == true) {
-                await Groups.removeUser(data);
+                await GroupUsers.removeUser(data);
                 //TODO: create entries in transaction tables
                 //TODO: Notify all the online users of the group (async)
 
@@ -195,7 +200,7 @@ module.exports = {
 
             data.groupids = message.data.groupids;
 
-            let usersOfGroups = await Groups.getUsers(data);
+            let usersOfGroups = await GroupUsers.getUsers(data);
             return success.sendData(usersOfGroups);
         } catch (err) {
             return errors.unknownError;
@@ -209,7 +214,7 @@ module.exports = {
 
             data.groupid = message.data.groupid;
 
-            let pollsInGroup = await Groups.getPolls(data);
+            let pollsInGroup = await GroupPolls.getPolls(data);
             return success.sendData(pollsInGroup);
         } catch (err) {
             return errors.unknownError;

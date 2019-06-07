@@ -1,7 +1,13 @@
 const uuidv4 = require('uuid/v4');
-var Polls = require('../db/polls');
-let Groups = require('../db/groups');
+
 var dbTransactions = require('../db/session');
+
+let PollData = require('../db/polldata');
+let PollVoteData = require('../db/pollvotedata');
+let PollVoteRegister = require('../db/pollvoteregister');
+
+let GroupPolls = require('../db/grouppolls');
+let GroupUsers = require('../db/groupusers');
 
 let connections = require('./websockets/connections');
 
@@ -22,7 +28,7 @@ module.exports = {
             data.options = message.data.options;
             data.createdby = message.user_id;
 
-            await Polls.create(data);
+            await PollData.create(data);
             await dbTransactions.commitTransaction(dbsession);
 
             return success.successPollCreated;
@@ -44,14 +50,14 @@ module.exports = {
             data.optionindex = message.data.optionindex;
             data.secretvote = message.data.secretvote;
 
-            let poll = Polls.getPollInfo(data);
+            let poll = PollData.getPollInfo(data);
             if (poll) {
 
-                let updatePollResult = Polls.updatePollResult(data);
-                let updatePollVoterList = Polls.updatePollVoterList(data);
+                let updatePollResult = PollData.updatePollResult(data);
+                let updatePollVoterList = PollVoteRegister.updatePollVoterList(data);
                 var updatePollPublicVotes;
                 if (poll.issecret != true && data.secretvote != true) {
-                    updatePollPublicVotes = Polls.saveVote(data);
+                    updatePollPublicVotes = PollVoteData.saveVote(data);
                 } else {
                     data.user_id = 'secret_voter';
                 }
@@ -64,7 +70,7 @@ module.exports = {
 
                 await dbTransactions.commitTransaction(dbsession);
 
-                let voters = await Polls.getVotersList(data);
+                let voters = await PollVoteRegister.getVotersList(data);
                 connections.inform(voters, data);
             } else {
                 await dbTransactions.abortTransaction(dbsession);
@@ -89,9 +95,9 @@ module.exports = {
             data.groupid = message.data.groupid;
             data.sharedby = message.user_id;
 
-            let pollInGroup = await Polls.isGroupHasPoll(data);
+            let pollInGroup = await GroupPolls.isGroupHasPoll(data);
             if (!pollInGroup) {
-                await Polls.shareToGroup(data);
+                await GroupPolls.shareToGroup(data);
                 await dbTransactions.commitTransaction(dbsession);
 
                 //TODO: send notification to all online users of the group (async)
@@ -99,7 +105,7 @@ module.exports = {
                     groupids: [data.groupid]
                 };
 
-                let groupUsers = await Groups.getUsers(groups);
+                let groupUsers = await GroupUsers.getUsers(groups);
                 connections.inform(groupUsers, data);
                 return success.successPollShared;
             } else {

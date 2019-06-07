@@ -1,0 +1,71 @@
+var mongodb = require('./mongo').getDbConnection;
+var dbtables = require('./dbtables');
+
+module.exports = {
+
+    addUser: async (data) => {
+        console.log('db.groups.addUser');
+        let date = new Date();
+        let createdAt = date.toISOString();
+        let updatedAt = date.toISOString();
+
+        await mongodb().collection(dbtables.GroupUsers).insertOne({
+            groupid: data.groupid,
+            user_id: data.user_id,
+            addedby: data.addedby,
+            permission: data.permission,
+            createdAt: createdAt,
+            updatedAt: updatedAt
+        });
+    },
+
+    changeUserPermission: async (data) => {
+        console.log('db.groups.changeUserPermission');
+        let date = new Date();
+        let updatedAt = date.toISOString();
+
+        await mongodb().collection(dbtables.GroupUsers).update(
+            {
+                groupid: data.groupid,
+                user_id: data.user_id
+            },
+            {
+                $set: {
+                    permission: data.permission,
+                    updatedAt: updatedAt
+                }
+            }
+        );
+    },
+
+    removeUser: async (data) => {
+        console.log('db.groups.removeUser');
+        await mongodb().collection(dbtables.GroupUsers).remove({
+            groupid: data.groupid,
+            user_id: data.user_id
+        });
+    },
+
+    getUsers: async (data) => {
+        console.log('db.groups.getUsers');
+        return await mongodb().collection(dbtables.GroupUsers)
+            .find({ groupid: { $in: data.groupids } })
+            .toArray();
+    },
+
+    isAdmin: async (data) => {
+        console.log('db.groups.isAdmin');
+        let adminUser = await mongodb().collection(dbtables.GroupUsers)
+            .find({
+                groupid: data.groupid,
+                user_id: data.user_id,
+                permission: 'ADMIN'
+            })
+            .toArray();
+
+        if (adminUser[0])
+            return true;
+        else
+            return false;
+    }
+}

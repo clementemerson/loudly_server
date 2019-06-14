@@ -5,6 +5,7 @@ var jwtSecret = 'ABCD';
 
 var Users = require('../db/users');
 var errors = require('../helpers/errorstousers');
+var success = require('../helpers/successtousers');
 
 
 module.exports = {
@@ -82,7 +83,7 @@ module.exports = {
             }
             return next();
         } catch (err) {
-            return res.json(errors.errorInProcessing);
+            return res.status(500).send();
         }
     },
 
@@ -95,9 +96,9 @@ module.exports = {
                 user_phonenumber: user_data.phonenumber
             }
             let token = jwt.sign(user_data_jwt, jwtSecret);
-            res.status(201).send({ token: token });
+            return res.status(200).json(success.sendData(token));
         } else {
-            return res.json(errors.errorInProcessing);
+            return res.status(500).send();
         }
     }
 }

@@ -25,7 +25,7 @@ module.exports = {
             try {
                 number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
             } catch (err) {
-                return res.json(errors.invalidData);
+                return res.status(400).send();
             }
 
             if (phoneUtil.isPossibleNumber(number) && phoneUtil.isValidNumber(number) &&
@@ -50,19 +50,19 @@ module.exports = {
                         //insert the data in db
                         loginProcess.insert(loginInfo);
                         //send reply
-                        return res.json(success.sendData(loginInfo.session_id));
+                        return res.status(200).json(success.sendData(loginInfo.session_id));
                     });
                 }).on("error", (err) => {
                     //error in 2factor
-                    return res.json(errors.errorInProcessing);
+                    return res.status(500).send();
                 });
             } else {
                 //phonenumber is invalid
-                return res.json(errors.invalidPhoneNumber);
+                return res.status(422).send();
             }
         } else {
             //phonenumber param is invalid
-            return res.json(errors.invalidData);
+            return res.status(400).send();
         }
     },
 
@@ -97,10 +97,10 @@ module.exports = {
                     }
                 });
             }).on("error", (err) => {
-                return res.json(errors.errorInProcessing);
+                return res.status(500).send();
             });
         } catch (err) {
-            return res.json(errors.errorInProcessing);
+            return res.status(400).send();
         }
     },
 
@@ -116,7 +116,7 @@ module.exports = {
             };
             return next();
         } catch (err) {
-            return res.json(errors.errorInProcessing);
+            return res.status(400).send();
         }
     },
 
@@ -133,7 +133,7 @@ module.exports = {
             }
             return next();
         } catch (err) {
-            return res.json(errors.errorInProcessing);
+            return res.status(400).send();
         }
     },
 
@@ -152,7 +152,7 @@ module.exports = {
         } catch (err) {
             console.log(err);
             await dbTransactions.abortTransaction(dbsession);
-            return res.json(errors.errorInProcessing);
+            return res.status(400).send();
         }
     },
 }

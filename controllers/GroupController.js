@@ -1,5 +1,3 @@
-const uuidv4 = require('uuid/v4');
-
 var dbTransactions = require('../db/session');
 
 let GroupUsers = require('../db/groupusers');
@@ -8,23 +6,53 @@ let GroupPolls = require('../db/grouppolls');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
+var replyHelper = require('../helpers/replyhelper');
+
+var sequenceCounter = require('../db/sequencecounter');
 
 module.exports = {
+    //Tested on: 18-06-2019
+    //{"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
     create: async (message) => {
         console.log('GroupController.create');
         try {
-            var data = {};
+            dbsession = await dbTransactions.startSession();
 
-            data.id = uuidv4();
-            data.name = message.data.name;
-            data.desc = message.data.desc;
-            data.createdby = message.createdby;
+            var groupid = await sequenceCounter.getNextSequenceValue('group');
 
-            await GroupInfo.create(data);
-            //TODO: Add createdby user as ADMIN
-            return success.groupCreated;
+            let groupData = {
+                id: groupid,
+                name: message.data.name,
+                desc: message.data.desc,
+                createdby: message.user_id
+            }
+            await GroupInfo.create(groupData);
+
+            //Adding user with CREATOR privileges
+            let userBeCreator = {
+                groupid: groupid,
+                user_id: message.user_id,
+                addedby: message.user_id,
+                permission: 'CREATOR'
+            }
+            await GroupUsers.addUser(userBeCreator);
+
+            //Adding user with ADMIN privileges
+            let userBeAdmin = {
+                groupid: groupid,
+                user_id: message.user_id,
+                addedby: message.user_id,
+                permission: 'ADMIN'
+            }
+            await GroupUsers.addUser(userBeAdmin);
+
+            let replyData = {
+                groupid: groupid,
+                status: success.groupCreated
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -32,21 +60,23 @@ module.exports = {
         console.log('GroupController.changeTitle');
         try {
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.id = message.data.id;
-            data.name = message.data.name;
-            data.changedby = message.user_id;
-
+            let data = {
+                id: message.data.id,
+                name: message.data.name,
+                changedby: message.user_id
+            };
             await GroupInfo.changeTitle(data);
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
 
-            await dbTransactions.commitTransaction(dbsession);
-            return success.groupTitleChanged;
+            let replyData = {
+                groupid: groupid,
+                status: success.groupTitleChanged
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -67,8 +97,7 @@ module.exports = {
             await dbTransactions.commitTransaction(dbsession);
             return success.groupDescChanged;
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -90,22 +119,22 @@ module.exports = {
             await dbTransactions.commitTransaction(dbsession);
             return success.groupDeleted;
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
+    //Tested on: 18-06-2019
+    //{"module":"groups", "event":"getGroupsInfo", "messageid":8971, "data":{"groupids":[1001, 1000]}}
     getGroupsInfo: async (message) => {
         console.log('GroupController.getGroupsInfo');
         try {
-            var data = {};
-
-            data.groupids = message.data.groupids;
-
+            let data = {
+                groupids: message.data.groupids
+            }
             let groupsInfo = await GroupInfo.getGroupsInfo(data);
-            return success.sendData(groupsInfo);
+            return await replyHelper.prepareSuccess(message, null, groupsInfo);
         } catch (err) {
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
 
@@ -129,12 +158,10 @@ module.exports = {
                 await dbTransactions.commitTransaction(dbsession);
                 return success.userAddedToGroup;
             } else {
-                await dbTransactions.abortTransaction(dbsession);
-                return error.errorNotAnAdminUser;
+                return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
             }
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -157,12 +184,10 @@ module.exports = {
                 await dbTransactions.commitTransaction(dbsession);
                 return success.userPermissionChangedInGroup;
             } else {
-                await dbTransactions.abortTransaction(dbsession);
-                return error.errorNotAnAdminUser;
-            }            
+                return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
+            }
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -184,40 +209,38 @@ module.exports = {
                 await dbTransactions.commitTransaction(dbsession);
                 return success.userRemovedFromGroup;
             } else {
-                await dbTransactions.abortTransaction(dbsession);
-                return error.errorNotAnAdminUser;
-            }        
+                return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
+            }
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
+    //Tested on: 18-06-2019
+    //{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[1001, 1000]}}
     getUsersOfGroups: async (message) => {
         console.log('GroupController.getUsersOfGroups');
         try {
-            var data = {};
-
-            data.groupids = message.data.groupids;
-
+            let data = {
+                groupids: message.data.groupids
+            };
             let usersOfGroups = await GroupUsers.getUsers(data);
-            return success.sendData(usersOfGroups);
+            return await replyHelper.prepareSuccess(message, null, usersOfGroups);
         } catch (err) {
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
 
     getPolls: async (message) => {
         console.log('GroupController.getPolls');
         try {
-            var data = {};
-
-            data.groupid = message.data.groupid;
-
+            let data = {
+                groupid: message.data.groupid
+            }
             let pollsInGroup = await GroupPolls.getPolls(data);
-            return success.sendData(pollsInGroup);
+            return await replyHelper.prepareSuccess(message, dbsession, pollsInGroup);
         } catch (err) {
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     }
 }

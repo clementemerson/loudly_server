@@ -1,5 +1,3 @@
-const uuidv4 = require('uuid/v4');
-
 var dbTransactions = require('../db/session');
 
 let PollData = require('../db/polldata');
@@ -9,32 +7,40 @@ let PollVoteRegister = require('../db/pollvoteregister');
 let GroupPolls = require('../db/grouppolls');
 let GroupUsers = require('../db/groupusers');
 
-let connections = require('./websockets/connections');
+let connections = require('../websockets/connections');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
+var replyHelper = require('../helpers/replyhelper');
+
+var sequenceCounter = require('../db/sequencecounter');
 
 module.exports = {
+    //Tested on: 18-06-2019
+    //{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "issecret": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
     create: async (message) => {
         console.log('PollController.create');
         try {
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.id = uuidv4();
-            data.title = message.data.title;
-            data.issecret = message.data.issecret;
-            data.canbeshared = message.data.canbeshared;
-            data.options = message.data.options;
-            data.createdby = message.user_id;
-
+            var pollid = await sequenceCounter.getNextSequenceValue('poll');
+            let data = {
+                id: pollid,
+                title: message.data.title,
+                issecret: message.data.issecret,
+                canbeshared: message.data.canbeshared,
+                options: message.data.options,
+                createdby: message.user_id
+            };
             await PollData.create(data);
-            await dbTransactions.commitTransaction(dbsession);
 
-            return success.successPollCreated;
+            let replyData = {
+                pollid: pollid,
+                status: success.successPollCreated
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -73,13 +79,11 @@ module.exports = {
                 let voters = await PollVoteRegister.getVotersList(data);
                 connections.inform(voters, data);
             } else {
-                await dbTransactions.abortTransaction(dbsession);
-                return errors.errorPollNotAvailable;
+                return await replyHelper.prepareError(message, dbsession, errors.errorPollNotAvailable);
             }
             return success.successVoted;
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
@@ -109,12 +113,10 @@ module.exports = {
                 connections.inform(groupUsers, data);
                 return success.successPollShared;
             } else {
-                await dbTransactions.abortTransaction(dbsession);
-                return errors.errorPollAlreadyInGroup;
+                return await replyHelper.prepareError(message, dbsession, errors.errorPollAlreadyInGroup);
             }
         } catch (err) {
-            await dbTransactions.abortTransaction(dbsession);
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 }

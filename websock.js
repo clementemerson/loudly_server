@@ -14,9 +14,6 @@ let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
 var success = require('./helpers/successtousers');
 
-
-const server = https.createServer();
-
 const server = https.createServer({
   cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
   key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')

@@ -1,34 +1,16 @@
 module.exports = {
-    unknownError: {
-        Status: 'Error',
-        Details: 'Unknown Error'
+    sendData: function (data) {
+        return {
+            Status: 'Error',
+            Details: data
+        };
     },
-    invalidData: {
-        Status: 'Error',
-        Details: 'Invalid Data'
-    },
-    invalidPhoneNumber: {
-        Status: 'Error',
-        Details: 'Invalid phone number'
-    },
-    errorInProcessing: {
-        Status: 'Error',
-        Details: 'Error in processing request'
-    },
-    errorOTPMismatchOrExpired: {
-        Status: 'Error',
-        Details: 'OTP Mismatch or Expired'
-    },
-    errorPollAlreadyInGroup: {
-        Status: 'Error',
-        Details:'Poll already available in the group'
-    },
-    errorNotAnAdminUser: {
-        Status: 'Error',
-        Details: "You're NOT an Admin user"
-    },
-    errorPollNotAvailable: {
-        Status: 'Error',
-        Details: 'Poll not available'
-    },
+    unknownError: 'Unknown Error',
+    invalidData: 'Invalid Data',
+    invalidPhoneNumber: 'Invalid phone number',
+    errorInProcessing: 'Error in processing request',
+    errorOTPMismatchOrExpired: 'OTP Mismatch or Expired',
+    errorPollAlreadyInGroup: 'Poll already available in the group',
+    errorNotAnAdminUser: "You're NOT an Admin user",
+    errorPollNotAvailable: 'Poll not available',
 };

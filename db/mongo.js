@@ -2,7 +2,6 @@
 var MongoClient = require('mongodb').MongoClient;
 var mdb;
 var dbClient;
-var assert = require('assert');
 
 module.exports = {
     getDbConnection: () => {

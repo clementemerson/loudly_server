@@ -57,7 +57,7 @@ module.exports = {
 
     getGroupsInfo: async (data) => {
         console.log('db.groups.getGroupsInfo');
-        await mongodb().collection(dbtables.GroupInfo)
+        return await mongodb().collection(dbtables.GroupInfo)
             .find({ id: { $in: data.groupids } })
             .toArray();
     },

@@ -47,7 +47,6 @@ module.exports = {
         let users = await mongodb().collection(dbtables.Users)
             .find({ phonenumber: phonenumber })
             .toArray();
-            console.log(users);
         return users[0];
     },
     //-------------------------------------------------------------------------

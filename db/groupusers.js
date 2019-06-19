@@ -4,7 +4,7 @@ var dbtables = require('./dbtables');
 module.exports = {
 
     addUser: async (data) => {
-        console.log('db.groups.addUser');
+        console.log('db.groupusers.addUser');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -20,7 +20,7 @@ module.exports = {
     },
 
     changeUserPermission: async (data) => {
-        console.log('db.groups.changeUserPermission');
+        console.log('db.groupusers.changeUserPermission');
         let date = new Date();
         let updatedAt = date.toISOString();
 
@@ -39,7 +39,7 @@ module.exports = {
     },
 
     removeUser: async (data) => {
-        console.log('db.groups.removeUser');
+        console.log('db.groupusers.removeUser');
         await mongodb().collection(dbtables.GroupUsers).remove({
             groupid: data.groupid,
             user_id: data.user_id
@@ -47,14 +47,14 @@ module.exports = {
     },
 
     getUsers: async (data) => {
-        console.log('db.groups.getUsers');
+        console.log('db.groupusers.getUsers');
         return await mongodb().collection(dbtables.GroupUsers)
             .find({ groupid: { $in: data.groupids } })
             .toArray();
     },
 
     isAdmin: async (data) => {
-        console.log('db.groups.isAdmin');
+        console.log('db.groupusers.isAdmin');
         let adminUser = await mongodb().collection(dbtables.GroupUsers)
             .find({
                 groupid: data.groupid,
@@ -64,6 +64,21 @@ module.exports = {
             .toArray();
 
         if (adminUser[0])
+            return true;
+        else
+            return false;
+    },
+
+    isMember: async (data) => {
+        console.log('db.groupusers.isMember');
+        let user = await mongodb().collection(dbtables.GroupUsers)
+            .find({
+                groupid: data.groupid,
+                user_id: data.user_id
+            })
+            .toArray();
+
+        if (user[0])
             return true;
         else
             return false;

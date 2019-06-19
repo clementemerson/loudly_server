@@ -4,14 +4,14 @@ var dbtables = require('./dbtables');
 module.exports = {
     
     getVotersList: async (data) => {
-        console.log('db.polls.getVotersList');
+        console.log('db.pollvoteregister.getVotersList');
         return await mongodb().collection(dbtables.PollVoteRegister)
             .find({ pollid: data.pollid },
                 { user_id: 1 }).toArray();
     },
 
     updatePollVoterList: async (data) => {
-        console.log('db.polls.updatePollVoterList');
+        console.log('db.pollvoteregister.updatePollVoterList');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();

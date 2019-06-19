@@ -4,7 +4,7 @@ var dbtables = require('./dbtables');
 module.exports = {
     
     shareToGroup: async (data) => {
-        console.log('db.polls.shareToGroup');
+        console.log('db.grouppolls.shareToGroup');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -18,8 +18,8 @@ module.exports = {
         });
     },
 
-    isGroupHasPoll: async (data) => {
-        console.log('db.polls.isGroupHasPoll');
+    groupHasPoll: async (data) => {
+        console.log('db.grouppolls.isGroupHasPoll');
         let polls = await mongodb().collection(dbtables.GroupPolls)
             .find({
                 pollid: data.pollid,
@@ -29,7 +29,7 @@ module.exports = {
     },
 
     getPolls: async (data) => {
-        console.log('db.groups.getPolls');
+        console.log('db.grouppolls.getPolls');
         return await mongodb().collection(dbtables.GroupPolls)
             .find({ groupid: data.groupid })
             .toArray();

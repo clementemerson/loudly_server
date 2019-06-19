@@ -71,4 +71,18 @@ module.exports = {
             .find({ user_id: { $in: user_ids } })
             .toArray();
     },
+
+    isUserExist: async (user_id) => {
+        console.log('db.users.isUserExist');
+        let user = await mongodb().collection(dbtables.UsersInfo)
+            .find({
+                user_id: data.user_id
+            })
+            .toArray();
+
+        if (user[0])
+            return true;
+        else
+            return false;
+    }
 };

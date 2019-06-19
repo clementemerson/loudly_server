@@ -3,7 +3,7 @@ var dbtables = require('./dbtables');
 
 module.exports = {
     create: async (data) => {
-        console.log('db.polls.create');
+        console.log('db.polldata.create');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -21,7 +21,7 @@ module.exports = {
     },
 
     getPollInfo: async (data) => {
-        console.log('db.polls.getPollInfo');
+        console.log('db.polldata.getPollInfo');
         let polls = await mongodb().collection(dbtables.PollData)
             .find({
                 pollid: data.pollid
@@ -30,7 +30,7 @@ module.exports = {
     },
 
     updatePollResult: async (data) => {
-        console.log('db.polls.updatePollResult');
+        console.log('db.polldata.updatePollResult');
         let date = new Date();
         let updatedAt = date.toISOString();
 

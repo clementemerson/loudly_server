@@ -3,7 +3,7 @@ var dbtables = require('./dbtables');
 
 module.exports = {
     create: async (data) => {
-        console.log('db.groups.create');
+        console.log('db.groupinfo.create');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();
@@ -19,7 +19,7 @@ module.exports = {
     },
 
     changeTitle: async (data) => {
-        console.log('db.groups.changeTitle');
+        console.log('db.groupinfo.changeTitle');
         let date = new Date();
         let updatedAt = date.toISOString();
 
@@ -34,7 +34,7 @@ module.exports = {
     },
 
     changeDesc: async (data) => {
-        console.log('db.groups.changeDesc');
+        console.log('db.groupinfo.changeDesc');
         let date = new Date();
         let updatedAt = date.toISOString();
 
@@ -49,14 +49,14 @@ module.exports = {
     },
 
     delete: async (data) => {
-        console.log('db.groups.delete');
+        console.log('db.groupinfo.delete');
         await mongodb().collection(dbtables.GroupInfo).remove({
             id: data.id
         });
     },
 
     getGroupsInfo: async (data) => {
-        console.log('db.groups.getGroupsInfo');
+        console.log('db.groupinfo.getGroupsInfo');
         return await mongodb().collection(dbtables.GroupInfo)
             .find({ id: { $in: data.groupids } })
             .toArray();

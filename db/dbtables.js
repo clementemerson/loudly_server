@@ -8,6 +8,7 @@ module.exports = {
     GroupInfo: 'groupinfo',
     GroupUsers: 'groupusers',
     GroupPolls: 'grouppolls',
+    UserPolls: 'userpolls',
 
     PollData: 'polldata',
     PollVoteData: 'pollvotedata',

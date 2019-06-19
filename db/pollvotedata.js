@@ -4,7 +4,7 @@ var dbtables = require('./dbtables');
 module.exports = {
     
     saveVote: async (data) => {
-        console.log('db.polls.saveVote');
+        console.log('db.pollvotedata.saveVote');
         let date = new Date();
         let createdAt = date.toISOString();
         let updatedAt = date.toISOString();

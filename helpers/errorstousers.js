@@ -10,7 +10,12 @@ module.exports = {
     invalidPhoneNumber: 'Invalid phone number',
     errorInProcessing: 'Error in processing request',
     errorOTPMismatchOrExpired: 'OTP Mismatch or Expired',
+
     errorPollAlreadyInGroup: 'Poll already available in the group',
+    errorUserDoesNotHavePoll: 'User does not have the poll',
+    errorUserIsNotMember: 'User is not a member of the group',
+    errorUserIsMember: 'User is a member of the group',
+    errorUserNotExists: 'User does not exist',
     errorNotAnAdminUser: "You're NOT an Admin user",
     errorPollNotAvailable: 'Poll not available',
 };

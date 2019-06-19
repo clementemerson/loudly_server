@@ -3,12 +3,16 @@ var dbTransactions = require('../db/session');
 let GroupUsers = require('../db/groupusers');
 let GroupInfo = require('../db/groupinfo');
 let GroupPolls = require('../db/grouppolls');
+var Users = require('../db/users');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
 var replyHelper = require('../helpers/replyhelper');
 
 var sequenceCounter = require('../db/sequencecounter');
+
+
+let ControllerHelper = require('./ControllerHelper');
 
 module.exports = {
     //Tested on: 18-06-2019
@@ -138,29 +142,61 @@ module.exports = {
         }
     },
 
+    //Tested on: 19-06-2019
+    //{"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
     addUser: async (message) => {
         console.log('GroupController.addUser');
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.groupid = message.data.groupid;
-            data.user_id = message.data.user_id;
-            data.addedby = message.user_id;
-            data.permission = message.data.permission;
+            //Check the user is available. If he is, then he can be added to the group.
+            const isUserExist = Users.isUserExist(message.data.user_id);
+            if(isUserExist == false) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserNotExists);
+            }
 
-            const isAdmin = await GroupUsers.isAdmin(data);
-            if (isAdmin == true) {
-                await GroupUsers.addUser(data);
-                //TODO: create entries in transaction tables
-                //TODO: Notify all the online users of the group (async)
+            //Check user is already a member
+            let isMemberData = {
+                groupid: message.data.groupid,
+                user_id: message.data.user_id,
+            };
+            const isMember = await GroupUsers.isMember(isMemberData);
+            console.log(isMember);
+            if(isMember == true) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserIsMember);
+            }
 
-                await dbTransactions.commitTransaction(dbsession);
-                return success.userAddedToGroup;
-            } else {
+            //Check the user is an ADMIN. If he is, then he can add user.
+            let isAdminData = {
+                groupid: message.data.groupid,
+                user_id: message.user_id,
+            };
+
+            const isAdmin = await GroupUsers.isAdmin(isAdminData);
+            if (isAdmin == false) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
             }
+
+            //Now add the user
+            let addUser = {
+                groupid: message.data.groupid,
+                user_id: message.data.user_id,
+                addedby: message.user_id,
+                permission: message.data.permission
+            };
+            await GroupUsers.addUser(addUser);
+
+            //TODO: create entries in transaction tables
+            //TODO: Notify all the online users of the group (async)
+            ControllerHelper.informUsers(addUser.groupid, addUser);
+
+            let replyData = {
+                status: success.userAddedToGroup
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -231,16 +267,26 @@ module.exports = {
         }
     },
 
+    //Tested on: 19-06-2019
+    //{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
     getPolls: async (message) => {
         console.log('GroupController.getPolls');
         try {
             let data = {
-                groupid: message.data.groupid
+                groupid: message.data.groupid,
+                user_id: message.user_id
             }
+
+            //Check user in group. If he is, then he can get the requested info
+            let userIsMember = await GroupUsers.isMember(data);
+            if (!userIsMember) {
+                return await replyHelper.prepareError(message, null, errors.errorUserIsNotMember);
+            }
+
             let pollsInGroup = await GroupPolls.getPolls(data);
-            return await replyHelper.prepareSuccess(message, dbsession, pollsInGroup);
+            return await replyHelper.prepareSuccess(message, null, pollsInGroup);
         } catch (err) {
-            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
         }
-    }
+    },
 }

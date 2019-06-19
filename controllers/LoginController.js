@@ -1,6 +1,5 @@
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 const https = require('https');
-const uuidv4 = require('uuid/v4');
 const cryptoRandomString = require('crypto-random-string');
 var crypto = require('crypto');
 
@@ -10,6 +9,8 @@ var Users = require('../db/users');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
+
+var sequenceCounter = require('../db/sequencecounter');
 
 
 //this key is for testing purposes
@@ -176,8 +177,9 @@ privateFunctions = {
         var phonenumber = req.body.phonenumber;
         if (!req.body.user) {
             //Create New User
+            var user_id = await sequenceCounter.getNextSequenceValue('user');
             user_data = {
-                user_id: uuidv4(),
+                user_id: user_id,
                 phonenumber: phonenumber,
                 user_secret_hashed: user_secret_hashed,
                 user_secret: user_secret

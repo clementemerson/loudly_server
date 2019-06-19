@@ -23,8 +23,8 @@ module.exports = {
         let date = new Date();
         let updatedAt = date.toISOString();
 
-        await mongodb().collection(dbtables.GroupInfo).update(
-            { id: data.id },
+        await mongodb().collection(dbtables.GroupInfo).updateOne(
+            { id: data.groupid },
             {
                 $set: {
                     name: data.name,
@@ -38,8 +38,8 @@ module.exports = {
         let date = new Date();
         let updatedAt = date.toISOString();
 
-        await mongodb().collection(dbtables.GroupInfo).update(
-            { id: data.id },
+        await mongodb().collection(dbtables.GroupInfo).updateOne(
+            { id: data.groupid },
             {
                 $set: {
                     desc: data.desc,

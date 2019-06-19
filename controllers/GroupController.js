@@ -60,26 +60,41 @@ module.exports = {
         }
     },
 
+    //Tested on: 19-06-2019
+    //{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
     changeTitle: async (message) => {
         console.log('GroupController.changeTitle');
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
 
+            //Check user is a member. If he is, then he can change the title
+            let isMemberData = {
+                groupid: message.data.groupid,
+                user_id: message.user_id,
+            };
+            const isMember = await GroupUsers.isMember(isMemberData);
+            if (isMember == false) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserIsNotMember);
+            }
+
+            //Change the title
             let data = {
-                id: message.data.id,
+                groupid: message.data.groupid,
                 name: message.data.name,
                 changedby: message.user_id
             };
             await GroupInfo.changeTitle(data);
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
+            ControllerHelper.informUsers(data.groupid, data);
 
             let replyData = {
-                groupid: groupid,
                 status: success.groupTitleChanged
             }
             return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -87,19 +102,34 @@ module.exports = {
     changeDesc: async (message) => {
         console.log('GroupController.changeDesc');
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.id = message.data.id;
-            data.desc = message.data.desc;
-            data.changedby = message.user_id;
+            //Check user is a member. If he is, then he can change the title
+            let isMemberData = {
+                groupid: message.data.groupid,
+                user_id: message.user_id,
+            };
+            const isMember = await GroupUsers.isMember(isMemberData);
+            if (isMember == false) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserIsNotMember);
+            }
 
+            //Change the desc
+            let data = {
+                groupid: message.data.groupid,
+                desc: message.data.desc,
+                changedby: message.user_id
+            };
             await GroupInfo.changeDesc(data);
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
+            ControllerHelper.informUsers(data.groupid, data);
 
-            await dbTransactions.commitTransaction(dbsession);
-            return success.groupDescChanged;
+            let replyData = {
+                status: success.groupDescChanged
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
@@ -152,7 +182,7 @@ module.exports = {
 
             //Check the user is available. If he is, then he can be added to the group.
             const isUserExist = Users.isUserExist(message.data.user_id);
-            if(isUserExist == false) {
+            if (isUserExist == false) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserNotExists);
             }
 
@@ -162,8 +192,7 @@ module.exports = {
                 user_id: message.data.user_id,
             };
             const isMember = await GroupUsers.isMember(isMemberData);
-            console.log(isMember);
-            if(isMember == true) {
+            if (isMember == true) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserIsMember);
             }
 

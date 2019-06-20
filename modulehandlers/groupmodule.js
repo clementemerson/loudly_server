@@ -17,9 +17,6 @@ module.exports = {
             case 'delete':
                 reply = await GroupController.delete(message);
                 break;
-            case 'getDetails':
-                reply = await GroupController.getDetails(message);
-                break;
             case 'changeAvatar':
                 //reply = await GroupController.changeAvatar(message);
                 break;
@@ -32,8 +29,8 @@ module.exports = {
             case 'removeUser':
                 reply = await GroupController.removeUser(message);
                 break;
-            case 'getGroupsInfo':
-                reply = await GroupController.getGroupsInfo(message);
+            case 'getInfo':
+                reply = await GroupController.getInfo(message);
                 break;
             case 'getUsersOfGroups':
                 reply = await GroupController.getUsersOfGroups(message);

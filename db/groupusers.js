@@ -82,5 +82,14 @@ module.exports = {
             return true;
         else
             return false;
-    }
+    },
+
+    getGroupsOfUser: async (user_id) => {
+        console.log('db.groupusers.getGroupsOfUser');
+
+        return await mongodb().collection(dbtables.GroupUsers).find({
+            user_id: user_id,
+        })
+        .toArray();;
+    },
 }

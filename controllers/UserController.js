@@ -3,6 +3,7 @@ var Users = require('../db/users');
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
 var replyHelper = require('../helpers/replyhelper');
+let GroupUsers = require('../db/groupusers');
 
 module.exports = {
     getUsersByPhoneNumbers: async (req, res) => {
@@ -36,14 +37,16 @@ module.exports = {
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
+
+    //Tested on: 20-06-2019
+    //{"module":"users", "event":"getGroups", "messageid":3432}
     getGroups: async (message) => {
         console.log('UserController.getGroups');
         try {
-            let groups = await Groups.getGroupsOfUser(message.user_id);
-            let reply = replyHelper.prepareReply(message, groups);
-            return success.sendData(reply);
+            let groups = await GroupUsers.getGroupsOfUser(message.user_id);
+            return await replyHelper.prepareSuccess(message, null, groups);
         } catch (err) {
-            return errors.unknownError;
+            return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
 }

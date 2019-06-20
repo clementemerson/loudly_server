@@ -11,7 +11,6 @@ var replyHelper = require('../helpers/replyhelper');
 
 var sequenceCounter = require('../db/sequencecounter');
 
-
 let ControllerHelper = require('./ControllerHelper');
 
 module.exports = {
@@ -99,6 +98,8 @@ module.exports = {
         }
     },
 
+    //Tested on: 20-06-2019
+    //{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
     changeDesc: async (message) => {
         console.log('GroupController.changeDesc');
         try {
@@ -138,13 +139,25 @@ module.exports = {
     delete: async (message) => {
         console.log('GroupController.delete');
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.id = message.data.id;
-            data.deleteby = message.user_id;
+            //Check the user is an ADMIN. If he is, then he can delete the group.
+            let isAdminData = {
+                groupid: message.data.groupid,
+                user_id: message.user_id,
+            };
+            const isAdmin = await GroupUsers.isAdmin(isAdminData);
+            if (isAdmin == false) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
+            }
 
+            let data = {
+                groupid: message.data.groupid,
+                deleteby: message.user_id
+            };
             await GroupInfo.delete(data);  //mark as deleted
+
             //TODO: delete usersofgroup
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async) ... 
@@ -159,7 +172,7 @@ module.exports = {
 
     //Tested on: 18-06-2019
     //{"module":"groups", "event":"getGroupsInfo", "messageid":8971, "data":{"groupids":[1001, 1000]}}
-    getGroupsInfo: async (message) => {
+    getInfo: async (message) => {
         console.log('GroupController.getGroupsInfo');
         try {
             let data = {
@@ -201,7 +214,6 @@ module.exports = {
                 groupid: message.data.groupid,
                 user_id: message.user_id,
             };
-
             const isAdmin = await GroupUsers.isAdmin(isAdminData);
             if (isAdmin == false) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
@@ -230,52 +242,99 @@ module.exports = {
         }
     },
 
+    //Tested on: 20-06-2019
+    //{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
     changeUserPermission: async (message) => {
         console.log('GroupController.changeUserPermission');
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.groupid = message.data.groupid;
-            data.user_id = message.data.user_id;
-            data.permission = message.data.permission;
+            //Check user is already a member
+            let isMemberData = {
+                groupid: message.data.groupid,
+                user_id: message.data.user_id,
+            };
+            const isMember = await GroupUsers.isMember(isMemberData);
+            if (isMember == false) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserIsNotMember);
+            }
 
-            const isAdmin = await GroupUsers.isAdmin(data);
-            if (isAdmin == true) {
-                await GroupUsers.changeUserPermission(data);
-                //TODO: create entries in transaction tables
-                //TODO: Notify all the online users of the group (async)
-
-                await dbTransactions.commitTransaction(dbsession);
-                return success.userPermissionChangedInGroup;
-            } else {
+            //Check the user is an ADMIN. If he is, then he can add user.
+            let isAdminData = {
+                groupid: message.data.groupid,
+                user_id: message.user_id,
+            };
+            const isAdmin = await GroupUsers.isAdmin(isAdminData);
+            if (isAdmin == false) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
             }
+
+            //Permission can be ADMIN or USER. Cant be CREATOR
+            if (message.data.permission != 'ADMIN' && message.data.permission != 'USER') {
+                return await replyHelper.prepareError(message, dbsession, errors.errorNotAllowedToSetThisPermission);
+            }
+
+            let data = {
+                groupid: message.data.groupid,
+                user_id: message.data.user_id,
+                permission: message.data.permission
+            };
+            await GroupUsers.changeUserPermission(data);
+            //TODO: create entries in transaction tables
+            //TODO: Notify all the online users of the group (async)
+            ControllerHelper.informUsers(data.groupid, data);
+
+            let replyData = {
+                status: success.userPermissionChangedInGroup
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 
+    //Tested on: 20-06-2019
+    //{"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}-
     removeUser: async (message) => {
         console.log('GroupController.removeUser');
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
-            var data = {};
 
-            data.groupid = message.data.groupid;
-            data.user_id = message.data.user_id;
+            //Check user is already a member
+            let isMemberData = {
+                groupid: message.data.groupid,
+                user_id: message.data.user_id,
+            };
+            const isMember = await GroupUsers.isMember(isMemberData);
+            if (isMember == false) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserIsNotMember);
+            }
 
-            const isAdmin = await GroupUsers.isAdmin(data);
-            if (isAdmin == true) {
-                await GroupUsers.removeUser(data);
-                //TODO: create entries in transaction tables
-                //TODO: Notify all the online users of the group (async)
-
-                await dbTransactions.commitTransaction(dbsession);
-                return success.userRemovedFromGroup;
-            } else {
+            //Check the user is an ADMIN. If he is, then he can add user.
+            let isAdminData = {
+                groupid: message.data.groupid,
+                user_id: message.user_id,
+            };
+            const isAdmin = await GroupUsers.isAdmin(isAdminData);
+            if (isAdmin == false) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
             }
+
+            let data = {
+                groupid: message.data.groupid,
+                user_id: message.data.user_id
+            };
+            await GroupUsers.removeUser(data);
+            //TODO: create entries in transaction tables
+            //TODO: Notify all the online users of the group (async)
+            ControllerHelper.informUsers(data.groupid, data);
+
+            let replyData = {
+                status: success.userRemovedFromGroup
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }

@@ -9,7 +9,7 @@ module.exports = {
         let updatedAt = date.toISOString();
 
         await mongodb().collection(dbtables.PollData).insertOne({
-            id: data.id,
+            pollid: data.id,
             title: data.title,
             issecret: data.issecret,
             canbeshared: data.canbeshared,
@@ -42,4 +42,11 @@ module.exports = {
             }
         );
     },
+
+    getPollInfoByPollIds: async (pollids) => {
+        console.log('db.polldata.getPollInfoByPollIds');
+        return await mongodb().collection(dbtables.PollData)
+            .find({ pollid: { $in: pollids } })
+            .toArray();
+    }
 }

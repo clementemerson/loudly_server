@@ -46,10 +46,10 @@ module.exports = {
         });
     },
 
-    getUsers: async (data) => {
+    getUsers: async (groupid) => {
         console.log('db.groupusers.getUsers');
         return await mongodb().collection(dbtables.GroupUsers)
-            .find({ groupid: { $in: data.groupids } })
+            .find({ groupid: groupid })
             .toArray();
     },
 

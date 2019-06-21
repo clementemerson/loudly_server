@@ -28,10 +28,10 @@ module.exports = {
         return polls[0];
     },
 
-    getPolls: async (data) => {
+    getPolls: async (groupid) => {
         console.log('db.grouppolls.getPolls');
         return await mongodb().collection(dbtables.GroupPolls)
-            .find({ groupid: data.groupid })
+            .find({ groupid: groupid })
             .toArray();
     },
 

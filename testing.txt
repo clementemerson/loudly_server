@@ -10,13 +10,17 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"users", "event":"getGroups", "messageid":3432}
 
+{"module":"users", "event":"getPolls", "messageid":9961}
+
+{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+
 
 
 {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"RE", "desc":"some description about the group"}}
 
-{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3000]}}
+{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3000, 3001]}}
 
-{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[3000]}}
+{"module":"groups", "event":"getUsersOfGroup", "messageid":15185, "data":{"groupid":3000}}
 
 {"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 3000}}
 
@@ -37,3 +41,5 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 {"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "issecret": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
 
 {"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1000, "groupid": 3000}}
+
+*{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}

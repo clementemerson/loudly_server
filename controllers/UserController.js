@@ -4,6 +4,7 @@ var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
 var replyHelper = require('../helpers/replyhelper');
 let GroupUsers = require('../db/groupusers');
+let UserPolls = require('../db/userpolls');
 
 module.exports = {
     getUsersByPhoneNumbers: async (req, res) => {
@@ -45,6 +46,30 @@ module.exports = {
         try {
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
             return await replyHelper.prepareSuccess(message, null, groups);
+        } catch (err) {
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    //Tested on: 21-06-2019
+    //{"module":"users", "event":"getPolls", "messageid":9961}
+    getPolls: async (message) => {
+        console.log('UserController.getPolls');
+        try {
+            let polls = await UserPolls.getPolls(message.user_id);
+            return await replyHelper.prepareSuccess(message, null, polls);
+        } catch (err) {
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    //Tested on: 21-06-2019
+    //{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+    getInfo: async (message) => {
+        console.log('UserController.getInfo');
+        try {
+            let userinfos = await Users.getUserInfoByUserIds(message.data.userids);
+            return await replyHelper.prepareSuccess(message, null, userinfos);
         } catch (err) {
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }

@@ -41,7 +41,7 @@ module.exports = {
             let shareWithUser = {
                 pollid: pollid,
                 user_id: message.user_id,
-                sharedby: message.user_id,
+                sharedby: message.user_id
             }
             await UserPolls.shareWithUser(shareWithUser);
 
@@ -98,7 +98,7 @@ module.exports = {
         }
     },
 
-    //Tested on: 19-06-2019
+    //Tested on: 21-06-2019
     //{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
     shareToGroup: async (message) => {
         console.log('PollController.shareToGroup');
@@ -123,7 +123,7 @@ module.exports = {
 
             //Check user in group. If he is, then he can share
             let userIsMember = await GroupUsers.isMember(data);
-            if(!userIsMember) {
+            if (!userIsMember) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserIsNotMember);
             }
 
@@ -136,6 +136,17 @@ module.exports = {
             //Share to the group
             await GroupPolls.shareToGroup(data);
 
+            let groupUsers = GroupUsers.getUsers(message.data.groupid);
+            for (const groupUser in groupUsers) {
+                //Create an entry in userpolls table
+                let shareWithUser = {
+                    pollid: message.data.pollid,
+                    user_id: groupUser.user_id,
+                    sharedby: message.user_id
+                }
+                await UserPolls.shareWithUser(shareWithUser);
+            }
+
             //Inform group users about this new poll
             ControllerHelper.informUsers(data.groupid, data);
 
@@ -145,6 +156,18 @@ module.exports = {
             return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
+        }
+    },
+
+    //Tested on: 21-06-2019
+    //{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
+    getInfo: async (message) => {
+        console.log('PollController.getInfo');
+        try {
+            let pollinfos = await PollData.getPollInfoByPollIds(message.data.pollids);
+            return await replyHelper.prepareSuccess(message, null, pollinfos);
+        } catch (err) {
+            return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
 }

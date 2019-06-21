@@ -14,7 +14,7 @@ var sequenceCounter = require('../db/sequencecounter');
 let ControllerHelper = require('./ControllerHelper');
 
 module.exports = {
-    //Tested on: 18-06-2019
+    //Tested on: 21-06-2019
     //{"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
     create: async (message) => {
         console.log('GroupController.create');
@@ -30,15 +30,6 @@ module.exports = {
                 createdby: message.user_id
             }
             await GroupInfo.create(groupData);
-
-            //Adding user with CREATOR privileges
-            let userBeCreator = {
-                groupid: groupid,
-                user_id: message.user_id,
-                addedby: message.user_id,
-                permission: 'CREATOR'
-            }
-            await GroupUsers.addUser(userBeCreator);
 
             //Adding user with ADMIN privileges
             let userBeAdmin = {
@@ -340,15 +331,12 @@ module.exports = {
         }
     },
 
-    //Tested on: 18-06-2019
+    //Tested on: 21-06-2019
     //{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[1001, 1000]}}
-    getUsersOfGroups: async (message) => {
+    getUsersOfGroup: async (message) => {
         console.log('GroupController.getUsersOfGroups');
         try {
-            let data = {
-                groupids: message.data.groupids
-            };
-            let usersOfGroups = await GroupUsers.getUsers(data);
+            let usersOfGroups = await GroupUsers.getUsers(message.data.groupid);
             return await replyHelper.prepareSuccess(message, null, usersOfGroups);
         } catch (err) {
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -371,7 +359,7 @@ module.exports = {
                 return await replyHelper.prepareError(message, null, errors.errorUserIsNotMember);
             }
 
-            let pollsInGroup = await GroupPolls.getPolls(data);
+            let pollsInGroup = await GroupPolls.getPolls(data.groupid);
             return await replyHelper.prepareSuccess(message, null, pollsInGroup);
         } catch (err) {
             return await replyHelper.prepareError(message, null, errors.unknownError);

@@ -11,7 +11,7 @@ module.exports = {
         await mongodb().collection(dbtables.PollData).insertOne({
             pollid: data.id,
             title: data.title,
-            issecret: data.issecret,
+            resultispublic: data.resultispublic,
             canbeshared: data.canbeshared,
             createdby: data.createdby,
             options: data.options,

@@ -1,5 +1,5 @@
 9884386484
-ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAwLCJ1c2VyX3NlY3JldCI6ImdqY0daNjd5ekIzV2ZnNE1jbGNGbU4rRCIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODg0Mzg2NDg0IiwiaWF0IjoxNTYxMTA1NjM4fQ.VJKdlZzTxxK3r5vehStCDpDHu3-U4NzY2yQlP_BnTuM
+ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAwLCJ1c2VyX3NlY3JldCI6Ik1qSkFwb2VLeVJyanY3bFhaWUZ2K2F4aSIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODg0Mzg2NDg0IiwiaWF0IjoxNTYxMDEwNTA0fQ.B3YyqrK8RbEM7rtt-zbs875fjYjKR0BPBu2InRuEKAM
 
 9789309582 - Karthik
 ws://lt140025:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAxLCJ1c2VyX3NlY3JldCI6IjhGYlVRYWpVOFAxdURNOWU1SzNjMGN1YiIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5Nzg5MzA5NTgyIiwiaWF0IjoxNTYwOTI0MzA0fQ.5P0a_Y1XOrUZjplh3ZIurgHQh9Eu9ROqVf9vx_8kNFA
@@ -10,17 +10,13 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"users", "event":"getGroups", "messageid":3432}
 
-{"module":"users", "event":"getPolls", "messageid":9961}
-
-{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
-
 
 
 {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"RE", "desc":"some description about the group"}}
 
-{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3000, 3001]}}
+{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3000]}}
 
-{"module":"groups", "event":"getUsersOfGroup", "messageid":15185, "data":{"groupid":3000}}
+{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[3000]}}
 
 {"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 3000}}
 
@@ -38,8 +34,6 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 
 
-{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "issecret": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
+{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
 
 {"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1000, "groupid": 3000}}
-
-*{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}

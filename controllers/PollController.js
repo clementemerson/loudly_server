@@ -17,7 +17,7 @@ var sequenceCounter = require('../db/sequencecounter');
 
 module.exports = {
     //Tested on: 19-06-2019
-    //{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "issecret": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
+    //{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
     create: async (message) => {
         console.log('PollController.create');
         try {
@@ -29,7 +29,7 @@ module.exports = {
             let data = {
                 id: pollid,
                 title: message.data.title,
-                issecret: message.data.issecret,
+                resultispublic: message.data.resultispublic,
                 canbeshared: message.data.canbeshared,
                 options: message.data.options,
                 createdby: message.user_id
@@ -73,7 +73,7 @@ module.exports = {
                 let updatePollResult = PollData.updatePollResult(data);
                 let updatePollVoterList = PollVoteRegister.updatePollVoterList(data);
                 var updatePollPublicVotes;
-                if (poll.issecret != true && data.secretvote != true) {
+                if (data.secretvote != true) {
                     updatePollPublicVotes = PollVoteData.saveVote(data);
                 } else {
                     data.user_id = 'secret_voter';

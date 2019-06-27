@@ -26,7 +26,7 @@ module.exports = {
     getUsersFromPhoneNumbers: async (message) => {
         console.log('UserController.getUsersFromPhoneNumbers');
         try {
-            let users = await Users.getUsersByPhoneNumbers(message.phoneNumbers);
+            let users = await Users.getUsersByPhoneNumbers(message.data.phoneNumbers);
             var user_ids = [];
             users.forEach(oneUser => {
                 user_ids.push(oneUser.user_id);

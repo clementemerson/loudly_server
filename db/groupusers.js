@@ -6,8 +6,8 @@ module.exports = {
     addUser: async (data) => {
         console.log('db.groupusers.addUser');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.GroupUsers).insertOne({
             groupid: data.groupid,
@@ -22,7 +22,7 @@ module.exports = {
     changeUserPermission: async (data) => {
         console.log('db.groupusers.changeUserPermission');
         let date = new Date();
-        let updatedAt = date.toISOString();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.GroupUsers).update(
             {

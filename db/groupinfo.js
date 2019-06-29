@@ -5,8 +5,8 @@ module.exports = {
     create: async (data) => {
         console.log('db.groupinfo.create');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.GroupInfo).insertOne({
             id: data.id,
@@ -21,7 +21,7 @@ module.exports = {
     changeTitle: async (data) => {
         console.log('db.groupinfo.changeTitle');
         let date = new Date();
-        let updatedAt = date.toISOString();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.GroupInfo).updateOne(
             { id: data.groupid },
@@ -36,7 +36,7 @@ module.exports = {
     changeDesc: async (data) => {
         console.log('db.groupinfo.changeDesc');
         let date = new Date();
-        let updatedAt = date.toISOString();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.GroupInfo).updateOne(
             { id: data.groupid },

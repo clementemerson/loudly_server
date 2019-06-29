@@ -5,8 +5,8 @@ var dbtables = require('./dbtables');
 module.exports = {
     insert: function (data) {
         var date = new Date();
-        var createdAt = date.toISOString();
-        var updatedAt = date.toISOString();
+        var createdAt = date.getTime();
+        var updatedAt = date.getTime();
 
         console.log('db.loginprocess.insert');
         mongodb().collection(dbtables.loginProcess).insertOne({

@@ -6,8 +6,8 @@ module.exports = {
     insert: async (data) => {
         console.log('db.users.insert');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.Users).insertOne({
             user_id: data.user_id,
@@ -21,8 +21,8 @@ module.exports = {
     insertInfo: async (data) => {
         console.log('db.users.insertInfo');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         let existingUsers = await mongodb().collection(dbtables.UsersInfo)
             .find({ user_id: data.user_id })

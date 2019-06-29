@@ -1,5 +1,5 @@
 const fs = require('fs');
-const https = require('https');
+const https = require('http');
 const WebSocket = require('ws');
 var url = require('url');
 var mongo = require('./db/mongo');
@@ -14,10 +14,12 @@ let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
 var success = require('./helpers/successtousers');
 
-const server = https.createServer({
-  cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
-  key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
-});
+const server = https.createServer();
+
+// const server = https.createServer({
+//   cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
+//   key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
+// });
 
 const wss = new WebSocket.Server({ server });
 
@@ -42,7 +44,8 @@ wss.on('connection', async (ws, req) => {
   }
   ws.onmessage = toEvent;
 
-  ws.send('something');
+  //ws.send('{module:"general", event:"connection established", status:"success", data:"something"');
+  ws.send('{"Status":"Success","Details":{"module":"general","event":"connection established","messageid":0,"data":"something"}}');
 });
 
 async function toEvent(ws) {

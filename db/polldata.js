@@ -5,8 +5,8 @@ module.exports = {
     create: async (data) => {
         console.log('db.polldata.create');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.PollData).insertOne({
             pollid: data.id,
@@ -32,7 +32,7 @@ module.exports = {
     updatePollResult: async (data) => {
         console.log('db.polldata.updatePollResult');
         let date = new Date();
-        let updatedAt = date.toISOString();
+        let updatedAt = date.getTime();
 
         return await mongodb().collection(dbtables.PollData).update(
             { pollid: data.pollid },

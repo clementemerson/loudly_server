@@ -6,8 +6,8 @@ module.exports = {
     saveVote: async (data) => {
         console.log('db.pollvotedata.saveVote');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.PollVoteData).insertOne({
             pollid: data.pollid,

@@ -6,8 +6,8 @@ module.exports = {
     shareToGroup: async (data) => {
         console.log('db.grouppolls.shareToGroup');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.GroupPolls).insertOne({
             pollid: data.pollid,

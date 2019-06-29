@@ -13,8 +13,8 @@ module.exports = {
     updatePollVoterList: async (data) => {
         console.log('db.pollvoteregister.updatePollVoterList');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         return await mongodb().collection(dbtables.PollVoteRegister).insertOne({
             pollid: data.pollid,

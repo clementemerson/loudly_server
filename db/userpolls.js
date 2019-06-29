@@ -6,8 +6,8 @@ module.exports = {
     shareWithUser: async (data) => {
         console.log('db.userpolls.shareWithUser');
         let date = new Date();
-        let createdAt = date.toISOString();
-        let updatedAt = date.toISOString();
+        let createdAt = date.getTime();
+        let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.UserPolls).update(
             {

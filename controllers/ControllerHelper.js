@@ -5,11 +5,7 @@ module.exports = {
 
     //Internal function
     informUsers: async (groupid, data) => {
-        const groups = {
-            groupids: [groupid]
-        };
-
-        let groupUsers = await GroupUsers.getUsers(groups);
+        let groupUsers = await GroupUsers.getUsers(groupid);
         connections.inform(groupUsers, data);
     }
 }

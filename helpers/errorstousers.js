@@ -18,5 +18,6 @@ module.exports = {
     errorUserNotExists: 'User does not exist',
     errorNotAnAdminUser: "You're NOT an Admin user",
     errorPollNotAvailable: 'Poll not available',
+    errorUserAlreadyVoted: 'User already voted',
     errorNotAllowedToSetThisPermission: 'You are not allowed to set the given permission to the user',
 };

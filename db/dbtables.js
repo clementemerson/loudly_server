@@ -14,6 +14,7 @@ module.exports = {
     PollVoteData: 'pollvotedata',
     PollVoteRegister: 'pollvoteregister',    
     PollSecretVoteData: 'pollsecretvotedata',
+    PollResult: 'pollresult',
 
     SequenceCounter: 'sequencecounter',
 };

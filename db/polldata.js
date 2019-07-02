@@ -9,7 +9,7 @@ module.exports = {
         let updatedAt = date.getTime();
 
         await mongodb().collection(dbtables.PollData).insertOne({
-            pollid: data.id,
+            pollid: data.pollid,
             title: data.title,
             resultispublic: data.resultispublic,
             canbeshared: data.canbeshared,
@@ -27,20 +27,6 @@ module.exports = {
                 pollid: data.pollid
             }).toArray();
         return polls[0];
-    },
-
-    updatePollResult: async (data) => {
-        console.log('db.polldata.updatePollResult');
-        let date = new Date();
-        let updatedAt = date.getTime();
-
-        return await mongodb().collection(dbtables.PollData).update(
-            { pollid: data.pollid },
-            { 
-                //$inc: { 'options' + '' + '' : 1 },
-                $set: { updatedAt: updatedAt }
-            }
-        );
     },
 
     getPollInfoByPollIds: async (pollids) => {

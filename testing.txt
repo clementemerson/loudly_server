@@ -1,32 +1,39 @@
 9884386484
-ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAwLCJ1c2VyX3NlY3JldCI6Ik1qSkFwb2VLeVJyanY3bFhaWUZ2K2F4aSIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODg0Mzg2NDg0IiwiaWF0IjoxNTYxMDEwNTA0fQ.B3YyqrK8RbEM7rtt-zbs875fjYjKR0BPBu2InRuEKAM
+ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAyLCJ1c2VyX3NlY3JldCI6InY5bmVzcHVwY2RZelVhZkhrV1RVMWdLSyIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODg0Mzg2NDg0IiwiaWF0IjoxNTYxOTU2MTU0fQ.meEPTO7U1xcQgZkx8JwuomGl26MRMXSFlgHS2TSs9BY
 
 9789309582 - Karthik
 ws://lt140025:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAxLCJ1c2VyX3NlY3JldCI6IjhGYlVRYWpVOFAxdURNOWU1SzNjMGN1YiIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5Nzg5MzA5NTgyIiwiaWF0IjoxNTYwOTI0MzA0fQ.5P0a_Y1XOrUZjplh3ZIurgHQh9Eu9ROqVf9vx_8kNFA
 
+9843910567 - Santhosh
+ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAzLCJ1c2VyX3NlY3JldCI6IkR6T3Y3YlZMbTh3L0l0dHExRDZKbGVSNSIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODQzOTEwNTY3IiwiaWF0IjoxNTYxOTU2NjY2fQ.nomeaWN5FxAaTvWAMfPnLH_ksA090eWINXal68rN-xo
+
 wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNDFkM2E5ZjMtYzYwNC00MjdmLWJiM2MtY2MwMWU4MGJkMmJlIiwidXNlcl9zZWNyZXQiOiIrWk02enp1OXZnSG5KMlJLbUlDUGtqZHEiLCJ1c2VyX3Bob25lbnVtYmVyIjoiKzkxOTg4NDM4NjQ4NCIsImlhdCI6MTU2MDgzNjU0MH0.f5tNh_b6u-IYFbQk-B1FW51H_kbpSco5Hti2-naAvrA
 
-{"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "phoneNumbers":["+919789309582"]}
+{"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data":{"phoneNumbers":["+919884386484"]}}
 
 {"module":"users", "event":"getGroups", "messageid":3432}
+
+{"module":"users", "event":"getPolls", "messageid":9961}
+
+{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
 
 
 
 {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"RE", "desc":"some description about the group"}}
 
-{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3000]}}
+{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3004, 3005]}}
 
-{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[3000]}}
+{"module":"groups", "event":"getUsersOfGroup", "messageid":15185, "data":{"groupid":3004}}
 
-{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 3000}}
+{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 3004}}
 
 {"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
 
 {"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
 
-{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
+{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3004, "desc":"some new group description"}}
 
-{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
+{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3005, "user_id":2002, "permission":"ADMIN"}}
 
 {"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}
 
@@ -35,5 +42,12 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 
 {"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
+{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll some time tieleit", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"fdgdfgfg"},{"index":1,"desc":"gdfdfhdhdshdfshdsf"}]}}
 
-{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1000, "groupid": 3000}}
+{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1004, "groupid": 3004}}
+
+{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
+
+{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
+
+{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}

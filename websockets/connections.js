@@ -1,4 +1,4 @@
-var connections = {}
+var connections = new Map();
 
 module.exports = {
     getConnections: () => {
@@ -7,8 +7,8 @@ module.exports = {
 
     inform: async (listOfUsers, data) => {
         listOfUsers.forEach(eachUser => {
-            if(connections[eachUser.user_id]) 
-                connections[eachUser.user_id].send(JSON.stringify(data));
+            if (connections.get(eachUser.user_id))
+                connections.get(eachUser.user_id).send(JSON.stringify(data));
         });
     }
 }

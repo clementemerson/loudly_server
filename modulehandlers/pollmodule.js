@@ -16,8 +16,8 @@ module.exports = {
             case 'getInfo':
                 reply = await PollController.getInfo(message);
                 break;
-            case 'getGroupUsersVoteInfo':
-                reply = await PollController.getGroupUsersVoteInfo(message);
+            case 'getUsersVoteInfo':
+                reply = await PollController.getUsersVoteInfo(message);
                 break;
             case 'syncPollResults':
                 reply = await PollController.syncPollResults(message);

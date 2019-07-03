@@ -21,7 +21,7 @@ module.exports = {
         .insertOne({
             pollid: data.pollid,
             user_id: data.user_id,
-            votetype: data.votetype,
+            votetype: data.secretvote == true ? 'secretvote' : 'openvote',
             createdAt: createdAt,
             updatedAt: updatedAt
         });

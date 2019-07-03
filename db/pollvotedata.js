@@ -18,19 +18,12 @@ module.exports = {
         });
     },
 
-    getGroupUsersVoteInfo: async (data) => {
+    getUsersVoteInfo: async (data) => {
         console.log('db.pollvotedata.getUsersVoteInfo');
-        let groupUsers = await GroupUsers.getUsers(data.groupid);
-        var user_ids = [];
-        groupUsers.forEach(eachUser => {
-            user_ids.push(eachUser.user_id);
-        });
-
         return await mongodb().collection(dbtables.PollVoteData)
             .find({
-                user_id: { $in: user_ids },
-                pollid: data.pollid,
-                updatedAt: { $gt: data.lastsynchedtime }
+                user_id: { $in: data.user_ids },
+                pollid: data.pollid
             }).toArray();
     },
 

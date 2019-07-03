@@ -29,7 +29,7 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
 
-{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
+{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3004, "name":"new group title"}}
 
 {"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3004, "desc":"some new group description"}}
 
@@ -41,13 +41,14 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 
 
-{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"title":"option1"},{"title":"option2"}]}}
 {"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll some time tieleit", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"fdgdfgfg"},{"index":1,"desc":"gdfdfhdhdshdfshdsf"}]}}
 
-{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1004, "groupid": 3004}}
+{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1013, "groupid": 3004}}
 
 {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
 
-{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
+{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1013, "optionindex": 1, "secretvote": true}}
+
+{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
 
 {"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}

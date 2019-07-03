@@ -103,7 +103,6 @@ module.exports = {
             connections.inform(voters, data);
             return success.successVoted;
         } catch (err) {
-            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -146,8 +145,9 @@ module.exports = {
             //Share to the group
             await GroupPolls.shareToGroup(data);
 
-            let groupUsers = GroupUsers.getUsers(message.data.groupid);
-            for (const groupUser in groupUsers) {
+            let groupUsers = await GroupUsers.getUsers(message.data.groupid);
+
+            groupUsers.forEach(async (groupUser) => {
                 //Create an entry in userpolls table
                 let shareWithUser = {
                     pollid: message.data.pollid,
@@ -155,10 +155,10 @@ module.exports = {
                     sharedby: message.user_id
                 }
                 await UserPolls.shareWithUser(shareWithUser);
-            }
+            });
 
             //Inform group users about this new poll
-            ControllerHelper.informUsers(data.groupid, data);
+            connections.inform(groupUsers, data);
 
             let replyData = {
                 status: success.successPollShared
@@ -181,16 +181,20 @@ module.exports = {
         }
     },
 
-    getGroupUsersVoteInfo: async (message) => {
+    //Tested on: 03-07-2019
+    //{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
+    getUsersVoteInfo: async (message) => {
         console.log('PollController.getUsersVoteInfo');
         try {
-            let usersVoteInfo = await PollVoteData.getGroupUsersVoteInfo(message.data);
+            let usersVoteInfo = await PollVoteData.getUsersVoteInfo(message.data);
             return await replyHelper.prepareSuccess(message, null, usersVoteInfo);
         } catch (err) {
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
 
+    //Tested on: 03-07-2019
+    //{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
     syncPollResults: async (message) => {
         console.log('PollController.syncPollResults');
         try {

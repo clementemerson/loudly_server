@@ -84,7 +84,6 @@ module.exports = {
             }
             return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
-            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -228,7 +227,6 @@ module.exports = {
             }
             return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
-            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },

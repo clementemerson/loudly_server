@@ -70,7 +70,6 @@ module.exports = {
     verifyotp: (req, res, next) => {
         console.log('LoginController.verifyotp');
         try {
-            console.log(req.body);
             var session_id = req.body.sessionid;
             var otp_entered_by_user = req.body.otp;
 
@@ -151,7 +150,6 @@ module.exports = {
             await dbTransactions.commitTransaction(dbsession);
             return next();
         } catch (err) {
-            console.log(err);
             await dbTransactions.abortTransaction(dbsession);
             return res.status(400).send();
         }

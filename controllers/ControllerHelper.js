@@ -7,5 +7,5 @@ module.exports = {
     informUsers: async (groupid, data) => {
         let groupUsers = await GroupUsers.getUsers(groupid);
         connections.inform(groupUsers, data);
-    }
+    },
 }

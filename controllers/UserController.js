@@ -1,4 +1,5 @@
 var Users = require('../db/users');
+var dbTransactions = require('../db/session');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
@@ -35,6 +36,7 @@ module.exports = {
             let userinfos = await Users.getUserInfoByUserIds(user_ids);
             return await replyHelper.prepareSuccess(message, null, userinfos);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
@@ -47,6 +49,7 @@ module.exports = {
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
             return await replyHelper.prepareSuccess(message, null, groups);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
@@ -59,6 +62,7 @@ module.exports = {
             let polls = await UserPolls.getPolls(message.user_id);
             return await replyHelper.prepareSuccess(message, null, polls);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
@@ -71,7 +75,62 @@ module.exports = {
             let userinfos = await Users.getUserInfoByUserIds(message.data.userids);
             return await replyHelper.prepareSuccess(message, null, userinfos);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    //Tested on: 03-07-2019
+    //{"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
+    changeName: async (message) => {
+        console.log('UserController.changeName');
+        var dbsession;
+        try {
+            //Start transaction
+            dbsession = await dbTransactions.startSession();
+
+            //Prepare data
+            let data = {
+                user_id: message.user_id,
+                name: message.data.name
+            }
+
+            //Change the name
+            await Users.changeName(data);
+            let replyData = {
+                status: success.userNameChanged
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
+        }
+    },
+
+    //Tested on: 03-07-2019
+    //{"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
+    changeStatusMsg: async (message) => {
+        console.log('UserController.changeStatusMsg');
+        var dbsession;
+        try {
+            //Start transaction
+            dbsession = await dbTransactions.startSession();
+
+            //Prepare data
+            let data = {
+                user_id: message.user_id,
+                statusmsg: message.data.statusmsg
+            }
+
+            //Change the name
+            await Users.changeStatusMsg(data);
+            let replyData = {
+                status: success.userStatusChanged
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 }

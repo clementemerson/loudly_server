@@ -13,7 +13,6 @@ let connections = require('../websockets/connections');
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
 var replyHelper = require('../helpers/replyhelper');
-let ControllerHelper = require('./ControllerHelper');
 var sequenceCounter = require('../db/sequencecounter');
 
 module.exports = {
@@ -54,6 +53,7 @@ module.exports = {
             }
             return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -73,11 +73,12 @@ module.exports = {
                 secretvote: message.data.secretvote
             }
 
-            //Check if already voted or not
+            //Check if poll is available
             let poll = await PollData.getPollInfo(data);
             if (poll == null)
                 return await replyHelper.prepareError(message, dbsession, errors.errorPollNotAvailable);
 
+            //Check if the user has voted already
             let isUserVoted = await PollVoteRegister.isUserVoted(data);
             if (isUserVoted == true)
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserAlreadyVoted);
@@ -91,18 +92,20 @@ module.exports = {
                 data.user_id = 'secret_voter';
             }
 
-            let resUpdatePollResult = await updatePollResult;
+            await updatePollResult;
             await updatePollVoterList;
             if (updatePollPublicVotes) {
                 await updatePollPublicVotes;
             }
 
-            await dbTransactions.commitTransaction(dbsession);
-
-            let voters = await PollVoteRegister.getVotersList(data);
-            connections.inform(voters, data);
-            return success.successVoted;
+            privateFunctions.updatePollResultToSubscribers(data.pollid);
+            let replyData = {
+                pollid: data.pollid,
+                status: success.successVoted
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -165,6 +168,7 @@ module.exports = {
             }
             return await replyHelper.prepareSuccess(message, dbsession, replyData);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
@@ -177,6 +181,7 @@ module.exports = {
             let pollinfos = await PollData.getPollInfoByPollIds(message.data.pollids);
             return await replyHelper.prepareSuccess(message, null, pollinfos);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
@@ -189,6 +194,7 @@ module.exports = {
             let usersVoteInfo = await PollVoteData.getUsersVoteInfo(message.data);
             return await replyHelper.prepareSuccess(message, null, usersVoteInfo);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
@@ -204,10 +210,105 @@ module.exports = {
                 lastsynchedtime: message.data.lastsynchedtime
             };
 
-            let pollResults = await PollResult.syncPollResults(data);
+            let userPolls = await PollVoteRegister.getUserPolls(data);
+            data.pollids = [];
+            userPolls.forEach(Itr => {
+                data.pollids.push(Itr.pollid);
+            });
+
+            let pollResults = await PollResult.getUpdatedPollResults(data);
             return await replyHelper.prepareSuccess(message, null, pollResults);
         } catch (err) {
+            console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
-    }
+    },
+
+    //Tested on: 04-07-2019
+    //{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+    subscribeToPollResult: async (message) => {
+        console.log('PollController.subscribeToPollResult');
+        try {
+            //Prepare data
+            let data = {
+                user_id: message.user_id,
+                pollid: message.data.pollid
+            }
+
+            //Check if the user has voted already
+            let isUserVoted = await PollVoteRegister.isUserVoted(data);
+            if (isUserVoted == false)
+                return await replyHelper.prepareError(message, null, errors.errorUserNotVoted);
+
+            //Put an entry in the subscription
+            if (!connections.getPollResultSubscriptions()[data.pollid]) {
+                connections.getPollResultSubscriptions()[data.pollid] = [];
+            }
+            connections.getPollResultSubscriptions()[data.pollid].push(data.user_id);
+            console.log(connections.getPollResultSubscriptions());
+
+            let replyData = {
+                status: success.userSubscribedToPollResult
+            }
+            return await replyHelper.prepareSuccess(message, null, replyData);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    //Tested on: 04-07-2019
+    //{"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+    unSubscribeToPollResult: async (message) => {
+        console.log('PollController.unSubscribeToPollResult');
+        try {
+            //Prepare data
+            let data = {
+                user_id: message.user_id,
+                pollid: message.data.pollid
+            }
+
+            //Remove entry from the subscription
+            const subscribersArray = connections.getPollResultSubscriptions()[data.pollid];
+            if (subscribersArray) {
+                console.log(subscribersArray);
+                var index = subscribersArray.indexOf(data.user_id);
+                console.log(index);
+                if (index > -1)
+                    subscribersArray.splice(index, 1);
+            }
+            console.log(connections.getPollResultSubscriptions());
+
+            let replyData = {
+                status: success.userUnSubscribedToPollResult
+            }
+            return await replyHelper.prepareSuccess(message, null, replyData);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+}
+
+privateFunctions = {
+    updatePollResultToSubscribers: async (pollid) => {
+        console.log('PollController.updatePollResultToSubscribers');
+        try {
+            console.log('getting poll result');
+            let pollResults = await PollResult.getPollResult(pollid);
+            console.log('Poll result', pollResults);
+            let pollResult = pollResults[0];
+            if (pollResult) {
+                let pollResultSubscribers = connections.getPollResultSubscriptions()[pollid];
+                if (pollResultSubscribers) {
+                    pollResultSubscribers.forEach(user_id => {
+                        console.log(user_id);
+                        connections.getConnections().get(user_id).send(JSON.stringify(pollResult));
+                    });
+                }
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    },
 }

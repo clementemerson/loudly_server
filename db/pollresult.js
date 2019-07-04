@@ -37,7 +37,8 @@ module.exports = {
                         "options.index": data.optionindex
                     },
                     {
-                        $inc: { "options.$.secretvotes": 1 }
+                        $inc: { "options.$.secretvotes": 1 },
+                        $set: { updatedAt: updatedAt }
                     });
         } else {
             await mongodb().collection(dbtables.PollResult)
@@ -47,7 +48,8 @@ module.exports = {
                         'options.index': data.optionindex
                     },
                     {
-                        $inc: { "options.$.openvotes": 1 }
+                        $inc: { "options.$.openvotes": 1 },
+                        $set: { updatedAt: updatedAt }
                     });
         }
     },

@@ -104,5 +104,6 @@ mongo.initDbConnection(initServer);
 function initServer() {
   server.listen(8080, () => {
     console.log("Websocket Server started at 8080");
+    console.log = () => {};
   });
 }

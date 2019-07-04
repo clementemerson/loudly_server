@@ -7,6 +7,9 @@ module.exports = {
             case 'create':
                 reply = await PollController.create(message);
                 break;
+            case 'delete':
+                reply = await PollController.delete(message);
+                break;
             case 'vote':
                 reply = await PollController.vote(message);
                 break;

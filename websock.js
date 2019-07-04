@@ -49,7 +49,9 @@ wss.on('connection', async (ws_client, req) => {
   });
 
   ws_client.on('close', () => {
+    console.log('Closing connection - ', ws_client.jwtDetails.user_id)
     connections.getConnections().delete(ws_client.jwtDetails.user_id);
+    connections.unsubscribeUserSubscriptions(ws_client.jwtDetails.user_id);
   });
 
   //ws.send('{module:"general", event:"connection established", status:"success", data:"something"');
@@ -59,12 +61,14 @@ wss.on('connection', async (ws_client, req) => {
 setInterval(function ping() {
   console.log(connections.getConnections().keys());
   console.log(connections.getPollResultSubscriptions());
+  console.log(connections.getUserPollSubscriptions());
+
   Array.from(connections.getConnections().values()).forEach(function each(client_stream) {
     if (!client_stream.is_alive) { client_stream.terminate(); return; }
     client_stream.is_alive = false;
     client_stream.ping();
   });
-}, 30000);
+}, 10000);
 
 async function toEvent(ws) {
   try {

@@ -1,8 +1,6 @@
 var dbTransactions = require('../db/session');
 
 let GroupUsers = require('../db/groupusers');
-let GroupInfo = require('../db/groupinfo');
-let GroupPolls = require('../db/grouppolls');
 var Users = require('../db/users');
 
 var errors = require('../helpers/errorstousers');

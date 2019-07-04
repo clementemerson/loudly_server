@@ -240,12 +240,19 @@ module.exports = {
             if (isUserVoted == false)
                 return await replyHelper.prepareError(message, null, errors.errorUserNotVoted);
 
-            //Put an entry in the subscription
+            //Put an entry in pollresult subscription
             if (!connections.getPollResultSubscriptions()[data.pollid]) {
                 connections.getPollResultSubscriptions()[data.pollid] = [];
             }
             connections.getPollResultSubscriptions()[data.pollid].push(data.user_id);
-            console.log(connections.getPollResultSubscriptions());
+
+            //Put an entry in user subscription.
+            //This will be used to clear pollresult subscription,
+            // when the user connection terminates abruptly
+            if (!connections.getUserPollSubscriptions()[data.user_id]) {
+                connections.getUserPollSubscriptions()[data.user_id] = [];
+            }
+            connections.getUserPollSubscriptions()[data.user_id].push(data.pollid);
 
             let replyData = {
                 status: success.userSubscribedToPollResult
@@ -268,16 +275,21 @@ module.exports = {
                 pollid: message.data.pollid
             }
 
-            //Remove entry from the subscription
+            //Remove entry from pollresult subscription
             const subscribersArray = connections.getPollResultSubscriptions()[data.pollid];
             if (subscribersArray) {
-                console.log(subscribersArray);
                 var index = subscribersArray.indexOf(data.user_id);
-                console.log(index);
                 if (index > -1)
                     subscribersArray.splice(index, 1);
             }
-            console.log(connections.getPollResultSubscriptions());
+
+            //Remove entry from user subscription
+            const pollArray = connections.getUserPollSubscriptions()[data.user_id];
+            if (pollArray) {
+                var index = pollArray.indexOf(data.pollid);
+                if (index > -1)
+                    pollArray.splice(index, 1);
+            }
 
             let replyData = {
                 status: success.userUnSubscribedToPollResult
@@ -294,15 +306,12 @@ privateFunctions = {
     updatePollResultToSubscribers: async (pollid) => {
         console.log('PollController.updatePollResultToSubscribers');
         try {
-            console.log('getting poll result');
             let pollResults = await PollResult.getPollResult(pollid);
-            console.log('Poll result', pollResults);
             let pollResult = pollResults[0];
             if (pollResult) {
                 let pollResultSubscribers = connections.getPollResultSubscriptions()[pollid];
                 if (pollResultSubscribers) {
                     pollResultSubscribers.forEach(user_id => {
-                        console.log(user_id);
                         connections.getConnections().get(user_id).send(JSON.stringify(pollResult));
                     });
                 }

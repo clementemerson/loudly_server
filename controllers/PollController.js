@@ -145,6 +145,12 @@ module.exports = {
                 return await replyHelper.prepareError(message, dbsession, errors.errorPollAlreadyInGroup);
             }
 
+            //Check if poll is deleted
+            let isDeleted = await PollData.isDeleted(data);
+            if (isDeleted) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorPollIsDeleted);
+            }
+
             //Share to the group
             await GroupPolls.shareToGroup(data);
 
@@ -298,6 +304,37 @@ module.exports = {
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    delete: async (message) => {
+        console.log('PollController.delete');
+        try {
+            //Start transaction
+            dbsession = await dbTransactions.startSession();
+
+            //Prepare create poll
+            let data = {
+                pollid: message.data.pollid,
+                user_id: message.user_id
+            };
+
+            //Creator can delete the poll
+            let isCreator = await PollData.isCreator(data);
+            if (!isCreator) {
+                return await replyHelper.prepareError(message, dbsession, errors.errorUserNotCreatorOfPoll);
+            }
+
+            await PollData.delete(data);
+
+            let replyData = {
+                pollid: data.pollid,
+                status: success.successPollDeleted
+            }
+            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, dbsession, errors.unknownError);
         }
     },
 }

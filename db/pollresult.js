@@ -30,7 +30,7 @@ module.exports = {
         let updatedAt = date.getTime();
 
         if (data.secretvote == true) {
-            return await mongodb().collection(dbtables.PollResult)
+            await mongodb().collection(dbtables.PollResult)
                 .updateOne(
                     {
                         pollid: data.pollid,
@@ -40,7 +40,7 @@ module.exports = {
                         $inc: { "options.$.secretvotes": 1 }
                     });
         } else {
-            return await mongodb().collection(dbtables.PollResult)
+            await mongodb().collection(dbtables.PollResult)
                 .updateOne(
                     {
                         pollid: data.pollid,
@@ -52,18 +52,18 @@ module.exports = {
         }
     },
 
-    syncPollResults: async (data) => {
+    getUpdatedPollResults: async (data) => {
         console.log('db.pollresult.syncPollResults');
-        let userPolls = await PollVoteRegister.getUserPolls(data);
-        var pollids = [];
-        userPolls.forEach(Itr => {
-            pollids.push(Itr.pollid);
-        });
-        console.log(pollids);
-
         return await mongodb().collection(dbtables.PollResult).find({
-            pollid: { $in: pollids },
+            pollid: { $in: data.pollids },
             updatedAt: { $gt: data.lastsynchedtime }
+        }).toArray();
+    },
+
+    getPollResult: async (pollid) => {
+        console.log('db.pollresult.getPollResult');
+        return await mongodb().collection(dbtables.PollResult).find({
+            pollid: pollid
         }).toArray();
     },
 }

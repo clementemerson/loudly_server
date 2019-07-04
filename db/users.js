@@ -84,5 +84,35 @@ module.exports = {
             return true;
         else
             return false;
-    }
+    },
+
+    changeName: async (data) => {
+        console.log('db.users.changeName');
+        let date = new Date();
+        let updatedAt = date.getTime();
+
+        await mongodb().collection(dbtables.UsersInfo).updateOne(
+            { user_id: data.user_id },
+            {
+                $set: {
+                    name: data.name,
+                    updatedAt: updatedAt
+                }
+            });
+    },
+
+    changeStatusMsg: async (data) => {
+        console.log('db.users.changeStatusMsg');
+        let date = new Date();
+        let updatedAt = date.getTime();
+
+        await mongodb().collection(dbtables.UsersInfo).updateOne(
+            { user_id: data.user_id },
+            {
+                $set: {
+                    statusmsg: data.statusmsg,
+                    updatedAt: updatedAt
+                }
+            });
+    },
 };

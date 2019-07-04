@@ -48,17 +48,17 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll some time tieleit", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"fdgdfgfg"},{"index":1,"desc":"gdfdfhdhdshdfshdsf"}]}}
 
-{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1023, "groupid": 3006}}
+{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1026, "groupid": 3006}}
 
 {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
 
-{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1023, "optionindex": 1, "secretvote": true}}
+{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1026, "optionindex": 1, "secretvote": true}}
 
 {"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1024}}
 
 {"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
 
-{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1026}}
 
 {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
 

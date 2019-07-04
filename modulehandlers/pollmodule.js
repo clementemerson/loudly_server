@@ -22,6 +22,12 @@ module.exports = {
             case 'syncPollResults':
                 reply = await PollController.syncPollResults(message);
                 break;
+            case 'subscribeToPollResult':
+                reply = await PollController.subscribeToPollResult(message);
+                break;
+            case 'unSubscribeToPollResult':
+                reply = await PollController.unSubscribeToPollResult(message);
+                break;
             default:
                 break;
         }

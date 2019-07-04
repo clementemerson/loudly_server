@@ -16,6 +16,12 @@ module.exports = {
             case 'getInfo':
                 reply = await UserController.getInfo(message);
                 break;
+            case 'changeName':
+                reply = await UserController.changeName(message);
+                break;
+            case 'changeStatusMsg':
+                reply = await UserController.changeStatusMsg(message);
+                break;
             default:
                 break;
         }

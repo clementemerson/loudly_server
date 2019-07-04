@@ -1,4 +1,5 @@
 let GroupController = require('../controllers/GroupController');
+let GroupUserController = require('../controllers/GroupUserController');
 
 module.exports = {
     handle: async (message) => {
@@ -20,20 +21,20 @@ module.exports = {
             case 'changeAvatar':
                 //reply = await GroupController.changeAvatar(message);
                 break;
-            case 'addUser':
-                reply = await GroupController.addUser(message);
-                break;
-            case 'changeUserPermission':
-                reply = await GroupController.changeUserPermission(message);
-                break;
-            case 'removeUser':
-                reply = await GroupController.removeUser(message);
-                break;
             case 'getInfo':
                 reply = await GroupController.getInfo(message);
                 break;
+            case 'addUser':
+                reply = await GroupUserController.addUser(message);
+                break;
+            case 'changeUserPermission':
+                reply = await GroupUserController.changeUserPermission(message);
+                break;
+            case 'removeUser':
+                reply = await GroupUserController.removeUser(message);
+                break;
             case 'getUsersOfGroup':
-                reply = await GroupController.getUsersOfGroup(message);
+                reply = await GroupUserController.getUsersOfGroup(message);
                 break;
             case 'getPolls':
                 reply = await GroupController.getPolls(message);

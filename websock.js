@@ -58,12 +58,13 @@ wss.on('connection', async (ws_client, req) => {
 
 setInterval(function ping() {
   console.log(connections.getConnections().keys());
+  console.log(connections.getPollResultSubscriptions());
   Array.from(connections.getConnections().values()).forEach(function each(client_stream) {
     if (!client_stream.is_alive) { client_stream.terminate(); return; }
     client_stream.is_alive = false;
     client_stream.ping();
   });
-}, 5000);
+}, 30000);
 
 async function toEvent(ws) {
   try {
@@ -86,7 +87,7 @@ async function toEvent(ws) {
     }
 
     console.log(reply);
-    connections.getConnections()[ws.target.jwtDetails.user_id]
+    connections.getConnections().get(ws.target.jwtDetails.user_id)
       .send(JSON.stringify(reply));
   } catch (err) {
     console.log(err);

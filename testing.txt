@@ -15,27 +15,32 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"users", "event":"getPolls", "messageid":9961}
 
-{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2002,2003]}}
+
+{"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
+
+{"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
 
 
 
 {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"RE", "desc":"some description about the group"}}
 
-{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3004, 3005]}}
+//Issue: groupinfo is retreived even if the user is not in the group
+{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3004, 3005, 3006, 3007]}}
 
-{"module":"groups", "event":"getUsersOfGroup", "messageid":15185, "data":{"groupid":3004}}
+{"module":"groups", "event":"getUsersOfGroup", "messageid":15185, "data":{"groupid":3006}}
 
-{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 3004}}
+{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 3006}}
 
-{"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
+{"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3006, "user_id":2002, "permission":"USER"}}
 
-{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3004, "name":"new group title"}}
+{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3006, "name":"new group title"}}
 
-{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3004, "desc":"some new group description"}}
+{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3006, "desc":"some new group description"}}
 
-{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3005, "user_id":2002, "permission":"ADMIN"}}
+{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3006, "user_id":2003, "permission":"ADMIN"}}
 
-{"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}
+{"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3006, "user_id":2002}}
 
 
 
@@ -43,12 +48,17 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll some time tieleit", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"fdgdfgfg"},{"index":1,"desc":"gdfdfhdhdshdfshdsf"}]}}
 
-{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1013, "groupid": 3004}}
+{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1023, "groupid": 3006}}
 
 {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
 
-{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1013, "optionindex": 1, "secretvote": true}}
+{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1023, "optionindex": 1, "secretvote": true}}
 
-{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
+{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1024}}
 
 {"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
+
+{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+
+{"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+

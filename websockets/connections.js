@@ -1,8 +1,13 @@
 var connections = new Map();
+var pollResultSubscriptions = {};
 
 module.exports = {
     getConnections: () => {
         return connections;
+    },
+
+    getPollResultSubscriptions: () => {
+        return pollResultSubscriptions;
     },
 
     inform: async (listOfUsers, data) => {

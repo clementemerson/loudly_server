@@ -33,7 +33,7 @@ module.exports = {
                 .insertOne({
                     user_id: data.user_id,
                     name: '~',
-                    statusmsg: 'I vote on Looudly',
+                    statusmsg: 'I vote on Loudly',
                     phonenumber: data.phonenumber,
                     createdAt: createdAt,
                     updatedAt: updatedAt

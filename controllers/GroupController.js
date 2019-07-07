@@ -27,7 +27,8 @@ module.exports = {
                 id: groupid,
                 name: message.data.name,
                 desc: message.data.desc,
-                createdby: message.user_id
+                createdby: message.user_id,
+                time: new Date()
             }
             await GroupInfo.create(groupData);
 
@@ -42,6 +43,7 @@ module.exports = {
 
             let replyData = {
                 groupid: groupid,
+                createdAt: groupData.time.getTime(),
                 status: success.groupCreated
             }
             return await replyHelper.prepareSuccess(message, dbsession, replyData);

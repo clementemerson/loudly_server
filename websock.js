@@ -14,7 +14,7 @@ let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 var success = require('./helpers/successtousers');
 
 
-//const server = https.createServer();
+// const server = https.createServer();
 
 const server = https.createServer({
   cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
@@ -44,8 +44,8 @@ wss.on('connection', async (ws_client, req) => {
   ws_client.onmessage = toEvent;
 
   ws_client.is_alive = true;
-  ws_client.on('pong', () => { 
-    ws_client.is_alive = true; 
+  ws_client.on('pong', () => {
+    ws_client.is_alive = true;
   });
 
   ws_client.on('close', () => {
@@ -65,13 +65,14 @@ setInterval(function ping() {
 
   Array.from(connections.getConnections().values()).forEach(function each(client_stream) {
     if (!client_stream.is_alive) { client_stream.terminate(); return; }
-    client_stream.is_alive = false;
+    client_stream.is_alive = true;
     client_stream.ping();
   });
 }, 10000);
 
 async function toEvent(ws) {
   try {
+    console.log(ws.data);
     let message = JSON.parse(ws.data);
     console.log(message);
     message.user_id = ws.target.jwtDetails.user_id;
@@ -102,8 +103,9 @@ async function toEvent(ws) {
 mongo.initDbConnection(initServer);
 
 function initServer() {
-  server.listen(8080, () => {
-    console.log("Websocket Server started at 8080");
-    console.log = () => {};
+  const PORT = process.env.PORT || 8080;
+  server.listen(PORT, () => {
+    console.log("Websocket Server started at", PORT);
+    //console.log = () => {};
   });
 }

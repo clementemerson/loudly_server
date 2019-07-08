@@ -34,7 +34,7 @@ module.exports = {
             });
 
             let userinfos = await Users.getUserInfoByUserIds(user_ids);
-            return await replyHelper.prepareSuccess(message, null, userinfos);
+            return await replyHelper.prepareSuccess(message, userinfos);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -47,7 +47,7 @@ module.exports = {
         console.log('UserController.getGroups');
         try {
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
-            return await replyHelper.prepareSuccess(message, null, groups);
+            return await replyHelper.prepareSuccess(message, groups);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -60,7 +60,7 @@ module.exports = {
         console.log('UserController.getPolls');
         try {
             let polls = await UserPolls.getPolls(message.user_id);
-            return await replyHelper.prepareSuccess(message, null, polls);
+            return await replyHelper.prepareSuccess(message, polls);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -73,7 +73,7 @@ module.exports = {
         console.log('UserController.getInfo');
         try {
             let userinfos = await Users.getUserInfoByUserIds(message.data.userids);
-            return await replyHelper.prepareSuccess(message, null, userinfos);
+            return await replyHelper.prepareSuccess(message, userinfos);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -97,10 +97,12 @@ module.exports = {
 
             //Change the name
             await Users.changeName(data);
+            await dbTransactions.commitTransaction(dbsession);
+
             let replyData = {
                 status: success.userNameChanged
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -124,10 +126,12 @@ module.exports = {
 
             //Change the name
             await Users.changeStatusMsg(data);
+            await dbTransactions.commitTransaction(dbsession);
+
             let replyData = {
                 status: success.userStatusChanged
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);

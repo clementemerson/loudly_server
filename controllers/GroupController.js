@@ -40,13 +40,14 @@ module.exports = {
                 permission: 'ADMIN'
             }
             await GroupUsers.addUser(userBeAdmin);
+            await dbTransactions.commitTransaction(dbsession);
 
             let replyData = {
                 groupid: groupid,
                 createdAt: groupData.time.getTime(),
                 status: success.groupCreated
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -78,6 +79,8 @@ module.exports = {
                 changedby: message.user_id
             };
             await GroupInfo.changeTitle(data);
+            await dbTransactions.commitTransaction(dbsession);
+
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(data.groupid, data);
@@ -85,7 +88,7 @@ module.exports = {
             let replyData = {
                 status: success.groupTitleChanged
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -117,6 +120,8 @@ module.exports = {
                 changedby: message.user_id
             };
             await GroupInfo.changeDesc(data);
+            await dbTransactions.commitTransaction(dbsession);
+
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(data.groupid, data);
@@ -124,7 +129,7 @@ module.exports = {
             let replyData = {
                 status: success.groupDescChanged
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -175,7 +180,7 @@ module.exports = {
                 groupids: message.data.groupids
             }
             let groupsInfo = await GroupInfo.getGroupsInfo(data);
-            return await replyHelper.prepareSuccess(message, null, groupsInfo);
+            return await replyHelper.prepareSuccess(message, groupsInfo);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -200,7 +205,7 @@ module.exports = {
             }
 
             let pollsInGroup = await GroupPolls.getPolls(data.groupid);
-            return await replyHelper.prepareSuccess(message, null, pollsInGroup);
+            return await replyHelper.prepareSuccess(message, pollsInGroup);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);

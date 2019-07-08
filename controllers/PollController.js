@@ -15,6 +15,8 @@ var success = require('../helpers/successtousers');
 var replyHelper = require('../helpers/replyhelper');
 var sequenceCounter = require('../db/sequencecounter');
 
+let ControllerHelper = require('./ControllerHelper');
+
 module.exports = {
 
     //Tested on: 02-07-2019
@@ -46,12 +48,13 @@ module.exports = {
                 sharedby: message.user_id
             }
             await UserPolls.shareWithUser(shareWithUser);
+            await dbTransactions.commitTransaction(dbsession);
 
             let replyData = {
                 pollid: pollid,
                 status: success.successPollCreated
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -97,13 +100,14 @@ module.exports = {
             if (updatePollPublicVotes) {
                 await updatePollPublicVotes;
             }
+            await dbTransactions.commitTransaction(dbsession);
 
             privateFunctions.updatePollResultToSubscribers(data.pollid);
             let replyData = {
                 pollid: data.pollid,
                 status: success.successVoted
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -153,26 +157,16 @@ module.exports = {
 
             //Share to the group
             await GroupPolls.shareToGroup(data);
-
-            let groupUsers = await GroupUsers.getUsers(message.data.groupid);
-
-            groupUsers.forEach(async (groupUser) => {
-                //Create an entry in userpolls table
-                let shareWithUser = {
-                    pollid: message.data.pollid,
-                    user_id: groupUser.user_id,
-                    sharedby: message.user_id
-                }
-                await UserPolls.shareWithUser(shareWithUser);
-            });
+            //We need to commit the transaction here. so that the currently added user will also get the notification.
+            await dbTransactions.commitTransaction(dbsession);
 
             //Inform group users about this new poll
-            connections.inform(groupUsers, data);
+            ControllerHelper.informUsers(message.data.groupid, data);
 
             let replyData = {
                 status: success.successPollShared
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -185,7 +179,7 @@ module.exports = {
         console.log('PollController.getInfo');
         try {
             let pollinfos = await PollData.getPollInfoByPollIds(message.data.pollids);
-            return await replyHelper.prepareSuccess(message, null, pollinfos);
+            return await replyHelper.prepareSuccess(message, pollinfos);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -198,7 +192,7 @@ module.exports = {
         console.log('PollController.getUsersVoteInfo');
         try {
             let usersVoteInfo = await PollVoteData.getUsersVoteInfo(message.data);
-            return await replyHelper.prepareSuccess(message, null, usersVoteInfo);
+            return await replyHelper.prepareSuccess(message, usersVoteInfo);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -223,7 +217,7 @@ module.exports = {
             });
 
             let pollResults = await PollResult.getUpdatedPollResults(data);
-            return await replyHelper.prepareSuccess(message, null, pollResults);
+            return await replyHelper.prepareSuccess(message, pollResults);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -263,7 +257,7 @@ module.exports = {
             let replyData = {
                 status: success.userSubscribedToPollResult
             }
-            return await replyHelper.prepareSuccess(message, null, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -300,7 +294,7 @@ module.exports = {
             let replyData = {
                 status: success.userUnSubscribedToPollResult
             }
-            return await replyHelper.prepareSuccess(message, null, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);
@@ -326,12 +320,13 @@ module.exports = {
             }
 
             await PollData.delete(data);
+            await dbTransactions.commitTransaction(dbsession);
 
             let replyData = {
                 pollid: data.pollid,
                 status: success.successPollDeleted
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);

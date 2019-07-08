@@ -15,9 +15,7 @@ function prepareReply(incomingMessage, data) {
 
 module.exports = {
 
-    prepareSuccess: async (message, dbsession, replyData) => {
-        if(dbsession)
-            await dbTransactions.commitTransaction(dbsession);
+    prepareSuccess: async (message, replyData) => {
         let reply = prepareReply(message, replyData);
         return success.sendData(reply);
     },

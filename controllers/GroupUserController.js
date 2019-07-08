@@ -55,6 +55,7 @@ module.exports = {
                 permission: message.data.permission
             };
             await GroupUsers.addUser(addUser);
+            await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
@@ -63,7 +64,7 @@ module.exports = {
             let replyData = {
                 status: success.userAddedToGroup
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -109,6 +110,8 @@ module.exports = {
                 permission: message.data.permission
             };
             await GroupUsers.changeUserPermission(data);
+            await dbTransactions.commitTransaction(dbsession);
+
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(data.groupid, data);
@@ -116,7 +119,7 @@ module.exports = {
             let replyData = {
                 status: success.userPermissionChangedInGroup
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -156,14 +159,17 @@ module.exports = {
                 user_id: message.data.user_id
             };
             await GroupUsers.removeUser(data);
+            await dbTransactions.commitTransaction(dbsession);
+
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(data.groupid, data);
+            //TODO: inform removed user
 
             let replyData = {
                 status: success.userRemovedFromGroup
             }
-            return await replyHelper.prepareSuccess(message, dbsession, replyData);
+            return await replyHelper.prepareSuccess(message, replyData);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
@@ -188,7 +194,7 @@ module.exports = {
             }
 
             let usersOfGroups = await GroupUsers.getUsers(data.groupid);
-            return await replyHelper.prepareSuccess(message, null, usersOfGroups);
+            return await replyHelper.prepareSuccess(message, usersOfGroups);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);

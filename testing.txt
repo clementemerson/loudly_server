@@ -1,5 +1,5 @@
 9884386484
-ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAyLCJ1c2VyX3NlY3JldCI6InY5bmVzcHVwY2RZelVhZkhrV1RVMWdLSyIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODg0Mzg2NDg0IiwiaWF0IjoxNTYxOTU2MTU0fQ.meEPTO7U1xcQgZkx8JwuomGl26MRMXSFlgHS2TSs9BY
+ws://localhost:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAwLCJ1c2VyX3NlY3JldCI6IkM3eWJMaXZZazJoODFwNytaNmtmSSsveCIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5ODg0Mzg2NDg0IiwiaWF0IjoxNTYyNjkyMjM3fQ.MQheKn9Etxlb1YY3ef2y6h2mGiBgzNkY2mdCKzStdXM
 
 9789309582 - Karthik
 ws://lt140025:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyMDAxLCJ1c2VyX3NlY3JldCI6IjhGYlVRYWpVOFAxdURNOWU1SzNjMGN1YiIsInVzZXJfcGhvbmVudW1iZXIiOiIrOTE5Nzg5MzA5NTgyIiwiaWF0IjoxNTYwOTI0MzA0fQ.5P0a_Y1XOrUZjplh3ZIurgHQh9Eu9ROqVf9vx_8kNFA
@@ -42,7 +42,7 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3006, "user_id":2002}}
 
-
+{"module":"groups", "event":"getMyGroupsInfo", "messageid":2959}
 
 
 
@@ -61,4 +61,14 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1026}}
 
 {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+
+{"module":"polls", "event":"getMyPollsInfo", "messageid":2959}
+
+
+
+Todo
+
+- When jet token is generated, check whether a user connection is already available. If it is there then terminate that session.
+
+
 

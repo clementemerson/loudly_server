@@ -171,6 +171,28 @@ module.exports = {
         }
     },
 
+    getMyGroupsInfo: async (message) => {
+        console.log('UserController.getGroups');
+        try {
+            let groups = await GroupUsers.getGroupsOfUser(message.user_id);
+            
+            let groupids = [];
+            groups.forEach(groupUser => {
+                groupids.push(groupUser.groupid);
+            });
+
+            //Prepare data
+            let data = {
+                groupids: groupids
+            }
+            let groupsInfo = await GroupInfo.getGroupsInfo(data);
+            return await replyHelper.prepareSuccess(message, groupsInfo);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
     //Tested on: 18-06-2019
     //{"module":"groups", "event":"getGroupsInfo", "messageid":8971, "data":{"groupids":[1001, 1000]}}
     getInfo: async (message) => {

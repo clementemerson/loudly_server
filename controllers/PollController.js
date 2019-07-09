@@ -173,6 +173,39 @@ module.exports = {
         }
     },
 
+    getMyPollsInfo: async (message) => {
+        console.log('PollController.getMyPollsInfo');
+        try {
+            let groups = await GroupUsers.getGroupsOfUser(message.user_id);
+
+            let groupids = [];
+            groups.forEach(groupUser => {
+                groupids.push(groupUser.groupid);
+            });
+
+            let pollids = [];
+            groupids.forEach(async (groupid) => {
+                let pollsInGroup = await GroupPolls.getPolls(groupid);
+                pollsInGroup.forEach(poll => {
+                    if (pollids.indexOf(poll.pollid) < 0)
+                        pollids.push(poll.pollid);
+                });
+            });
+
+            let userPolls = await UserPolls.getPolls(message.user_id);
+            userPolls.forEach(poll => {
+                if (pollids.indexOf(poll.pollid) < 0)
+                    pollids.push(poll.pollid);
+            });
+
+            let pollinfos = await PollData.getPollInfoByPollIds(pollids);
+            return await replyHelper.prepareSuccess(message, pollinfos);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
     //Tested on: 21-06-2019
     //{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
     getInfo: async (message) => {

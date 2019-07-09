@@ -16,6 +16,9 @@ module.exports = {
             case 'shareToGroup':
                 reply = await PollController.shareToGroup(message);
                 break;
+            case 'getMyPollsInfo':
+                reply = await PollController.getMyPollsInfo(message);
+                break;
             case 'getInfo':
                 reply = await PollController.getInfo(message);
                 break;

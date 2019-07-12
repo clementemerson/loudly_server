@@ -1,5 +1,6 @@
 var mongodb = require('./mongo').getDbConnection;
 var dbtables = require('./dbtables');
+const redClient = require('../redis/redclient').getRedClient;
 
 module.exports = {
     

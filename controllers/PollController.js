@@ -17,6 +17,8 @@ var sequenceCounter = require('../db/sequencecounter');
 
 let ControllerHelper = require('./ControllerHelper');
 
+const redClient = require('../redis/redclient');
+
 module.exports = {
 
     //Tested on: 02-07-2019
@@ -232,7 +234,6 @@ module.exports = {
         }
     },
 
-    //Tested on: 03-07-2019
     //{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
     syncPollResults: async (message) => {
         console.log('PollController.syncPollResults');
@@ -240,14 +241,9 @@ module.exports = {
             //Prepare data
             let data = {
                 user_id: message.user_id,
+                pollids: message.data.pollids,
                 lastsynchedtime: message.data.lastsynchedtime
             };
-
-            let userPolls = await PollVoteRegister.getUserPolls(data);
-            data.pollids = [];
-            userPolls.forEach(Itr => {
-                data.pollids.push(Itr.pollid);
-            });
 
             let pollResults = await PollResult.getUpdatedPollResults(data);
             return await replyHelper.prepareSuccess(message, pollResults);
@@ -274,6 +270,7 @@ module.exports = {
                 return await replyHelper.prepareError(message, null, errors.errorUserNotVoted);
 
             //Put an entry in pollresult subscription
+            redClient.sadd(data.pollid, data.user_id);
             if (!connections.getPollResultSubscriptions()[data.pollid]) {
                 connections.getPollResultSubscriptions()[data.pollid] = [];
             }
@@ -282,6 +279,7 @@ module.exports = {
             //Put an entry in user subscription.
             //This will be used to clear pollresult subscription,
             // when the user connection terminates abruptly
+            redClient.sadd(data.user_id, data.pollid);
             if (!connections.getUserPollSubscriptions()[data.user_id]) {
                 connections.getUserPollSubscriptions()[data.user_id] = [];
             }
@@ -309,6 +307,7 @@ module.exports = {
             }
 
             //Remove entry from pollresult subscription
+            redClient.SREM(data.pollid, data.user_id);
             const subscribersArray = connections.getPollResultSubscriptions()[data.pollid];
             if (subscribersArray) {
                 var index = subscribersArray.indexOf(data.user_id);
@@ -317,6 +316,7 @@ module.exports = {
             }
 
             //Remove entry from user subscription
+            redClient.SREM(data.user_id, data.pollid);
             const pollArray = connections.getUserPollSubscriptions()[data.user_id];
             if (pollArray) {
                 var index = pollArray.indexOf(data.pollid);

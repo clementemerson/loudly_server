@@ -92,7 +92,13 @@ module.exports = {
                 user_phonenumber: user_data.phonenumber
             }
             let token = jwt.sign(user_data_jwt, jwtSecret);
-            return res.status(200).json(success.sendData(token));
+
+            //Prepare data to send
+            let data = {
+                token: token,
+                user_id: user_data_jwt.user_id
+            }
+            return res.status(200).json(success.sendData(data));
         } else {
             return res.status(500).send();
         }

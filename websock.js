@@ -109,7 +109,7 @@ function initServer() {
   server.listen(PORT, () => {
     console.log("Websocket Server started at", PORT);
     redClient.SADD('list1', 'some 123ot');
-    redClient.SMEMBERS("list1");
+    redClient.SMEMBERS('list1');
     // console.log = () => {};
   });
 }

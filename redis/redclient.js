@@ -34,7 +34,7 @@ module.exports = {
         redClient.smembers(setname, function (err, reply) {
             console.log(reply);
         });
-        let replies = await redClient.smembers(setname);
+        let replies = redClient.smembers(setname);
         console.log(replies);
     }
 };

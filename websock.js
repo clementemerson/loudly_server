@@ -1,8 +1,8 @@
-const fs = require('fs');
 const https = require('https');
 const WebSocket = require('ws');
-var url = require('url');
-var mongo = require('./db/mongo');
+const url = require('url');
+const mongo = require('./db/mongo');
+const redClient = require('./redis/redclient');
 let connections = require('./websockets/connections');
 
 let jwtController = require('./controllers/jwtController');
@@ -10,9 +10,6 @@ let jwtController = require('./controllers/jwtController');
 let UsersModuleHandlers = require('./modulehandlers/usermodule');
 let GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 let PollsModuleHandlers = require('./modulehandlers/pollmodule');
-
-var success = require('./helpers/successtousers');
-
 
 // const server = https.createServer();
 
@@ -100,12 +97,19 @@ async function toEvent(ws) {
 }
 
 //Init connection with DB
-mongo.initDbConnection(initServer);
+redClient.initRedisClient(initRedis);
+
+function initRedis() {
+  console.log('Redis connected');
+  mongo.initDbConnection(initServer);
+}
 
 function initServer() {
   const PORT = process.env.PORT || 8080;
   server.listen(PORT, () => {
     console.log("Websocket Server started at", PORT);
-    //console.log = () => {};
+    redClient.SADD('list1', 'some 123ot');
+    redClient.SMEMBERS("list1");
+    // console.log = () => {};
   });
 }

@@ -11,9 +11,8 @@ module.exports = {
             Itr.secretvotes = 0;
         });
 
-        let date = new Date();
-        let createdAt = date.getTime();
-        let updatedAt = date.getTime();
+        let createdAt = data.time.getTime();
+        let updatedAt = data.time.getTime();
 
         await mongodb().collection(dbtables.PollResult).insertOne({
             pollid: data.pollid,

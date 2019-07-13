@@ -46,7 +46,7 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 
 
-{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll some time tieleit", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"fdgdfgfg"},{"index":1,"desc":"gdfdfhdhdshdfshdsf"}]}}
+{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll some time tieleit", "resultispublic": false, "canbeshared": true, "options":[{"optionindex":0, "desc":"fdgdfgfg"},{"optionindex":1,"desc":"gdfdfhdhdshdfshdsf"}]}}
 
 {"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1026, "groupid": 3006}}
 

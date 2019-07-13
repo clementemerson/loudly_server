@@ -37,7 +37,8 @@ module.exports = {
                 resultispublic: message.data.resultispublic,
                 canbeshared: message.data.canbeshared,
                 options: message.data.options,
-                createdby: message.user_id
+                createdby: message.user_id,
+                time: new Date()
             };
             //Create the poll
             await PollData.create(data);
@@ -54,6 +55,7 @@ module.exports = {
 
             let replyData = {
                 pollid: pollid,
+                createdAt: data.time.getTime(),
                 status: success.successPollCreated
             }
             return await replyHelper.prepareSuccess(message, replyData);

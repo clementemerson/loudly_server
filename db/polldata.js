@@ -4,9 +4,8 @@ var dbtables = require('./dbtables');
 module.exports = {
     create: async (data) => {
         console.log('db.polldata.create');
-        let date = new Date();
-        let createdAt = date.getTime();
-        let updatedAt = date.getTime();
+        let createdAt = data.time.getTime();
+        let updatedAt = data.time.getTime();
 
         await mongodb().collection(dbtables.PollData).insertOne({
             pollid: data.pollid,

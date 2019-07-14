@@ -1,5 +1,3 @@
-const fs = require('fs');
-const https = require('https');
 const WebSocket = require('ws');
 const url = require('url');
 const mongo = require('./db/mongo');
@@ -12,12 +10,20 @@ let UsersModuleHandlers = require('./modulehandlers/usermodule');
 let GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
-// const server = https.createServer();
+let localServer = true;
 
-const server = https.createServer({
-  cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
-  key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
-});
+var server;
+if (localServer) {
+  const http = require('http');
+  server = http.createServer();
+} else {
+  const https = require('https');
+  const fs = require('fs');
+  server = https.createServer({
+    cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
+    key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
+  });
+}
 
 const wss = new WebSocket.Server({ server });
 

@@ -66,7 +66,7 @@ setInterval(function ping() {
     client_stream.is_alive = true;
     client_stream.ping();
   });
-}, 10000);
+}, 120000);
 
 async function toEvent(ws) {
   try {

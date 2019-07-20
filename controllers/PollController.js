@@ -104,8 +104,10 @@ module.exports = {
             if (updatePollPublicVotes) {
                 await updatePollPublicVotes;
             }
+            await redClient.sadd('PollVotedUsers_' + data.pollid, data.user_id);
             await dbTransactions.commitTransaction(dbsession);
 
+            ControllerHelper.informPollUpdate(data.pollid);
             privateFunctions.updatePollResultToSubscribers(data.pollid);
             let replyData = {
                 pollid: data.pollid,
@@ -161,11 +163,14 @@ module.exports = {
 
             //Share to the group
             await GroupPolls.shareToGroup(data);
+            await redClient.sadd('PollInGroups_' + data.pollid, data.groupid);
+            await redClient.sadd('PollsOfGroup_' + data.groupid, data.pollid);
             //We need to commit the transaction here. so that the currently added user will also get the notification.
             await dbTransactions.commitTransaction(dbsession);
 
             //Inform group users about this new poll
             ControllerHelper.informUsers(message.data.groupid, data);
+            ControllerHelper.informGroupUpdate(message.data.groupid);
 
             let replyData = {
                 status: success.successPollShared

@@ -11,6 +11,8 @@ var sequenceCounter = require('../db/sequencecounter');
 
 let ControllerHelper = require('./ControllerHelper');
 
+const redClient = require('../redis/redclient');
+
 module.exports = {
 
     //Tested on: 19-06-2019
@@ -55,11 +57,13 @@ module.exports = {
                 permission: message.data.permission
             };
             await GroupUsers.addUser(addUser);
-            await dbTransactions.commitTransaction(dbsession);
+            await redClient.sadd('GroupUsers_' + addUser.groupid, addUser.user_id);
+            await dbTransactions.commitTransaction(dbsession);            
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(addUser.groupid, addUser);
+            ControllerHelper.informGroupUpdate(addUser.groupid);
 
             let replyData = {
                 status: success.userAddedToGroup
@@ -115,6 +119,7 @@ module.exports = {
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(data.groupid, data);
+            ControllerHelper.informGroupUpdate(data.groupid);
 
             let replyData = {
                 status: success.userPermissionChangedInGroup
@@ -159,11 +164,13 @@ module.exports = {
                 user_id: message.data.user_id
             };
             await GroupUsers.removeUser(data);
+            await redClient.srem('GroupUsers_' + data.groupid, data.user_id);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
             ControllerHelper.informUsers(data.groupid, data);
+            ControllerHelper.informGroupUpdate(data.groupid);
             //TODO: inform removed user
 
             let replyData = {

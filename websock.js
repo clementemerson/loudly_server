@@ -113,10 +113,15 @@ function initRedis() {
 
 function initServer() {
   const PORT = process.env.PORT || 8080;
-  server.listen(PORT, () => {
+  server.listen(PORT, async () => {
     console.log("Websocket Server started at", PORT);
-    redClient.SADD('list1', 'some 123ot');
-    redClient.SMEMBERS('list1');
+    console.log(await redClient.sadd('list1', 'some 126ot'));
+    console.log(await redClient.sadd('list1', 'some 124'));
+    console.log(await redClient.sadd('list1', 'some 1'));
+    let replies = await redClient.smembers('list1');
+    replies.forEach((reply) => {
+      console.log(reply);
+    })
     // console.log = () => {};
   });
 }

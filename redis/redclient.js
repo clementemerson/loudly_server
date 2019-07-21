@@ -22,17 +22,36 @@ module.exports = {
             console.log(err);
         }
     },
-    sadd: async (setname, value) => {
-        return await redClient.saddAsync([setname, value]);
+    sadd: async (setKey, value) => {
+        return await redClient.saddAsync([setKey, value]);
     },
-    srem: async (setname, value) => {
-        return await redClient.sremAsync([setname, value]);
+    srem: async (setKey, value) => {
+        return await redClient.sremAsync([setKey, value]);
     },
-    smembers: async (setname) => {
-        return await redClient.smembersAsync(setname);
+    smembers: async (setKey) => {
+        return await redClient.smembersAsync(setKey);
     },
     lpush: async (listKey, value) => {
         return await redClient.lpush(listKey, value);
+    },
+    hmset: async (hashKey, ...args) => {
+        //console.log(redClient);
+        return await redClient.hmsetAsync(hashKey, args);
+    },
+    hincrby: async (hashKey, field, incrBy) => {
+        return await redClient.hincrbyAsync(hashKey, field, incrBy);
+    },
+    hgetall: async (hashKey) => {
+        return await redClient.hgetallAsync(hashKey);
+    },
+    multiget: async (prefixKey, ids) => {
+        let multiCmd = redClient.multi({pipeline: false});
+
+        ids.forEach(async (id) => {
+            multiCmd.hgetall(prefixKey + id);
+        });
+
+        return await multiCmd.execAsync();
     },
 };
 

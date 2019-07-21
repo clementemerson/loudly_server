@@ -42,6 +42,9 @@ module.exports = {
             case 'getPolls':
                 reply = await GroupController.getPolls(message);
                 break;
+            case 'getGroupUpdates':
+                reply = await GroupController.getGroupUpdates(message);
+                break;
             default:
                 break;
         }

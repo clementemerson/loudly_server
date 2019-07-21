@@ -2,6 +2,8 @@ var mongodb = require('./mongo').getDbConnection;
 var dbtables = require('./dbtables');
 let PollVoteRegister = require('./pollvoteregister');
 
+const redHelper = require('../redis/redhelper');
+
 module.exports = {
 
     create: async (data) => {
@@ -20,6 +22,8 @@ module.exports = {
             createdAt: createdAt,
             updatedAt: updatedAt
         });
+
+        //await 
     },
 
     updatePollResult: async (data) => {
@@ -39,6 +43,7 @@ module.exports = {
                         $inc: { "options.$.secretvotes": 1 },
                         $set: { updatedAt: updatedAt }
                     });
+            await redHelper.updateSecretVoteResult(data.pollid, data.optionindex);
         } else {
             await mongodb().collection(dbtables.PollResult)
                 .updateOne(
@@ -50,6 +55,7 @@ module.exports = {
                         $inc: { "options.$.openvotes": 1 },
                         $set: { updatedAt: updatedAt }
                     });
+            await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
         }
     },
 

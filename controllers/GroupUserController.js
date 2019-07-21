@@ -12,6 +12,7 @@ var sequenceCounter = require('../db/sequencecounter');
 let ControllerHelper = require('./ControllerHelper');
 
 const redClient = require('../redis/redclient');
+const keyPrefix = require('../redis/key_prefix');
 
 module.exports = {
 
@@ -57,7 +58,7 @@ module.exports = {
                 permission: message.data.permission
             };
             await GroupUsers.addUser(addUser);
-            await redClient.sadd('GroupUsers_' + addUser.groupid, addUser.user_id);
+            await redClient.sadd(keyPrefix.groupUsers + addUser.groupid, addUser.user_id);
             await dbTransactions.commitTransaction(dbsession);            
 
             //TODO: create entries in transaction tables

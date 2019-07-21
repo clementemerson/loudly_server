@@ -1,3 +1,12 @@
+/*!
+ * @author Clement <clementemerson@gmail.com>
+ * date 07/21/2019
+ * Methods to create, vote, share a poll. 
+ */
+/**
+ * @copyright  Loudly 2019 
+ *  
+ */
 var dbTransactions = require('../db/session');
 
 let PollData = require('../db/polldata');
@@ -18,6 +27,8 @@ var sequenceCounter = require('../db/sequencecounter');
 let ControllerHelper = require('./ControllerHelper');
 
 const redClient = require('../redis/redclient');
+const keyPrefix = require('../redis/key_prefix');
+const redHelper = require('../redis/redhelper');
 
 module.exports = {
 
@@ -43,6 +54,7 @@ module.exports = {
             //Create the poll
             await PollData.create(data);
             await PollResult.create(data);
+            await redHelper.updatePollInfo(data.pollid, data.title, data.resultispublic, data.canbeshared, data.options, data.createdby, data.time.getTime());
 
             //Create an entry in userpolls table
             let shareWithUser = {
@@ -104,7 +116,7 @@ module.exports = {
             if (updatePollPublicVotes) {
                 await updatePollPublicVotes;
             }
-            await redClient.sadd('PollVotedUsers_' + data.pollid, data.user_id);
+            await redClient.sadd(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
             await dbTransactions.commitTransaction(dbsession);
 
             ControllerHelper.informPollUpdate(data.pollid);
@@ -163,8 +175,8 @@ module.exports = {
 
             //Share to the group
             await GroupPolls.shareToGroup(data);
-            await redClient.sadd('PollInGroups_' + data.pollid, data.groupid);
-            await redClient.sadd('PollsOfGroup_' + data.groupid, data.pollid);
+            await redClient.sadd(keyPrefix.pollInGroups + data.pollid, data.groupid);
+            await redClient.sadd(keyPrefix.pollsOfGroup + data.groupid, data.pollid);
             //We need to commit the transaction here. so that the currently added user will also get the notification.
             await dbTransactions.commitTransaction(dbsession);
 
@@ -370,6 +382,24 @@ module.exports = {
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
+        }
+    },
+
+    getPollUpdates: async (message) => {
+        console.log('GroupController.getGroupUpdates');
+        try {
+            //Prepare data
+            let data = {
+                user_id: message.user_id
+            }
+
+            let updatedPollResultIds = await redClient.smembers(keyPrefix.pollResultUpdate + data.user_id);
+            let updatedResults = await redHelper.getPollResults(updatedPollResultIds);
+
+            return await replyHelper.prepareSuccess(message, updatedResults);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
 }

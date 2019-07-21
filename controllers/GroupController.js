@@ -13,6 +13,10 @@ var sequenceCounter = require('../db/sequencecounter');
 
 let ControllerHelper = require('./ControllerHelper');
 
+const redClient = require('../redis/redclient');
+const redHelper = require('../redis/redhelper');
+const keyPrefix = require('../redis/key_prefix');
+
 module.exports = {
     //Tested on: 21-06-2019
     //{"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
@@ -40,6 +44,8 @@ module.exports = {
                 permission: 'ADMIN'
             }
             await GroupUsers.addUser(userBeAdmin);
+            await redClient.sadd(keyPrefix.groupUsers + groupData.groupid, groupData.createdby);
+            await redHelper.updateGroupInfo(groupData.id, groupData.name, groupData.desc, groupData.createdby, groupData.time.getTime());
             await dbTransactions.commitTransaction(dbsession);
 
             let replyData = {
@@ -79,6 +85,7 @@ module.exports = {
                 changedby: message.user_id
             };
             await GroupInfo.changeTitle(data);
+            await redHelper.updateGroupName(data.groupid, data.name);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
@@ -121,6 +128,7 @@ module.exports = {
                 changedby: message.user_id
             };
             await GroupInfo.changeDesc(data);
+            await redHelper.updateGroupDesc(data.groupid, data.desc);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
@@ -230,6 +238,24 @@ module.exports = {
 
             let pollsInGroup = await GroupPolls.getPolls(data.groupid);
             return await replyHelper.prepareSuccess(message, pollsInGroup);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    getGroupUpdates: async (message) => {
+        console.log('GroupController.getGroupUpdates');
+        try {
+            //Prepare data
+            let data = {
+                user_id: message.user_id
+            }
+
+            let updatedGroupIds = await redClient.smembers(keyPrefix.groupUpdate + data.user_id);
+            let updatedGroupInfo = await redHelper.getGroupInfo(updatedGroupIds);
+
+            return await replyHelper.prepareSuccess(message, updatedGroupInfo);
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, null, errors.unknownError);

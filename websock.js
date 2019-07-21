@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const url = require('url');
 const mongo = require('./db/mongo');
 const redClient = require('./redis/redclient');
+const redHelper = require('./redis/redhelper');
 let connections = require('./websockets/connections');
 
 let jwtController = require('./controllers/jwtController');
@@ -115,13 +116,32 @@ function initServer() {
   const PORT = process.env.PORT || 8080;
   server.listen(PORT, async () => {
     console.log("Websocket Server started at", PORT);
-    console.log(await redClient.sadd('list1', 'some 126ot'));
-    console.log(await redClient.sadd('list1', 'some 124'));
-    console.log(await redClient.sadd('list1', 'some 1'));
-    let replies = await redClient.smembers('list1');
-    replies.forEach((reply) => {
-      console.log(reply);
-    })
+    try {
+      console.log(await redClient.sadd('list1', 'some 126ot'));
+      console.log(await redClient.sadd('list1', 'some 124'));
+      console.log(await redClient.sadd('list1', 'some 1'));
+      let replies = await redClient.smembers('list1');
+      replies.forEach((reply) => {
+        console.log(reply);
+      });
+
+      let groupName = {
+        name: 'snkdfndskf',
+        name2: 'dsfsdfsdfsdf'
+      };
+      await redClient.hmset('GroupInfo:100', 'id', 1000, 'name', JSON.stringify(groupName), 'desc', 'groupdesc', 'at', (new Date()).getTime());
+      await redClient.hmset('GroupInfo:101', 'id', 1001, 'name', JSON.stringify(groupName), 'desc', 'groupdesc', 'at', (new Date()).getTime());
+      await redClient.hmset('GroupInfo:102', 'id', 1004, 'name', JSON.stringify(groupName), 'desc', 'groupdesc', 'at', (new Date()).getTime());
+      console.log(await redClient.hgetall('somekey'));
+      console.log(await redHelper.getGroupInfo([100, 101]));
+      let groupInfo = await redHelper.getGroupInfo([100, 101]);
+      groupInfo.forEach((group) => {
+        console.log(group.id);
+        console.log(JSON.parse(group.name).name);
+      });
+    } catch (err) {
+      console.log(err);
+    }
     // console.log = () => {};
   });
 }

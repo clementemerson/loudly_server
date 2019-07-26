@@ -1,9 +1,14 @@
 let GroupController = require('../controllers/GroupController');
 let GroupUserController = require('../controllers/GroupUserController');
 
+const errors = require('../helpers/errorstousers');
+const replyHelper = require('../helpers/replyhelper');
+
 module.exports = {
     handle: async (message) => {
-        console.log('groups module');
+        if (!message || !message.event)
+            throw 'Invalid Arguments';
+
         var reply;
         switch (message.event) {
             case 'create':
@@ -46,6 +51,7 @@ module.exports = {
                 reply = await GroupController.getGroupUpdates(message);
                 break;
             default:
+                reply = await replyHelper.prepareError(message, null, errors.unknownEvent);
                 break;
         }
         return reply;

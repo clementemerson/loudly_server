@@ -1,7 +1,13 @@
 let PollController = require('../controllers/PollController');
 
+const errors = require('../helpers/errorstousers');
+const replyHelper = require('../helpers/replyhelper');
+
 module.exports = {
     handle: async (message) => {
+        if (!message)
+            throw 'Invalid Arguments';
+
         var reply;
         switch (message.event) {
             case 'create':
@@ -35,6 +41,7 @@ module.exports = {
                 reply = await PollController.unSubscribeToPollResult(message);
                 break;
             default:
+                reply = await replyHelper.prepareError(message, null, errors.unknownEvent);
                 break;
         }
         return reply;

@@ -77,9 +77,12 @@ setInterval(function ping() {
 
 async function toEvent(ws) {
   try {
-    console.log(ws.data);
     let message = JSON.parse(ws.data);
     console.log(message);
+
+    if (!message.module)
+      throw 'Invalid Arguments';
+
     message.user_id = ws.target.jwtDetails.user_id;
     var reply;
     switch (message.module) {
@@ -116,32 +119,6 @@ function initServer() {
   const PORT = process.env.PORT || 8080;
   server.listen(PORT, async () => {
     console.log("Websocket Server started at", PORT);
-    try {
-      console.log(await redClient.sadd('list1', 'some 126ot'));
-      console.log(await redClient.sadd('list1', 'some 124'));
-      console.log(await redClient.sadd('list1', 'some 1'));
-      let replies = await redClient.smembers('list1');
-      replies.forEach((reply) => {
-        console.log(reply);
-      });
-
-      let groupName = {
-        name: 'snkdfndskf',
-        name2: 'dsfsdfsdfsdf'
-      };
-      await redClient.hmset('GroupInfo:100', 'id', 1000, 'name', JSON.stringify(groupName), 'desc', 'groupdesc', 'at', (new Date()).getTime());
-      await redClient.hmset('GroupInfo:101', 'id', 1001, 'name', JSON.stringify(groupName), 'desc', 'groupdesc', 'at', (new Date()).getTime());
-      await redClient.hmset('GroupInfo:102', 'id', 1004, 'name', JSON.stringify(groupName), 'desc', 'groupdesc', 'at', (new Date()).getTime());
-      console.log(await redClient.hgetall('somekey'));
-      console.log(await redHelper.getGroupInfo([100, 101]));
-      let groupInfo = await redHelper.getGroupInfo([100, 101]);
-      groupInfo.forEach((group) => {
-        console.log(group.id);
-        console.log(JSON.parse(group.name).name);
-      });
-    } catch (err) {
-      console.log(err);
-    }
     // console.log = () => {};
   });
 }

@@ -14,7 +14,6 @@ var sequenceCounter = require('../db/sequencecounter');
 let ControllerHelper = require('./ControllerHelper');
 
 const redClient = require('../redis/redclient');
-const redHelper = require('../redis/redhelper');
 const keyPrefix = require('../redis/key_prefix');
 
 module.exports = {
@@ -22,11 +21,17 @@ module.exports = {
     //{"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
     create: async (message) => {
         console.log('GroupController.create');
+        if (!message.data || !message.data.name || !message.data.desc || !message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
+            //Start transaction
             dbsession = await dbTransactions.startSession();
 
+            //Get id for group
             var groupid = await sequenceCounter.getNextSequenceValue('group');
 
+            //Prepare data
             let groupData = {
                 id: groupid,
                 name: message.data.name,
@@ -45,7 +50,6 @@ module.exports = {
             }
             await GroupUsers.addUser(userBeAdmin);
             await redClient.sadd(keyPrefix.groupUsers + groupData.groupid, groupData.createdby);
-            await redHelper.updateGroupInfo(groupData.id, groupData.name, groupData.desc, groupData.createdby, groupData.time.getTime());
             await dbTransactions.commitTransaction(dbsession);
 
             let replyData = {
@@ -64,6 +68,9 @@ module.exports = {
     //{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
     changeTitle: async (message) => {
         console.log('GroupController.changeTitle');
+        if (!message.data || !message.data.groupid || !message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Start transaction
             dbsession = await dbTransactions.startSession();
@@ -85,7 +92,6 @@ module.exports = {
                 changedby: message.user_id
             };
             await GroupInfo.changeTitle(data);
-            await redHelper.updateGroupName(data.groupid, data.name);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
@@ -107,6 +113,9 @@ module.exports = {
     //{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
     changeDesc: async (message) => {
         console.log('GroupController.changeDesc');
+        if (!message.data || !message.data.groupid || !message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Start transaction
             dbsession = await dbTransactions.startSession();
@@ -128,7 +137,6 @@ module.exports = {
                 changedby: message.user_id
             };
             await GroupInfo.changeDesc(data);
-            await redHelper.updateGroupDesc(data.groupid, data.desc);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
@@ -148,6 +156,9 @@ module.exports = {
 
     delete: async (message) => {
         console.log('GroupController.delete');
+        if (!message.data || !message.data.groupid || !message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Start transaction
             dbsession = await dbTransactions.startSession();
@@ -183,9 +194,12 @@ module.exports = {
 
     getMyGroupsInfo: async (message) => {
         console.log('UserController.getGroups');
+        if (!message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
-            
+
             let groupids = [];
             groups.forEach(groupUser => {
                 groupids.push(groupUser.groupid);
@@ -206,6 +220,9 @@ module.exports = {
     //Tested on: 18-06-2019
     //{"module":"groups", "event":"getGroupsInfo", "messageid":8971, "data":{"groupids":[1001, 1000]}}
     getInfo: async (message) => {
+        if (!message.data || !message.data.groupids)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         console.log('GroupController.getGroupsInfo');
         try {
             let data = {
@@ -223,6 +240,9 @@ module.exports = {
     //{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
     getPolls: async (message) => {
         console.log('GroupController.getPolls');
+        if (!message.data || !message.data.groupid || !message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {
@@ -246,6 +266,9 @@ module.exports = {
 
     getGroupUpdates: async (message) => {
         console.log('GroupController.getGroupUpdates');
+        if (!message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {
@@ -253,7 +276,7 @@ module.exports = {
             }
 
             let updatedGroupIds = await redClient.smembers(keyPrefix.groupUpdate + data.user_id);
-            let updatedGroupInfo = await redHelper.getGroupInfo(updatedGroupIds);
+            //Todo: get groupInfo from mongodb
 
             return await replyHelper.prepareSuccess(message, updatedGroupInfo);
         } catch (err) {

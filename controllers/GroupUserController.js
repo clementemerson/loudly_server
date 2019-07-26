@@ -20,6 +20,9 @@ module.exports = {
     //{"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
     addUser: async (message) => {
         console.log('GroupController.addUser');
+        if (!message.user_id || !message.data.user_id || !message.data.groupid || !message.data.permission)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Start transaction
             dbsession = await dbTransactions.startSession();
@@ -59,7 +62,7 @@ module.exports = {
             };
             await GroupUsers.addUser(addUser);
             await redClient.sadd(keyPrefix.groupUsers + addUser.groupid, addUser.user_id);
-            await dbTransactions.commitTransaction(dbsession);            
+            await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
@@ -79,6 +82,9 @@ module.exports = {
     //Tested on: 20-06-2019
     //{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
     changeUserPermission: async (message) => {
+        if (!message.user_id || !message.data.user_id || !message.data.groupid || !message.data.permission)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         console.log('GroupController.changeUserPermission');
         try {
             //Start transaction
@@ -135,6 +141,9 @@ module.exports = {
     //Tested on: 20-06-2019
     //{"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}-
     removeUser: async (message) => {
+        if (!message.user_id || !message.data.user_id || !message.data.groupid)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         console.log('GroupController.removeUser');
         try {
             //Start transaction
@@ -188,6 +197,9 @@ module.exports = {
     //{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[1001, 1000]}}
     getUsersOfGroup: async (message) => {
         console.log('GroupController.getUsersOfGroups');
+        if (!message.user_id || !message.data.groupid)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {

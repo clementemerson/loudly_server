@@ -26,6 +26,9 @@ module.exports = {
     //{"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "phoneNumbers":["+919884386484"]}
     getUsersFromPhoneNumbers: async (message) => {
         console.log('UserController.getUsersFromPhoneNumbers');
+        if (!message.user_id || !message.data || !message.data.phoneNumbers)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+            
         try {
             let users = await Users.getUsersByPhoneNumbers(message.data.phoneNumbers);
             var user_ids = [];
@@ -45,6 +48,9 @@ module.exports = {
     //{"module":"users", "event":"getGroups", "messageid":3432}
     getGroups: async (message) => {
         console.log('UserController.getGroups');
+        if (!message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
             return await replyHelper.prepareSuccess(message, groups);
@@ -58,6 +64,9 @@ module.exports = {
     //{"module":"users", "event":"getPolls", "messageid":9961}
     getPolls: async (message) => {
         console.log('UserController.getPolls');
+        if (!message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             let polls = await UserPolls.getPolls(message.user_id);
             return await replyHelper.prepareSuccess(message, polls);
@@ -71,6 +80,9 @@ module.exports = {
     //{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
     getInfo: async (message) => {
         console.log('UserController.getInfo');
+        if (!message.user_id || !message.data || !message.data.userids)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             let userinfos = await Users.getUserInfoByUserIds(message.data.userids);
             return await replyHelper.prepareSuccess(message, userinfos);
@@ -84,6 +96,9 @@ module.exports = {
     //{"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
     changeName: async (message) => {
         console.log('UserController.changeName');
+        if (!message.user_id || !message.data || !message.data.name)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         var dbsession;
         try {
             //Start transaction
@@ -113,6 +128,9 @@ module.exports = {
     //{"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
     changeStatusMsg: async (message) => {
         console.log('UserController.changeStatusMsg');
+        if (!message.user_id || !message.data || !message.data.statusmsg)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         var dbsession;
         try {
             //Start transaction

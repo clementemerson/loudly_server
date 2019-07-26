@@ -36,6 +36,9 @@ module.exports = {
     //{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"},{"index":1,"desc":"option2"}]}}
     create: async (message) => {
         console.log('PollController.create');
+        if (!message.user_id || !message.data || !message.data.title || !message.data.resultispublic
+            || !message.data.canbeshared || !message.data.options)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
         try {
             //Start transaction
             dbsession = await dbTransactions.startSession();
@@ -54,7 +57,6 @@ module.exports = {
             //Create the poll
             await PollData.create(data);
             await PollResult.create(data);
-            await redHelper.updatePollInfo(data.pollid, data.title, data.resultispublic, data.canbeshared, data.options, data.createdby, data.time.getTime());
 
             //Create an entry in userpolls table
             let shareWithUser = {
@@ -81,6 +83,10 @@ module.exports = {
     //{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
     vote: async (message) => {
         console.log('PollController.vote');
+        if (!message.user_id || !message.data || !message.data.pollid
+            || !message.data.optionindex || !message.data.secretvote)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         var dbsession;
         try {
             dbsession = await dbTransactions.startSession();
@@ -136,6 +142,9 @@ module.exports = {
     //{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
     shareToGroup: async (message) => {
         console.log('PollController.shareToGroup');
+        if (!message.user_id || !message.data || !message.data.pollid 
+            || !message.data.groupid)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
 
         var dbsession;
         try {
@@ -196,6 +205,9 @@ module.exports = {
 
     getMyPollsInfo: async (message) => {
         console.log('PollController.getMyPollsInfo');
+        if (!message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
 
@@ -231,6 +243,9 @@ module.exports = {
     //{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
     getInfo: async (message) => {
         console.log('PollController.getInfo');
+        if (!message.user_id || !message.data || !message.data.pollids)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             let pollinfos = await PollData.getPollInfoByPollIds(message.data.pollids);
             return await replyHelper.prepareSuccess(message, pollinfos);
@@ -244,8 +259,17 @@ module.exports = {
     //{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
     getUsersVoteInfo: async (message) => {
         console.log('PollController.getUsersVoteInfo');
+        if (!message.user_id || !message.data || !message.data.pollid 
+            || !message.data.user_ids)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
-            let usersVoteInfo = await PollVoteData.getUsersVoteInfo(message.data);
+            //Prepare data
+            let data = {
+                pollid: message.data.pollid,
+                user_ids: message.data.user_ids
+            }
+            let usersVoteInfo = await PollVoteData.getUsersVoteInfo(data);
             return await replyHelper.prepareSuccess(message, usersVoteInfo);
         } catch (err) {
             console.log(err);
@@ -256,6 +280,10 @@ module.exports = {
     //{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
     syncPollResults: async (message) => {
         console.log('PollController.syncPollResults');
+        if (!message.user_id || !message.data || !message.data.pollids
+            || !message.data.lastsynchedtime)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {
@@ -276,6 +304,9 @@ module.exports = {
     //{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
     subscribeToPollResult: async (message) => {
         console.log('PollController.subscribeToPollResult');
+        if (!message.user_id || !message.data || !message.data.pollid)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {
@@ -318,6 +349,9 @@ module.exports = {
     //{"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
     unSubscribeToPollResult: async (message) => {
         console.log('PollController.unSubscribeToPollResult');
+        if (!message.user_id || !message.data || !message.data.pollid)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {
@@ -355,6 +389,9 @@ module.exports = {
 
     delete: async (message) => {
         console.log('PollController.delete');
+        if (!message.user_id || !message.data || !message.data.pollid)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Start transaction
             dbsession = await dbTransactions.startSession();
@@ -387,6 +424,9 @@ module.exports = {
 
     getPollUpdates: async (message) => {
         console.log('GroupController.getGroupUpdates');
+        if (!message.user_id || !message.data)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
         try {
             //Prepare data
             let data = {

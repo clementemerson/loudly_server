@@ -7,7 +7,5 @@ module.exports = {
     pollInGroups: 'pollInGroups:',
     pollsOfGroup: 'pollsOfGroup:',
 
-    groupInfo: 'GroupInfo:',
-    pollInfo: 'PollInfo:',
-    userInfo: 'UserInfo:',
+    phoneNumber: 'phoneNo:',
 };

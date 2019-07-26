@@ -2,41 +2,53 @@ const redClient = require('./redclient');
 const keyPrefix = require('./key_prefix');
 
 module.exports = {
-    updateGroupInfo: async (id, groupName, groupDesc, createdBy, createdAt) => {
-        return await redClient.hmset(keyPrefix.groupInfo + id, 'id', id, 'N', groupName,
-            'D', groupDesc, 'by', createdBy, 'at1', createdAt);
+    createUser: async (userid, phoneNumber) => {
+        if(!userid || !phoneNumber)
+            throw "Invalid Arguments";
+
+        await redClient.hmset(keyPrefix.phoneNumber + phoneNumber, 'id', userid);
     },
-    updateGroupName: async (id, groupName) => {
-        return await redClient.hmset(keyPrefix.groupInfo + id, 'N', groupName);
+    addGroupUser: async (groupid, userid) => {
+        if(!groupid || !userid)
+            throw "Invalid Arguments";
+
+        if (await redClient.exists(keyPrefix.groupUsers + groupid) == 1)
+            return await redClient.sadd(keyPrefix.groupUsers + groupid, userid);
+        else
+            return await redClient.sadd(keyPrefix.groupUsers + groupid, userid);
     },
-    updateGroupDesc: async (id, groupDesc) => {
-        return await redClient.hmset(keyPrefix.groupInfo + id, 'D', groupDesc);
-    },
-    updatePollInfo: async (id, pollTitle, resultIsPublic, canBeShared, options, createdBy, createdAt) => {
-        return await redClient.hmset(keyPrefix.pollInfo + id, 'id', id, 'T', pollTitle,
-            'RP', resultIsPublic, 'S', canBeShared, 'O', JSON.stringify(options),
-            'by', createdBy, 'at1', createdAt);
-    },
-    createPollResult: async (id, options, createdAt, updatedAt) => {
-        await redClient.hmset(keyPrefix.pollResultUpdate + id, 'id', id,
+    createPollResult: async (pollid, options, createdAt, updatedAt) => {
+        if(!pollid || !options || !createdAt || !updatedAt)
+            throw "Invalid Arguments";
+
+        await redClient.hmset(keyPrefix.pollResultUpdate + pollid, 'id', pollid,
             'at1', createdAt, 'at2', updatedAt);
         options.forEach(async (option, index) => {
-            await redClient.hmset(keyPrefix.pollResultUpdate + id, 'OV' + index.toString(), 0, 'SV' + index.toString(), 0);
+            await redClient.hmset(keyPrefix.pollResultUpdate + pollid, 'OV' + index.toString(), 0, 'SV' + index.toString(), 0);
         });
     },
-    updateOpenVoteResult: async (id, optionindex) => {
-        await redClient.hincrby(keyPrefix.pollResultUpdate + id, 'OV' + optionindex.toString(), 1);
+    updateOpenVoteResult: async (pollid, optionindex) => {
+        if(!pollid || !optionindex)
+            throw "Invalid Arguments";
+
+        await redClient.hincrby(keyPrefix.pollResultUpdate + pollid, 'OV' + optionindex.toString(), 1);
     },
-    updateSecretVoteResult: async (id, optionindex) => {
-        await redClient.hincrby(keyPrefix.pollResultUpdate + id, 'SV' + optionindex.toString(), 1);
+    updateSecretVoteResult: async (pollid, optionindex) => {
+        if(!pollid || !optionindex)
+            throw "Invalid Arguments";
+
+        await redClient.hincrby(keyPrefix.pollResultUpdate + pollid, 'SV' + optionindex.toString(), 1);
     },
-    getGroupInfo: async (groupids) => {
-        return await redClient.multiget(keyPrefix.groupInfo, groupids);
-    },
-    getPollInfo: async (pollids) => {
-        return await redClient.multiget(keyPrefix.pollInfo, pollids);
+    getUserIdsByPhone: async (phoneNumbers) => {
+        if(!phoneNumbers)
+            throw "Invalid Arguments";
+
+        return await redClient.multiget(keyPrefix.phoneNumber, phoneNumbers);
     },
     getPollResults: async (pollids) => {
+        if(!pollids)
+            throw "Invalid Arguments";
+
         return await redClient.multiget(keyPrefix.pollResultUpdate, pollids);
     },
 }

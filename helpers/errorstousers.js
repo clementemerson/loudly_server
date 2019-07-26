@@ -6,6 +6,7 @@ module.exports = {
         };
     },
     unknownError: 'Unknown Error',
+    unknownEvent: 'Unknown Event',
     invalidData: 'Invalid Data',
     invalidPhoneNumber: 'Invalid phone number',
     errorInProcessing: 'Error in processing request',

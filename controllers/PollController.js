@@ -83,14 +83,18 @@ module.exports = {
     //{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
     vote: async (message) => {
         console.log('PollController.vote');
+
+        //Validation checks
         if (!message.user_id || !message.data || !message.data.pollid
             || !message.data.optionindex || !message.data.secretvote)
             return await replyHelper.prepareError(message, null, errors.invalidData);
 
         var dbsession;
         try {
+            //Start session
             dbsession = await dbTransactions.startSession();
 
+            //Prepare voting data
             let data = {
                 pollid: message.data.pollid,
                 user_id: message.user_id,
@@ -108,25 +112,41 @@ module.exports = {
             if (isUserVoted == true)
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserAlreadyVoted);
 
+            //Update poll result
             let updatePollResult = PollResult.updatePollResult(data);
+            //Update poll voter list
             let updatePollVoterList = PollVoteRegister.updatePollVoterList(data);
             var updatePollPublicVotes;
             if (data.secretvote != true) {
+                //If vote is public, save who has voted
                 updatePollPublicVotes = PollVoteData.saveVote(data);
             } else {
                 data.user_id = 'secret_voter';
             }
 
-            await updatePollResult;
-            await updatePollVoterList;
+            //Await for all operations.
             if (updatePollPublicVotes) {
-                await updatePollPublicVotes;
+                await Promise.all([
+                    updatePollResult,
+                    updatePollVoterList,
+                    updatePollPublicVotes
+                ]);
+            } else {
+                await Promise.all([
+                    updatePollResult,
+                    updatePollVoterList,
+                ]);
+            }
+
+            if(secretvote == true) {
+                await redHelper.updateSecretVoteResult(data.pollid, data.optionindex);
+            } else {
+                await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
             }
             await redClient.sadd(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
+            await redClient.sadd(keyPrefix.pollUpdates, data.pollid);
             await dbTransactions.commitTransaction(dbsession);
 
-            ControllerHelper.informPollUpdate(data.pollid);
-            privateFunctions.updatePollResultToSubscribers(data.pollid);
             let replyData = {
                 pollid: data.pollid,
                 status: success.successVoted
@@ -142,7 +162,7 @@ module.exports = {
     //{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
     shareToGroup: async (message) => {
         console.log('PollController.shareToGroup');
-        if (!message.user_id || !message.data || !message.data.pollid 
+        if (!message.user_id || !message.data || !message.data.pollid
             || !message.data.groupid)
             return await replyHelper.prepareError(message, null, errors.invalidData);
 
@@ -259,7 +279,7 @@ module.exports = {
     //{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
     getUsersVoteInfo: async (message) => {
         console.log('PollController.getUsersVoteInfo');
-        if (!message.user_id || !message.data || !message.data.pollid 
+        if (!message.user_id || !message.data || !message.data.pollid
             || !message.data.user_ids)
             return await replyHelper.prepareError(message, null, errors.invalidData);
 
@@ -300,7 +320,6 @@ module.exports = {
         }
     },
 
-    //Tested on: 04-07-2019
     //{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
     subscribeToPollResult: async (message) => {
         console.log('PollController.subscribeToPollResult');
@@ -319,21 +338,7 @@ module.exports = {
             if (isUserVoted == false)
                 return await replyHelper.prepareError(message, null, errors.errorUserNotVoted);
 
-            //Put an entry in pollresult subscription
-            redClient.sadd(data.pollid, data.user_id);
-            if (!connections.getPollResultSubscriptions()[data.pollid]) {
-                connections.getPollResultSubscriptions()[data.pollid] = [];
-            }
-            connections.getPollResultSubscriptions()[data.pollid].push(data.user_id);
-
-            //Put an entry in user subscription.
-            //This will be used to clear pollresult subscription,
-            // when the user connection terminates abruptly
-            redClient.sadd(data.user_id, data.pollid);
-            if (!connections.getUserPollSubscriptions()[data.user_id]) {
-                connections.getUserPollSubscriptions()[data.user_id] = [];
-            }
-            connections.getUserPollSubscriptions()[data.user_id].push(data.pollid);
+            redClient.sadd(keyPrefix.pollSub + data.pollid, data.user_id);
 
             let replyData = {
                 status: success.userSubscribedToPollResult
@@ -345,7 +350,6 @@ module.exports = {
         }
     },
 
-    //Tested on: 04-07-2019
     //{"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
     unSubscribeToPollResult: async (message) => {
         console.log('PollController.unSubscribeToPollResult');
@@ -359,23 +363,7 @@ module.exports = {
                 pollid: message.data.pollid
             }
 
-            //Remove entry from pollresult subscription
-            redClient.SREM(data.pollid, data.user_id);
-            const subscribersArray = connections.getPollResultSubscriptions()[data.pollid];
-            if (subscribersArray) {
-                var index = subscribersArray.indexOf(data.user_id);
-                if (index > -1)
-                    subscribersArray.splice(index, 1);
-            }
-
-            //Remove entry from user subscription
-            redClient.SREM(data.user_id, data.pollid);
-            const pollArray = connections.getUserPollSubscriptions()[data.user_id];
-            if (pollArray) {
-                var index = pollArray.indexOf(data.pollid);
-                if (index > -1)
-                    pollArray.splice(index, 1);
-            }
+            redClient.srem(keyPrefix.pollSub + data.pollid, data.user_id);
 
             let replyData = {
                 status: success.userUnSubscribedToPollResult
@@ -419,47 +407,6 @@ module.exports = {
         } catch (err) {
             console.log(err);
             return await replyHelper.prepareError(message, dbsession, errors.unknownError);
-        }
-    },
-
-    getPollUpdates: async (message) => {
-        console.log('GroupController.getGroupUpdates');
-        if (!message.user_id || !message.data)
-            return await replyHelper.prepareError(message, null, errors.invalidData);
-
-        try {
-            //Prepare data
-            let data = {
-                user_id: message.user_id
-            }
-
-            let updatedPollResultIds = await redClient.smembers(keyPrefix.pollResultUpdate + data.user_id);
-            let updatedResults = await redHelper.getPollResults(updatedPollResultIds);
-
-            return await replyHelper.prepareSuccess(message, updatedResults);
-        } catch (err) {
-            console.log(err);
-            return await replyHelper.prepareError(message, null, errors.unknownError);
-        }
-    },
-}
-
-privateFunctions = {
-    updatePollResultToSubscribers: async (pollid) => {
-        console.log('PollController.updatePollResultToSubscribers');
-        try {
-            let pollResults = await PollResult.getPollResult(pollid);
-            let pollResult = pollResults[0];
-            if (pollResult) {
-                let pollResultSubscribers = connections.getPollResultSubscriptions()[pollid];
-                if (pollResultSubscribers) {
-                    pollResultSubscribers.forEach(user_id => {
-                        connections.getConnections().get(user_id).send(JSON.stringify(pollResult));
-                    });
-                }
-            }
-        } catch (err) {
-            console.log(err);
         }
     },
 }

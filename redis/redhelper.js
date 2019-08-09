@@ -21,23 +21,23 @@ module.exports = {
         if(!pollid || !options || !createdAt || !updatedAt)
             throw "Invalid Arguments";
 
-        await redClient.hmset(keyPrefix.pollResultUpdate + pollid, 'id', pollid,
+        await redClient.hmset(keyPrefix.pollResult + pollid, 'id', pollid,
             'at1', createdAt, 'at2', updatedAt);
         options.forEach(async (option, index) => {
-            await redClient.hmset(keyPrefix.pollResultUpdate + pollid, 'OV' + index.toString(), 0, 'SV' + index.toString(), 0);
+            await redClient.hmset(keyPrefix.pollResult + pollid, 'OV' + index.toString(), 0, 'SV' + index.toString(), 0);
         });
     },
     updateOpenVoteResult: async (pollid, optionindex) => {
         if(!pollid || !optionindex)
             throw "Invalid Arguments";
 
-        await redClient.hincrby(keyPrefix.pollResultUpdate + pollid, 'OV' + optionindex.toString(), 1);
+        await redClient.hincrby(keyPrefix.pollResult + pollid, 'OV' + optionindex.toString(), 1);
     },
     updateSecretVoteResult: async (pollid, optionindex) => {
         if(!pollid || !optionindex)
             throw "Invalid Arguments";
 
-        await redClient.hincrby(keyPrefix.pollResultUpdate + pollid, 'SV' + optionindex.toString(), 1);
+        await redClient.hincrby(keyPrefix.pollResult + pollid, 'SV' + optionindex.toString(), 1);
     },
     getUserIdsByPhone: async (phoneNumbers) => {
         if(!phoneNumbers)
@@ -49,6 +49,12 @@ module.exports = {
         if(!pollids)
             throw "Invalid Arguments";
 
-        return await redClient.multiget(keyPrefix.pollResultUpdate, pollids);
+        return await redClient.multiget(keyPrefix.pollResult, pollids);
     },
+    getPollResult: async (pollid) => {
+        if(!pollid)
+            throw "Invalid Arguments";
+
+        return await redClient.hgetall(keyPrefix.pollResult + pollid);
+    }
 }

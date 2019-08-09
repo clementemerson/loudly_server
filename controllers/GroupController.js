@@ -96,7 +96,6 @@ module.exports = {
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informUsers(data.groupid, data);
             ControllerHelper.informGroupUpdate(data.groupid);
 
             let replyData = {
@@ -141,7 +140,6 @@ module.exports = {
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informUsers(data.groupid, data);
             ControllerHelper.informGroupUpdate(data.groupid);
 
             let replyData = {

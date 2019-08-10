@@ -38,7 +38,7 @@ module.exports = {
     groupUserUpdate: 'gUU:',
     //List of groups in which user related data has been changed
     //Format groupUserUpdate:<user_id>
-    newGroupPoll: 'nPU:%1_G:%2',
+    newGroupPoll: 'nPU:{0}_G:{1}',
     //Stores a list of userids, who subscribed to the poll
     //Format pollSub:<pollid>
     pollSubsription: 'pS:',

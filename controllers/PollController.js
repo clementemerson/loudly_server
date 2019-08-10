@@ -210,7 +210,7 @@ module.exports = {
             await dbTransactions.commitTransaction(dbsession);
 
             //Inform group users about this new poll
-            ControllerHelper.informGroupUpdate(message.data.groupid);
+            ControllerHelper.informNewPollInGroup(data.groupid, data.pollid);
 
             let replyData = {
                 status: success.successPollShared
@@ -338,7 +338,8 @@ module.exports = {
                 return await replyHelper.prepareError(message, null, errors.errorUserNotVoted);
 
             //Adding subscription
-            redClient.sadd(keyPrefix.pollSubsription + data.pollid, data.user_id);
+            const score = (new Date()).getTime();
+            redClient.zadd(keyPrefix.pollSubsription + data.pollid, data.user_id, score);
 
             //Send latest result to the user
             const pollResult = await redHelper.getPollResult(data.pollid);

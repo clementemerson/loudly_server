@@ -66,7 +66,7 @@ module.exports = {
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUpdate(addUser.groupid);
+            ControllerHelper.informGroupUserUpdate(addUser.groupid);
 
             let replyData = {
                 status: success.userAddedToGroup
@@ -124,7 +124,7 @@ module.exports = {
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUpdate(data.groupid);
+            ControllerHelper.informGroupUserUpdate(data.groupid);
 
             let replyData = {
                 status: success.userPermissionChangedInGroup
@@ -172,12 +172,12 @@ module.exports = {
                 user_id: message.data.user_id
             };
             await GroupUsers.removeUser(data);
-            await redClient.srem('GroupUsers_' + data.groupid, data.user_id);
+            await redClient.srem(keyPrefix.groupUsers + data.groupid, data.user_id);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUpdate(data.groupid);
+            ControllerHelper.informGroupUserUpdate(data.groupid);
             //TODO: inform removed user
 
             let replyData = {

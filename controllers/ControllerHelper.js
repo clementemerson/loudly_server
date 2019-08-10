@@ -1,6 +1,3 @@
-let connections = require('../websockets/connections');
-let GroupUsers = require('../db/groupusers');
-
 const redClient = require('../redis/redclient');
 const keyPrefix = require('../redis/key_prefix');
 
@@ -22,7 +19,7 @@ module.exports = {
     informNewPollInGroup: async (groupid, pollid) => {
         let usersFromRedis = await redClient.smembers(keyPrefix.groupUsers + groupid);
         usersFromRedis.forEach((userid) => {
-            redClient.sadd(keyPrefix.newGroupPoll + userid, groupid);
+            redClient.sadd(keyPrefix.newGroupPoll.format(userid, groupid), pollid);
         })
     }
 

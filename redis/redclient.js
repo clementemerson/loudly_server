@@ -46,9 +46,18 @@ module.exports = {
     //-----------------------------------------------------------------//
     //      UNSORTED SET FUNCTIONS
     //-----------------------------------------------------------------//
-    sadd: async (setKey, value) => {
+    sadd: async (setKey, value, expirySecs) => {
         if (!setKey || !value)
             throw "Invalid Arguments";
+
+        if(!!expirySecs) {
+            const exists = await redClient.existsAsync(setKey);
+            if(exists == false) {
+                const saddReturn = await redClient.saddAsync([setKey, value]);
+                await redClient.expire(setKey, expirySecs);
+                return saddReturn;
+            }
+        }
 
         return await redClient.saddAsync([setKey, value]);
     },

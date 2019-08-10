@@ -143,7 +143,9 @@ module.exports = {
             } else {
                 await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
             }
+            //Adding to voted user list
             await redClient.sadd(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
+            //This list is used by fanout mechanism, to fanout the updated result to the subscribed users
             await redClient.sadd(keyPrefix.pollUpdates, data.pollid);
             await dbTransactions.commitTransaction(dbsession);
 
@@ -204,7 +206,9 @@ module.exports = {
 
             //Share to the group
             await GroupPolls.shareToGroup(data);
+            //Adding to Poll->[group list]
             await redClient.sadd(keyPrefix.pollInGroups + data.pollid, data.groupid);
+            //Adding to Group->[poll list]
             await redClient.sadd(keyPrefix.pollsOfGroup + data.groupid, data.pollid);
             //We need to commit the transaction here. so that the currently added user will also get the notification.
             await dbTransactions.commitTransaction(dbsession);

@@ -43,7 +43,7 @@ module.exports = {
 
         let cursor = 0;
         do {
-            const result = await redClient.scan(cursor, 'gUp:*');
+            const result = await redClient.scan(cursor, keyPrefix.groupUpdate + '*');
             cursor = result[0];
             if (!!result[1]) {
                 result[1].forEach(async (updateKey) => {
@@ -63,7 +63,7 @@ module.exports = {
 
         let cursor = 0;
         do {
-            const result = await redClient.scan(cursor, 'gUU:*');
+            const result = await redClient.scan(cursor, keyPrefix.groupUserUpdate + '*');
             cursor = result[0];
             if (!!result[1]) {
                 result[1].forEach(async (updateKey) => {

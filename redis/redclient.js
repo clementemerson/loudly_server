@@ -43,6 +43,18 @@ module.exports = {
 
         return await multiCmd.execAsync();
     },
+    scan: async (cursor, match) => {
+        if (!match)
+            throw "Invalid Arguments";
+
+        return await redClient.scanAsync(cursor, 'MATCH', match);
+    },
+    del: async (key) => {
+        if (!key)
+            throw "Invalid Arguments";
+
+        return await redClient.delAsync(key);
+    },
     //-----------------------------------------------------------------//
     //      UNSORTED SET FUNCTIONS
     //-----------------------------------------------------------------//
@@ -71,7 +83,7 @@ module.exports = {
         if (!setKey)
             throw "Invalid Arguments";
 
-        return await redClient.spop(setKey);
+        return await redClient.spopAsync(setKey);
     },
     smembers: async (setKey) => {
         if (!setKey)

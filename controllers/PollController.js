@@ -149,6 +149,10 @@ module.exports = {
             await redClient.sadd(keyPrefix.pollUpdates, data.pollid);
             await dbTransactions.commitTransaction(dbsession);
 
+            //Send latest result to the user
+            const pollResult = await redHelper.getPollResult(data.pollid);
+            connections.inform(data.user_id, pollResult);
+            
             let replyData = {
                 pollid: data.pollid,
                 status: success.successVoted

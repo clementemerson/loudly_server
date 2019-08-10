@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js --host 127.0.0.1",
-    "ws": "nodemon websock.js --host 127.0.0.1"
+    "ws": "nodemon websock.js --host 127.0.0.1",
+    "fanout": "nodemon fanout.js --host 127.0.0.1"
   },
   "author": "",
   "license": "ISC",

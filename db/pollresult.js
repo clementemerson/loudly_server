@@ -28,7 +28,6 @@ module.exports = {
 
     updatePollResult: async (data) => {
         console.log('db.pollresult.updatePollResult');
-        console.log(data);
         let date = new Date();
         let updatedAt = date.getTime();
 

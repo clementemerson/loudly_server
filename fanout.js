@@ -69,9 +69,13 @@ setInterval(function ping() {
 }, 15000);
 
 //To send updates to the subscribed client - 500 ms
-setInterval(() => {
+setInterval(async () => {
+  console.log('Starting Update');
   await updateController.sendPollUpdates();
-}, 500);
+  await updateController.sendGroupUpdate();
+  await updateController.sendGroupUserUpdate();
+  await updateController.sendGroupPollUpdate();
+}, 5000);
 
 //To clear the elapsed subscriptions - 1 day
 setInterval(function clearElapsedSubscriptions() {

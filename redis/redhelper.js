@@ -12,10 +12,10 @@ module.exports = {
         if (!groupid || !userid)
             throw "Invalid Arguments";
 
-        if (await redClient.exists(keyPrefix.groupUsers + groupid) == 1)
-            return await redClient.sadd(keyPrefix.groupUsers + groupid, userid);
+        if (await redClient.exists(keyPrefix.usersOfGroup + groupid) == 1)
+            return await redClient.sadd(keyPrefix.usersOfGroup + groupid, userid);
         else
-            return await redClient.sadd(keyPrefix.groupUsers + groupid, userid);
+            return await redClient.sadd(keyPrefix.usersOfGroup + groupid, userid);
     },
     createPollResult: async (pollid, options, createdAt, updatedAt) => {
         if (!pollid || !options || !createdAt || !updatedAt)

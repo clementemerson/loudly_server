@@ -1,6 +1,9 @@
 var mongodb = require('./mongo').getDbConnection;
 var dbtables = require('./dbtables');
 
+const keyPrefix = require('../redis/key_prefix');
+const redClient = require('../redis/redclient');
+
 module.exports = {
 
     addUser: async (data) => {
@@ -17,6 +20,9 @@ module.exports = {
             createdAt: createdAt,
             updatedAt: updatedAt
         });
+
+        await redClient.sadd(keyPrefix.usersOfGroup + data.groupid, data.user_id);
+        await redClient.sadd(keyPrefix.groupsOfUser + data.user_id, data.groupid);
     },
 
     changeUserPermission: async (data) => {
@@ -44,6 +50,9 @@ module.exports = {
             groupid: data.groupid,
             user_id: data.user_id
         });
+
+        await redClient.srem(keyPrefix.usersOfGroup + data.groupid, data.user_id);
+        await redClient.srem(keyPrefix.groupsOfUser + data.user_id, data.groupid);
     },
 
     getUsers: async (groupid) => {
@@ -90,6 +99,6 @@ module.exports = {
         return await mongodb().collection(dbtables.GroupUsers).find({
             user_id: user_id,
         })
-        .toArray();;
+            .toArray();;
     },
 }

@@ -210,10 +210,6 @@ module.exports = {
 
             //Share to the group
             await GroupPolls.shareToGroup(data);
-            //Adding to Poll->[group list]
-            await redClient.sadd(keyPrefix.pollInGroups + data.pollid, data.groupid);
-            //Adding to Group->[poll list]
-            await redClient.sadd(keyPrefix.pollsOfGroup + data.groupid, data.pollid);
             //We need to commit the transaction here. so that the currently added user will also get the notification.
             await dbTransactions.commitTransaction(dbsession);
 

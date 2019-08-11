@@ -5,7 +5,7 @@ module.exports = {
     //***********************************************************************//
     //List of users in a group
     //Format groupUsers:<groupid>
-    groupUsers: 'gU:',
+    usersOfGroup: 'uOG:',
     //List of users voted for a poll
     //Format pollVotedUsers:<pollid>
     pollVotedUsers: 'pVU:',
@@ -15,6 +15,9 @@ module.exports = {
     //List of polls in a group
     //Format pollsOfGroup:<groupid>
     pollsOfGroup: 'pOG:',
+    //List of groups of a user
+    //Format groupsOfUser:<user_id>
+    groupsOfUser: 'gOU:',
     //***********************************************************************//
 
     //***********************************************************************//

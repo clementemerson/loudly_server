@@ -7,19 +7,19 @@ module.exports = {
 
     //Internal function
     informGroupUpdate: async (groupid) => {
-        let usersFromRedis = await redClient.smembers(keyPrefix.groupUsers + groupid);
+        let usersFromRedis = await redClient.smembers(keyPrefix.usersOfGroup + groupid);
         usersFromRedis.forEach((userid) => {
             redClient.sadd(keyPrefix.groupUpdate + userid, groupid, thirtyDaysInSeconds);
         })
     },
     informGroupUserUpdate: async (groupid) => {
-        let usersFromRedis = await redClient.smembers(keyPrefix.groupUsers + groupid);
+        let usersFromRedis = await redClient.smembers(keyPrefix.usersOfGroup + groupid);
         usersFromRedis.forEach((userid) => {
             redClient.sadd(keyPrefix.groupUserUpdate + userid, groupid, thirtyDaysInSeconds);
         })
     },
     informNewPollInGroup: async (groupid, pollid) => {
-        let usersFromRedis = await redClient.smembers(keyPrefix.groupUsers + groupid);
+        let usersFromRedis = await redClient.smembers(keyPrefix.usersOfGroup + groupid);
         usersFromRedis.forEach((userid) => {
             redClient.sadd(keyPrefix.newGroupPoll.format(userid, groupid), pollid, thirtyDaysInSeconds);
         })

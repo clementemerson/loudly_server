@@ -54,19 +54,18 @@ module.exports = {
             }
 
             //Now add the user
-            let addUser = {
+            let data = {
                 groupid: message.data.groupid,
                 user_id: message.data.user_id,
                 addedby: message.user_id,
                 permission: message.data.permission
             };
-            await GroupUsers.addUser(addUser);
-            await redClient.sadd(keyPrefix.groupUsers + addUser.groupid, addUser.user_id);
+            await GroupUsers.addUser(data);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUserUpdate(addUser.groupid);
+            ControllerHelper.informGroupUserUpdate(data.groupid);
 
             let replyData = {
                 status: success.userAddedToGroup
@@ -172,7 +171,6 @@ module.exports = {
                 user_id: message.data.user_id
             };
             await GroupUsers.removeUser(data);
-            await redClient.srem(keyPrefix.groupUsers + data.groupid, data.user_id);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
@@ -210,6 +208,7 @@ module.exports = {
                 return await replyHelper.prepareError(message, null, errors.errorUserIsNotMember);
             }
 
+            //Todo: use redis
             let usersOfGroups = await GroupUsers.getUsers(data.groupid);
             return await replyHelper.prepareSuccess(message, usersOfGroups);
         } catch (err) {

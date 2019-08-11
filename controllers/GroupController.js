@@ -42,14 +42,13 @@ module.exports = {
             await GroupInfo.create(groupData);
 
             //Adding user with ADMIN privileges
-            let userBeAdmin = {
+            let data = {
                 groupid: groupid,
                 user_id: message.user_id,
                 addedby: message.user_id,
                 permission: 'ADMIN'
             }
-            await GroupUsers.addUser(userBeAdmin);
-            await redClient.sadd(keyPrefix.groupUsers + groupData.groupid, groupData.createdby);
+            await GroupUsers.addUser(data);
             await dbTransactions.commitTransaction(dbsession);
 
             let replyData = {
@@ -196,6 +195,7 @@ module.exports = {
             return await replyHelper.prepareError(message, null, errors.invalidData);
 
         try {
+            //Todo: use redis
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
 
             let groupids = [];
@@ -249,11 +249,13 @@ module.exports = {
             }
 
             //Check user in group. If he is, then he can get the requested info
+            //Todo: use redis
             let userIsMember = await GroupUsers.isMember(data);
             if (!userIsMember) {
                 return await replyHelper.prepareError(message, null, errors.errorUserIsNotMember);
             }
 
+            //Todo: use redis
             let pollsInGroup = await GroupPolls.getPolls(data.groupid);
             return await replyHelper.prepareSuccess(message, pollsInGroup);
         } catch (err) {

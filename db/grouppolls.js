@@ -1,9 +1,11 @@
 var mongodb = require('./mongo').getDbConnection;
 var dbtables = require('./dbtables');
-const redClient = require('../redis/redclient').getRedClient;
+
+const keyPrefix = require('../redis/key_prefix');
+const redClient = require('../redis/redclient');
 
 module.exports = {
-    
+
     shareToGroup: async (data) => {
         console.log('db.grouppolls.shareToGroup');
         let date = new Date();
@@ -17,6 +19,11 @@ module.exports = {
             createdAt: createdAt,
             updatedAt: updatedAt
         });
+
+        //Adding to Poll->[group list]
+        await redClient.sadd(keyPrefix.pollInGroups + data.pollid, data.groupid);
+        //Adding to Group->[poll list]
+        await redClient.sadd(keyPrefix.pollsOfGroup + data.groupid, data.pollid);
     },
 
     groupHasPoll: async (data) => {

@@ -91,6 +91,12 @@ module.exports = {
 
         return await redClient.smembersAsync(setKey);
     },
+    sismember: async (setKey, value) => {
+        if (!setKey || !value)
+            throw "Invalid Arguments";
+
+        return await redClient.sismemberAsync(setKey, value);
+    },
     //-----------------------------------------------------------------//
     //      SORTED SET FUNCTIONS
     //-----------------------------------------------------------------//
@@ -149,3 +155,5 @@ module.exports = {
         return await redClient.hgetallAsync(hashKey);
     },
 };
+
+

@@ -12,10 +12,10 @@ module.exports = {
             redClient.sadd(keyPrefix.groupUpdate + userid, groupid, thirtyDaysInSeconds);
         })
     },
-    informGroupUserUpdate: async (groupid) => {
+    informGroupUserUpdate: async (groupid, data) => {
         let usersFromRedis = await redClient.smembers(keyPrefix.usersOfGroup + groupid);
         usersFromRedis.forEach((userid) => {
-            redClient.sadd(keyPrefix.groupUserUpdate + userid, groupid, thirtyDaysInSeconds);
+            redClient.sadd(keyPrefix.groupUserUpdate + userid, data, thirtyDaysInSeconds);
         })
     },
     informNewPollInGroup: async (groupid, pollid) => {

@@ -263,25 +263,4 @@ module.exports = {
             return await replyHelper.prepareError(message, null, errors.unknownError);
         }
     },
-
-    getGroupUpdates: async (message) => {
-        console.log('GroupController.getGroupUpdates');
-        if (!message.user_id)
-            return await replyHelper.prepareError(message, null, errors.invalidData);
-
-        try {
-            //Prepare data
-            let data = {
-                user_id: message.user_id
-            }
-
-            let updatedGroupIds = await redClient.smembers(keyPrefix.groupUpdate + data.user_id);
-            //Todo: get groupInfo from mongodb
-
-            return await replyHelper.prepareSuccess(message, updatedGroupInfo);
-        } catch (err) {
-            console.log(err);
-            return await replyHelper.prepareError(message, null, errors.unknownError);
-        }
-    },
 }

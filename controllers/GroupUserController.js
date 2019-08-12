@@ -58,14 +58,15 @@ module.exports = {
                 groupid: message.data.groupid,
                 user_id: message.data.user_id,
                 addedby: message.user_id,
-                permission: message.data.permission
+                permission: message.data.permission,
+                operation: 'addUser'
             };
             await GroupUsers.addUser(data);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUserUpdate(data.groupid);
+            ControllerHelper.informGroupUserUpdate(data.groupid, data);
 
             let replyData = {
                 status: success.userAddedToGroup
@@ -116,14 +117,15 @@ module.exports = {
             let data = {
                 groupid: message.data.groupid,
                 user_id: message.data.user_id,
-                permission: message.data.permission
+                permission: message.data.permission,
+                operation: 'changeUser'
             };
             await GroupUsers.changeUserPermission(data);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUserUpdate(data.groupid);
+            ControllerHelper.informGroupUserUpdate(data.groupid, data);
 
             let replyData = {
                 status: success.userPermissionChangedInGroup
@@ -168,14 +170,15 @@ module.exports = {
 
             let data = {
                 groupid: message.data.groupid,
-                user_id: message.data.user_id
+                user_id: message.data.user_id,
+                operation: 'removeUser'
             };
             await GroupUsers.removeUser(data);
             await dbTransactions.commitTransaction(dbsession);
 
             //TODO: create entries in transaction tables
             //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUserUpdate(data.groupid);
+            ControllerHelper.informGroupUserUpdate(data.groupid, data);
             //TODO: inform removed user
 
             let replyData = {

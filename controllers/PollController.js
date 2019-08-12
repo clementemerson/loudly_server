@@ -108,7 +108,7 @@ module.exports = {
                 return await replyHelper.prepareError(message, dbsession, errors.errorPollNotAvailable);
 
             //Check if the user has voted already
-            let isUserVoted = await PollVoteRegister.isUserVoted(data);
+            let isUserVoted = await redClient.sismember(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
             if (isUserVoted == true)
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserAlreadyVoted);
 
@@ -226,6 +226,7 @@ module.exports = {
         }
     },
 
+    //One time called, when user signsup newly or signin from a new device, no redis usage
     getMyPollsInfo: async (message) => {
         console.log('PollController.getMyPollsInfo');
         if (!message.user_id)
@@ -243,7 +244,7 @@ module.exports = {
             groupids.forEach(async (groupid) => {
                 let pollsInGroup = await GroupPolls.getPolls(groupid);
                 pollsInGroup.forEach(poll => {
-                    if (pollids.indexOf(poll.pollid) < 0)
+                    if (pollids.indexOf(poll.pollid) == -1)
                         pollids.push(poll.pollid);
                 });
             });
@@ -337,7 +338,7 @@ module.exports = {
             }
 
             //Check if the user has voted already
-            let isUserVoted = await PollVoteRegister.isUserVoted(data);
+            let isUserVoted = await redClient.sismember(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
             if (isUserVoted == false)
                 return await replyHelper.prepareError(message, null, errors.errorUserNotVoted);
 

@@ -1,4 +1,5 @@
 let connections = require('../websockets/connections');
+var replyHelper = require('../helpers/replyhelper');
 
 const redClient = require('../redis/redclient');
 const keyPrefix = require('../redis/key_prefix');
@@ -31,8 +32,14 @@ module.exports = {
                 subscribedUsers.forEach(user_id => {
                     console.log(user_id);
                     const wsConn = connections.getConnections().get(user_id);
-                    if (!!wsConn)
-                        wsConn.send(JSON.stringify(pollResult));
+                    if (!!wsConn) {
+                        let message = {
+                            module: 'sync',
+                            event: 'pollResult'
+                        }
+                        let reply = replyHelper.prepareSuccess(message, pollResult)
+                        wsConn.send(JSON.stringify(reply));
+                    }
                 });
             }
         } while (!!pollid);
@@ -51,7 +58,12 @@ module.exports = {
                     const wsConn = connections.getConnections().get(user_id);
                     if (!!wsConn) {
                         const groups = await redClient.smembers(updateKey);
-                        wsConn.send(JSON.stringify(groups));
+                        let message = {
+                            module: 'sync',
+                            event: 'groupInfo'
+                        }
+                        let reply = replyHelper.prepareSuccess(message, groups)
+                        wsConn.send(JSON.stringify(reply));
                         redClient.del(updateKey);
                     }                    
                 });
@@ -70,8 +82,13 @@ module.exports = {
                     const user_id = privateFunctions.getAfterColon(updateKey);
                     const wsConn = connections.getConnections().get(user_id);
                     if (!!wsConn) {
-                        const groups = await redClient.smembers(updateKey);
-                        wsConn.send(JSON.stringify(groups));
+                        const groups = await redClient.smembers(updateKey);                        
+                        let message = {
+                            module: 'sync',
+                            event: 'groupUserInfo'
+                        }
+                        let reply = replyHelper.prepareSuccess(message, groups)
+                        wsConn.send(JSON.stringify(reply));
                         redClient.del(updateKey);
                     }                    
                 });
@@ -91,7 +108,12 @@ module.exports = {
                     const wsConn = connections.getConnections().get(user_id);
                     if (!!wsConn) {
                         const polls = await redClient.smembers(updateKey);
-                        wsConn.send(JSON.stringify(polls));
+                        let message = {
+                            module: 'sync',
+                            event: 'newPoll'
+                        }
+                        let reply = replyHelper.prepareSuccess(message, polls)
+                        wsConn.send(JSON.stringify(reply));
                         redClient.del(updateKey);
                     }                    
                 });

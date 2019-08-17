@@ -26,6 +26,7 @@ module.exports = {
             try {
                 number = phoneUtil.parseAndKeepRawInput(req.params.phonenumber);
             } catch (err) {
+                console.log(err);
                 return res.status(400).send();
             }
 
@@ -100,6 +101,7 @@ module.exports = {
                 return res.status(500).send();
             });
         } catch (err) {
+            console.log(err);
             return res.status(400).send();
         }
     },
@@ -116,6 +118,7 @@ module.exports = {
             };
             return next();
         } catch (err) {
+            console.log(err);
             return res.status(400).send();
         }
     },
@@ -133,6 +136,7 @@ module.exports = {
             }
             return next();
         } catch (err) {
+            console.log(err);
             return res.status(400).send();
         }
     },
@@ -150,6 +154,7 @@ module.exports = {
             await dbTransactions.commitTransaction(dbsession);
             return next();
         } catch (err) {
+            console.log(err);
             await dbTransactions.abortTransaction(dbsession);
             return res.status(400).send();
         }

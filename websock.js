@@ -2,7 +2,6 @@ const WebSocket = require('ws');
 const url = require('url');
 const mongo = require('./db/mongo');
 const redClient = require('./redis/redclient');
-const redHelper = require('./redis/redhelper');
 let connections = require('./websockets/connections');
 
 let jwtController = require('./controllers/jwtController');
@@ -11,7 +10,7 @@ let UsersModuleHandlers = require('./modulehandlers/usermodule');
 let GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
-let localServer = false;
+let localServer = true;
 
 var server;
 if (localServer) {
@@ -25,7 +24,7 @@ if (localServer) {
     key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
   });
 }
-s
+
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', async (ws_client, req) => {

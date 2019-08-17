@@ -4,6 +4,7 @@ var server;
 serverapp.use(express.json())
 
 var mongo = require('./db/mongo');
+const redClient = require('./redis/redclient');
 
 //config
 var listen_to_port = 8081;
@@ -31,7 +32,12 @@ function recursiveRoutes(folderName) {
 recursiveRoutes('routes'); // Initialize it
 
 //Init connection with DB
-mongo.initDbConnection(initServer);
+redClient.initRedisClient(initRedis);
+
+function initRedis() {
+  console.log('Redis connected');
+  mongo.initDbConnection(initServer);
+}
 
 function initServer() {
     server = serverapp.listen(listen_to_port, function () {

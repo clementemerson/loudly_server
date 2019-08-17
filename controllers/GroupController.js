@@ -17,7 +17,7 @@ const redClient = require('../redis/redclient');
 const keyPrefix = require('../redis/key_prefix');
 
 module.exports = {
-    //Tested on: 21-06-2019
+    //Tested on: 17-Aug-2019
     //{"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
     create: async (message) => {
         console.log('GroupController.create');
@@ -63,7 +63,7 @@ module.exports = {
         }
     },
 
-    //Tested on: 19-06-2019
+    //Tested on: 17-Aug-2019
     //{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
     changeTitle: async (message) => {
         console.log('GroupController.changeTitle');
@@ -107,7 +107,7 @@ module.exports = {
         }
     },
 
-    //Tested on: 20-06-2019
+    //Tested on: 17-Aug-2019
     //{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
     changeDesc: async (message) => {
         console.log('GroupController.changeDesc');
@@ -189,6 +189,8 @@ module.exports = {
         }
     },
 
+    //Tested on: 17-Aug-2019
+    //{"module":"groups", "event":"getMyGroupsInfo", "messageid":4641}
     getMyGroupsInfo: async (message) => {
         console.log('UserController.getGroups');
         if (!message.user_id)
@@ -215,8 +217,8 @@ module.exports = {
         }
     },
 
-    //Tested on: 18-06-2019
-    //{"module":"groups", "event":"getGroupsInfo", "messageid":8971, "data":{"groupids":[1001, 1000]}}
+    //Tested on: 17-Aug-2019
+    //{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3001, 3002]}}
     getInfo: async (message) => {
         if (!message.data || !message.data.groupids)
             return await replyHelper.prepareError(message, null, errors.invalidData);

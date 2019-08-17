@@ -24,18 +24,19 @@ module.exports = {
         res.status(200).send({ userslist: userinfos });
     },
 
-    //{"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "phoneNumbers":["+919884386484"]}
+    //Tested on: 17-Aug-2019
+    //{"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data": {"phoneNumbers":["+919884386484"]}}
     getUsersFromPhoneNumbers: async (message) => {
         console.log('UserController.getUsersFromPhoneNumbers');
         if (!message.user_id || !message.data || !message.data.phoneNumbers)
             return await replyHelper.prepareError(message, null, errors.invalidData);
-            
+
         try {
             let users = await redHelper.getUserIdsByPhone(message.data.phoneNumbers);
-            console.log(users);
+
             var user_ids = [];
             users.forEach(oneUser => {
-                user_ids.push(oneUser.id);
+                user_ids.push(parseInt(oneUser.id));
             });
 
             let userinfos = await Users.getUserInfoByUserIds(user_ids);
@@ -47,6 +48,8 @@ module.exports = {
     },
 
     //One time
+    //Tested on: 17-Aug-2019
+    //{"module":"users", "event":"getGroups", "messageid":4641}
     getGroups: async (message) => {
         console.log('UserController.getGroups');
         if (!message.user_id)
@@ -62,6 +65,8 @@ module.exports = {
     },
 
     //One time
+    //Tested on: 17-Aug-2019
+    //{"module":"users", "event":"getPolls", "messageid":4641}
     getPolls: async (message) => {
         console.log('UserController.getPolls');
         if (!message.user_id)
@@ -76,6 +81,7 @@ module.exports = {
         }
     },
 
+    //Tested on: 17-Aug-2019
     //{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
     getInfo: async (message) => {
         console.log('UserController.getInfo');
@@ -91,6 +97,7 @@ module.exports = {
         }
     },
 
+    //Tested on: 17-Aug-2019
     //{"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
     changeName: async (message) => {
         console.log('UserController.changeName');
@@ -122,6 +129,7 @@ module.exports = {
         }
     },
 
+    //Tested on: 17-Aug-2019
     //{"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
     changeStatusMsg: async (message) => {
         console.log('UserController.changeStatusMsg');

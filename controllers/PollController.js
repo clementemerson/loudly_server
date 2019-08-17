@@ -32,12 +32,12 @@ const redHelper = require('../redis/redhelper');
 
 module.exports = {
 
-    //Tested on: 02-07-2019
+    //Tested on: 17-Aug-2019
     //{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"},{"index":1,"desc":"option2"}]}}
     create: async (message) => {
         console.log('PollController.create');
-        if (!message.user_id || !message.data || !message.data.title || !message.data.resultispublic
-            || !message.data.canbeshared || !message.data.options)
+        if (!message.user_id || !message.data || !message.data.title || (message.data.resultispublic === undefined)
+            || (message.data.canbeshared === undefined) || !message.data.options)
             return await replyHelper.prepareError(message, null, errors.invalidData);
         try {
             //Start transaction
@@ -79,7 +79,6 @@ module.exports = {
         }
     },
 
-    //Tested on: 02-07-2019
     //{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
     vote: async (message) => {
         console.log('PollController.vote');
@@ -164,7 +163,7 @@ module.exports = {
         }
     },
 
-    //Tested on: 21-06-2019
+    //Tested on: 17-Aug-2019
     //{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
     shareToGroup: async (message) => {
         console.log('PollController.shareToGroup');
@@ -227,6 +226,8 @@ module.exports = {
     },
 
     //One time called, when user signsup newly or signin from a new device, no redis usage
+    //Tested on: 17-Aug-2019
+    //{"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
     getMyPollsInfo: async (message) => {
         console.log('PollController.getMyPollsInfo');
         if (!message.user_id)
@@ -263,7 +264,7 @@ module.exports = {
         }
     },
 
-    //Tested on: 21-06-2019
+    //Tested on: 17-Aug-2019
     //{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
     getInfo: async (message) => {
         console.log('PollController.getInfo');
@@ -279,7 +280,6 @@ module.exports = {
         }
     },
 
-    //Tested on: 03-07-2019
     //{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
     getUsersVoteInfo: async (message) => {
         console.log('PollController.getUsersVoteInfo');
@@ -301,7 +301,8 @@ module.exports = {
         }
     },
 
-    //{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
+    //Tested on: 17-Aug-2019
+    //{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"pollids":[1033, 1034], "lastsynchedtime":1562059405239}}
     syncPollResults: async (message) => {
         console.log('PollController.syncPollResults');
         if (!message.user_id || !message.data || !message.data.pollids
@@ -324,6 +325,7 @@ module.exports = {
         }
     },
 
+    //Tested on: 17-Aug-2019
     //{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
     subscribeToPollResult: async (message) => {
         console.log('PollController.subscribeToPollResult');

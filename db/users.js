@@ -2,6 +2,8 @@
 var mongodb = require('./mongo').getDbConnection;
 var dbtables = require('./dbtables');
 
+const redHelper = require('../redis/redhelper');
+
 module.exports = {
     insert: async (data) => {
         console.log('db.users.insert');
@@ -16,6 +18,8 @@ module.exports = {
             createdAt: createdAt,
             updatedAt: updatedAt
         });
+
+        await redHelper.createUser(data.user_id, data.phonenumber);
     },
     //-------------------------------------------------------------------------
     insertInfo: async (data) => {

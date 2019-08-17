@@ -11,7 +11,7 @@ let UsersModuleHandlers = require('./modulehandlers/usermodule');
 let GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
-let localServer = true;
+let localServer = false;
 
 var server;
 if (localServer) {
@@ -25,7 +25,7 @@ if (localServer) {
     key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem')
   });
 }
-
+s
 const wss = new WebSocket.Server({ server });
 
 wss.on('connection', async (ws_client, req) => {

@@ -74,7 +74,6 @@ setInterval(function ping() {
 async function toEvent(ws) {
   try {
     let message = JSON.parse(ws.data);
-    console.log(message);
 
     if (!message.module)
       throw 'Invalid Arguments';
@@ -95,7 +94,6 @@ async function toEvent(ws) {
         break;
     }
 
-    console.log(reply);
     connections.getConnections().get(ws.target.jwtDetails.user_id)
       .send(JSON.stringify(reply));
   } catch (err) {

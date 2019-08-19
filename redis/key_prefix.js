@@ -11,12 +11,15 @@ module.exports = {
     pollVotedUsers: 'pVU:',
     //List of groups that a poll is shared
     //Format pollInGroups:<pollid>
+    //Not used
     pollInGroups: 'pIG:',
     //List of polls in a group
     //Format pollsOfGroup:<groupid>
+    //Not used
     pollsOfGroup: 'pOG:',
     //List of groups of a user
     //Format groupsOfUser:<user_id>
+    //Not Used
     groupsOfUser: 'gOU:',
     //***********************************************************************//
 

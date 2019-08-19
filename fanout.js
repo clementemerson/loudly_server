@@ -34,6 +34,7 @@ wss.on('connection', async (ws_client, req) => {
     let validData = await jwtController.validateJwtData(req);
     if (validData == true) {
       ws_client.jwtDetails = req.jwtDetails;
+      console.log(ws_client.jwtDetails.user_id);
       connections.getConnections().set(ws_client.jwtDetails.user_id, ws_client);
     } else {
       console.log('Data not valid');

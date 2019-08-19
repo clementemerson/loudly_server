@@ -3,7 +3,6 @@ var dbTransactions = require('../db/session');
 let GroupUsers = require('../db/groupusers');
 let GroupInfo = require('../db/groupinfo');
 let GroupPolls = require('../db/grouppolls');
-var Users = require('../db/users');
 
 var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
@@ -13,12 +12,20 @@ var sequenceCounter = require('../db/sequencecounter');
 
 let ControllerHelper = require('./ControllerHelper');
 
-const redClient = require('../redis/redclient');
-const keyPrefix = require('../redis/key_prefix');
-
+//This file all functions to create and modify group info.
 module.exports = {
-    //Tested on: 17-Aug-2019
-    //{"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
+    
+    /**
+     * To create a group.
+     * The user who creates the group is ADMIN.
+     * No one will be notified except the creator.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     create: async (message) => {
         console.log('GroupController.create');
         if (!message.data || !message.data.name || !message.data.desc || !message.user_id)
@@ -63,8 +70,19 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
+    /**
+     * To change the title of the group.
+     * Online users will get notification through fanout process.
+     * Offline users can update themselves when they come online.
+     * The 'update' information is redis will expire in 30 days.
+     * If a user comes online after 30 days, then the user should do a fulll scan.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     changeTitle: async (message) => {
         console.log('GroupController.changeTitle');
         if (!message.data || !message.data.groupid || !message.user_id)
@@ -107,8 +125,19 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
+    /**
+     * To change the description of the group.
+     * Online users will get notification through fanout process.
+     * Offline users can update themselves when they come online.
+     * The 'update' information is redis will expire in 30 days.
+     * If a user comes online after 30 days, then the user should do a fulll scan.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     changeDesc: async (message) => {
         console.log('GroupController.changeDesc');
         if (!message.data || !message.data.groupid || !message.user_id)
@@ -151,6 +180,13 @@ module.exports = {
         }
     },
 
+    /**
+     * Not usable until now.
+     * No idea of deleting a group.
+     *
+     * @param {*} message
+     * @returns
+     */
     delete: async (message) => {
         console.log('GroupController.delete');
         if (!message.data || !message.data.groupid || !message.user_id)
@@ -189,15 +225,22 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"groups", "event":"getMyGroupsInfo", "messageid":4641}
+    /**
+     * To get the user's group info.
+     * //Todo: Need to check whether this is usable.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"groups", "event":"getMyGroupsInfo", "messageid":4641}
+     * 
+     * @param {*} message
+     * @returns
+     */
     getMyGroupsInfo: async (message) => {
         console.log('UserController.getGroups');
         if (!message.user_id)
             return await replyHelper.prepareError(message, null, errors.invalidData);
 
         try {
-            //Todo: use redis
             let groups = await GroupUsers.getGroupsOfUser(message.user_id);
 
             let groupids = [];
@@ -217,8 +260,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3001, 3002]}}
+    /**
+     * To get group information for the given groupids.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3001, 3002]}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     getInfo: async (message) => {
         if (!message.data || !message.data.groupids)
             return await replyHelper.prepareError(message, null, errors.invalidData);
@@ -236,8 +286,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 19-06-2019
-    //{"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
+    /**
+     * To get polls of a group (only the metainfo).
+     * To get pollinfo or pollresult, the user should call the respective fn()
+     *
+     * Tested on: 19-06-2019
+     * {"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
+     * @param {*} message
+     * @returns
+     */
     getPolls: async (message) => {
         console.log('GroupController.getPolls');
         if (!message.data || !message.data.groupid || !message.user_id)

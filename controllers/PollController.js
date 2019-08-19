@@ -32,8 +32,15 @@ const redHelper = require('../redis/redhelper');
 
 module.exports = {
 
-    //Tested on: 17-Aug-2019
-    //{"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"},{"index":1,"desc":"option2"}]}}
+    /**
+     * To create a poll.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"create", "messageid":3435, "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"},{"index":1,"desc":"option2"}]}}
+     *
+     * @param {*} message
+     * @returns
+     */
     create: async (message) => {
         console.log('PollController.create');
         if (!message.user_id || !message.data || !message.data.title || (message.data.resultispublic === undefined)
@@ -79,7 +86,16 @@ module.exports = {
         }
     },
 
-    //{"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
+    //
+    /**
+     * To vote. And update group users, where the poll is present.
+     * 
+     * Tested on: Pending
+     * {"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
+     *
+     * @param {*} message
+     * @returns
+     */
     vote: async (message) => {
         console.log('PollController.vote');
 
@@ -151,6 +167,9 @@ module.exports = {
             //Send latest result to the user
             const pollResult = await redHelper.getPollResult(data.pollid);
             connections.inform(data.user_id, pollResult);
+
+            //Todo: Send the vote information to the users of groups where the voted user is in.
+            //User needs to send the groupids in which the poll is present.
             
             let replyData = {
                 pollid: data.pollid,
@@ -163,8 +182,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
+    /**
+     * Share a poll to a group, where the poll does not exist previously.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     shareToGroup: async (message) => {
         console.log('PollController.shareToGroup');
         if (!message.user_id || !message.data || !message.data.pollid
@@ -225,9 +251,16 @@ module.exports = {
         }
     },
 
-    //One time called, when user signsup newly or signin from a new device, no redis usage
-    //Tested on: 17-Aug-2019
-    //{"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
+    /**
+     * To get all the polls in all the user's groups. (pollinfo)
+     * May be called once when login.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
+     * 
+     * @param {*} message
+     * @returns
+     */
     getMyPollsInfo: async (message) => {
         console.log('PollController.getMyPollsInfo');
         if (!message.user_id)
@@ -264,8 +297,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
+    /**
+     * To get the pollinfo of the given pollids.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
+     *
+     * @param {*} message
+     * @returns
+     */
     getInfo: async (message) => {
         console.log('PollController.getInfo');
         if (!message.user_id || !message.data || !message.data.pollids)
@@ -280,7 +320,16 @@ module.exports = {
         }
     },
 
-    //{"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
+    /**
+     * To get the vote information of the given list of users for the given poll.
+     * Not sure this is useful.
+     * 
+     * Tested on: Pending
+     * {"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
+     *
+     * @param {*} message
+     * @returns
+     */
     getUsersVoteInfo: async (message) => {
         console.log('PollController.getUsersVoteInfo');
         if (!message.user_id || !message.data || !message.data.pollid
@@ -301,8 +350,16 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"pollids":[1033, 1034], "lastsynchedtime":1562059405239}}
+    /**
+     * To synchronize the poll result of the given polls.
+     * Not sure this is useful.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"pollids":[1033, 1034], "lastsynchedtime":1562059405239}}
+     *
+     * @param {*} message
+     * @returns
+     */
     syncPollResults: async (message) => {
         console.log('PollController.syncPollResults');
         if (!message.user_id || !message.data || !message.data.pollids
@@ -325,8 +382,18 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+    /**
+     * To subscribe to the pollresult.
+     * Subscribed users will get notified by the fanout process.
+     * The subscription will expire in a specific time, if the user 
+     * does not unsubscribe it.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+     *
+     * @param {*} message
+     * @returns
+     */
     subscribeToPollResult: async (message) => {
         console.log('PollController.subscribeToPollResult');
         if (!message.user_id || !message.data || !message.data.pollid)
@@ -362,7 +429,15 @@ module.exports = {
         }
     },
 
-    //{"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+    /**
+     * Unsubscribe to the poll result
+     * 
+     * Tested on: Pending
+     * {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+     *
+     * @param {*} message
+     * @returns
+     */
     unSubscribeToPollResult: async (message) => {
         console.log('PollController.unSubscribeToPollResult');
         if (!message.user_id || !message.data || !message.data.pollid)
@@ -387,6 +462,17 @@ module.exports = {
         }
     },
 
+    /**
+     * Delete a poll.
+     * Todo: need to decide the conditions when a poll can be deleted.
+     * 1. it is not shared to a group.
+     * 2. no one has voted, like that...
+     * 
+     * Tested on: Pending
+     *
+     * @param {*} message
+     * @returns
+     */
     delete: async (message) => {
         console.log('PollController.delete');
         if (!message.user_id || !message.data || !message.data.pollid)

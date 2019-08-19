@@ -7,17 +7,20 @@ var errors = require('../helpers/errorstousers');
 var success = require('../helpers/successtousers');
 var replyHelper = require('../helpers/replyhelper');
 
-var sequenceCounter = require('../db/sequencecounter');
-
 let ControllerHelper = require('./ControllerHelper');
-
-const redClient = require('../redis/redclient');
-const keyPrefix = require('../redis/key_prefix');
 
 module.exports = {
 
-    //Tested on: 19-06-2019
-    //{"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
+    /**
+     * To add an user to the group.
+     * Only ADMINs can add an user to the group.
+     *
+     * Tested on: 19-Aug-2019
+     * {"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     addUser: async (message) => {
         console.log('GroupController.addUser');
         if (!message.user_id || !message.data.user_id || !message.data.groupid || !message.data.permission)
@@ -27,13 +30,13 @@ module.exports = {
             //Start transaction
             dbsession = await dbTransactions.startSession();
 
-            //Check the user is available. If he is, then he can be added to the group.
+            //Check the 'user-being-added' is available. If he is, then he can be added to the group.
             const isUserExist = Users.isUserExist(message.data.user_id);
             if (isUserExist == false) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserNotExists);
             }
 
-            //Check user is already a member
+            //Check 'user-being-added' is already a member
             let isMemberData = {
                 groupid: message.data.groupid,
                 user_id: message.data.user_id,
@@ -43,7 +46,7 @@ module.exports = {
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserIsMember);
             }
 
-            //Check the user is an ADMIN. If he is, then he can add user.
+            //Check the 'user who made the request' is an ADMIN. If he is, then he can add user.
             let isAdminData = {
                 groupid: message.data.groupid,
                 user_id: message.user_id,
@@ -64,8 +67,7 @@ module.exports = {
             await GroupUsers.addUser(data);
             await dbTransactions.commitTransaction(dbsession);
 
-            //TODO: create entries in transaction tables
-            //TODO: Notify all the online users of the group (async)
+            //Inform group members about the new user.
             ControllerHelper.informGroupUserUpdate(data.groupid, data);
 
             let replyData = {
@@ -78,8 +80,16 @@ module.exports = {
         }
     },
 
-    //Tested on: 20-06-2019
-    //{"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
+    /**
+     * To change user's permission in the group.
+     * Only ADMINs can change other users' permission.
+     *
+     * Tested on: 19-Aug-2019
+     * {"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     changeUserPermission: async (message) => {
         if (!message.user_id || !message.data.user_id || !message.data.groupid || !message.data.permission)
             return await replyHelper.prepareError(message, null, errors.invalidData);
@@ -114,6 +124,9 @@ module.exports = {
                 return await replyHelper.prepareError(message, dbsession, errors.errorNotAllowedToSetThisPermission);
             }
 
+            //Todo: Do we need to check with existing permission and throw an error, if 
+            //  existing and the requested one are same
+
             let data = {
                 groupid: message.data.groupid,
                 user_id: message.data.user_id,
@@ -123,9 +136,14 @@ module.exports = {
             await GroupUsers.changeUserPermission(data);
             await dbTransactions.commitTransaction(dbsession);
 
-            //TODO: create entries in transaction tables
-            //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUserUpdate(data.groupid, data);
+            //Inform group members about the permission change.
+            let redisData = {
+                gid: data.groupid,
+                uid: data.user_id,
+                perm: data.permission,
+                op: 'cUP'
+            }
+            ControllerHelper.informGroupUserUpdate(data.groupid, JSON.stringify(redisData));
 
             let replyData = {
                 status: success.userPermissionChangedInGroup
@@ -137,8 +155,16 @@ module.exports = {
         }
     },
 
-    //Tested on: 20-06-2019
-    //{"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}-
+    /**
+     * To remove an user from the group.
+     * Only ADMINs can remove an user from the group.
+     * 
+     * Tested on: Pending
+     * {"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}-
+     *
+     * @param {*} message
+     * @returns
+     */
     removeUser: async (message) => {
         if (!message.user_id || !message.data.user_id || !message.data.groupid)
             return await replyHelper.prepareError(message, null, errors.invalidData);
@@ -168,17 +194,22 @@ module.exports = {
                 return await replyHelper.prepareError(message, dbsession, errors.errorNotAnAdminUser);
             }
 
+            //remove the user.
             let data = {
                 groupid: message.data.groupid,
-                user_id: message.data.user_id,
-                operation: 'removeUser'
+                user_id: message.data.user_id
             };
             await GroupUsers.removeUser(data);
             await dbTransactions.commitTransaction(dbsession);
 
-            //TODO: create entries in transaction tables
-            //TODO: Notify all the online users of the group (async)
-            ControllerHelper.informGroupUserUpdate(data.groupid, data);
+            //Inform group members about the user removal.
+            let redisData = {
+                gid: data.groupid,
+                uid: data.user_id,
+                op: 'rU'
+            }
+            ControllerHelper.informGroupUserUpdate(data.groupid, redisData);
+
             //TODO: inform removed user
 
             let replyData = {
@@ -191,8 +222,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 21-06-2019
-    //{"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[1001, 1000]}}
+    /**
+     * Get all users of a group. (user_ids only)
+     *
+     * Tested on: Pending
+     * {"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupids":[1001, 1000]}}
+     * 
+     * @param {*} message
+     * @returns
+     */
     getUsersOfGroup: async (message) => {
         console.log('GroupController.getUsersOfGroups');
         if (!message.user_id || !message.data.groupid)

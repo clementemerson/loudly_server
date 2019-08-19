@@ -34,7 +34,6 @@ module.exports = {
                 phoneUtil.isValidNumberForRegion(number, 'IN')) {
                 //phonenumber is valid
                 var otpRequestUrl = 'https://2factor.in/API/V1/' + api_key + '/SMS/' + req.params.phonenumber + '/AUTOGEN/PhoneAuthLoudSpeaker';
-                console.log(otpRequestUrl);
                 https.get(otpRequestUrl, (resp) => {
                     let data = '';
 
@@ -75,7 +74,6 @@ module.exports = {
             var otp_entered_by_user = req.body.otp;
 
             var otpRequestUrl = 'https://2factor.in/API/V1/' + api_key + '/SMS/VERIFY/' + session_id + '/' + otp_entered_by_user;
-            console.log(otpRequestUrl);
             https.get(otpRequestUrl, (resp) => {
                 let data = '';
 
@@ -87,7 +85,6 @@ module.exports = {
                 // The whole response has been received. Print out the result.
                 resp.on('end', () => {
                     var response = JSON.parse(data);
-                    console.log(response);
                     if (response.Details === 'OTP Matched') {
                         req.body = {
                             session_id: session_id

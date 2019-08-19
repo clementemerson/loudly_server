@@ -24,13 +24,20 @@ module.exports = {
         res.status(200).send({ userslist: userinfos });
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data": {"phoneNumbers":["+919884386484"]}}
+    /**
+     * Get userinfo from their phonenumbers
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data": {"phoneNumbers":["+919884386484"]}}
+     *
+     * @param {*} message
+     * @returns
+     */
     getUsersFromPhoneNumbers: async (message) => {
         console.log('UserController.getUsersFromPhoneNumbers');
         if (!message.user_id || !message.data || !message.data.phoneNumbers)
             return await replyHelper.prepareError(message, null, errors.invalidData);
-
+            
         try {
             let users = await redHelper.getUserIdsByPhone(message.data.phoneNumbers);
 
@@ -47,9 +54,15 @@ module.exports = {
         }
     },
 
-    //One time
-    //Tested on: 17-Aug-2019
-    //{"module":"users", "event":"getGroups", "messageid":4641}
+    /**
+     * Get user's group. One time usage, when user is logging in.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"users", "event":"getGroups", "messageid":4641}
+     *
+     * @param {*} message
+     * @returns
+     */
     getGroups: async (message) => {
         console.log('UserController.getGroups');
         if (!message.user_id)
@@ -64,9 +77,15 @@ module.exports = {
         }
     },
 
-    //One time
-    //Tested on: 17-Aug-2019
-    //{"module":"users", "event":"getPolls", "messageid":4641}
+    /**
+     * To get user created polls. One time usage, when user is logging in.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"users", "event":"getPolls", "messageid":4641}
+     *
+     * @param {*} message
+     * @returns
+     */
     getPolls: async (message) => {
         console.log('UserController.getPolls');
         if (!message.user_id)
@@ -81,8 +100,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+    /**
+     * To get userinfo for the given userids.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+     *
+     * @param {*} message
+     * @returns
+     */
     getInfo: async (message) => {
         console.log('UserController.getInfo');
         if (!message.user_id || !message.data || !message.data.userids)
@@ -97,8 +123,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
+    /**
+     * To change one's display name.
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
+     *
+     * @param {*} message
+     * @returns
+     */
     changeName: async (message) => {
         console.log('UserController.changeName');
         if (!message.user_id || !message.data || !message.data.name)
@@ -129,8 +162,15 @@ module.exports = {
         }
     },
 
-    //Tested on: 17-Aug-2019
-    //{"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
+    /**
+     * To change one's status message
+     * 
+     * Tested on: 17-Aug-2019
+     * {"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
+     *
+     * @param {*} message
+     * @returns
+     */
     changeStatusMsg: async (message) => {
         console.log('UserController.changeStatusMsg');
         if (!message.user_id || !message.data || !message.data.statusmsg)

@@ -8,7 +8,7 @@ var redClient;
 module.exports = {
     initRedisClient: async (callback) => {
         try {
-            redClient = redis.createClient(6379, 'loudly.loudspeakerdev.net');
+            redClient = redis.createClient(6379, 'localhost');
             redClient.on('connect', function () {
                 console.log('Redis client connected');
                 callback();

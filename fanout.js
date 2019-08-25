@@ -4,13 +4,10 @@ const mongo = require('./db/mongo');
 const redClient = require('./redis/redclient');
 let connections = require('./websockets/connections');
 
-const keyPrefix = require('./redis/key_prefix');
-const redHelper = require('./redis/redhelper');
-
 let jwtController = require('./controllers/jwtController');
 const updateController = require('./controllers/UpdateController');
 
-let localServer = true;
+let localServer = false;
 
 var server;
 if (localServer) {

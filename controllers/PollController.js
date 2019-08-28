@@ -290,7 +290,6 @@ module.exports = {
             });
 
             let pollinfos = await PollData.getPollInfoByPollIds(pollids);
-            console.log(pollinfos);
             return await replyHelper.prepareSuccess(message, pollinfos);
         } catch (err) {
             console.log(err);

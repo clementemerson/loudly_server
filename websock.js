@@ -10,7 +10,7 @@ let UsersModuleHandlers = require('./modulehandlers/usermodule');
 let GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 let PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
-let localServer = false;
+let localServer = true;
 
 var server;
 if (localServer) {

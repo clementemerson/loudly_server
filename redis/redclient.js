@@ -9,12 +9,12 @@ var redClient;
 module.exports = {
     initRedisClient: async (callback) => {
         try {
-            redClient = redis.createClient(6379, 'loudly.loudspeakerdev.net');
+            redClient = redis.createClient(6379, 'localhost');
             redClient.on('connect', function () {
                 redClient.auth(password, () => {
-                    console.log('Redis client connected');
-                    callback();
-                });
+                console.log('Redis client connected');
+                callback();
+            });
             });
 
             redClient.on('error', function (err) {
@@ -65,9 +65,9 @@ module.exports = {
         if (!setKey || !value)
             throw "Invalid Arguments";
 
-        if (!!expirySecs) {
+        if(!!expirySecs) {
             const exists = await redClient.existsAsync(setKey);
-            if (exists == false) {
+            if(exists == false) {
                 const saddReturn = await redClient.saddAsync([setKey, value]);
                 await redClient.expire(setKey, expirySecs);
                 return saddReturn;
@@ -115,13 +115,13 @@ module.exports = {
 
         return await redClient.zremAsync(setKey, value);
     },
-    zrangebyscore: async (setKey, scoreMin, scoreMax) => {
+    zrangebyscore: async(setKey, scoreMin, scoreMax) => {
         if (!setKey || !scoreMin || !scoreMax)
             throw "Invalid Arguments";
 
         return await redClient.zrangebyscoreAsync(setKey, scoreMin, scoreMax);
     },
-    zremrangebyscore: async (setKey, scoreMin, scoreMax) => {
+    zremrangebyscore: async(setKey, scoreMin, scoreMax) => {
         if (!setKey || !scoreMin || !scoreMax)
             throw "Invalid Arguments";
 

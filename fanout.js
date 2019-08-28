@@ -7,7 +7,7 @@ let connections = require('./websockets/connections');
 let jwtController = require('./controllers/jwtController');
 const updateController = require('./controllers/UpdateController');
 
-let localServer = false;
+let localServer = true;
 
 var server;
 if (localServer) {

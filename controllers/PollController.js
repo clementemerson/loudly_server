@@ -101,7 +101,7 @@ module.exports = {
 
         //Validation checks
         if (!message.user_id || !message.data || !message.data.pollid
-            || !message.data.optionindex || !message.data.secretvote)
+            || (message.data.optionindex === undefined) || (message.data.secretvote === undefined))
             return await replyHelper.prepareError(message, null, errors.invalidData);
 
         var dbsession;
@@ -153,11 +153,12 @@ module.exports = {
                 ]);
             }
 
-            if(secretvote == true) {
+            if(data.secretvote == true) {
                 await redHelper.updateSecretVoteResult(data.pollid, data.optionindex);
             } else {
                 await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
             }
+
             //Adding to voted user list
             await redClient.sadd(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
             //This list is used by fanout mechanism, to fanout the updated result to the subscribed users

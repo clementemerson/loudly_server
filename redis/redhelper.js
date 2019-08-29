@@ -28,13 +28,13 @@ module.exports = {
         });
     },
     updateOpenVoteResult: async (pollid, optionindex) => {
-        if (!pollid || !optionindex)
+        if (!pollid || optionindex === undefined)
             throw "Invalid Arguments";
 
         await redClient.hincrby(keyPrefix.pollResult + pollid, 'OV' + optionindex.toString(), 1);
     },
     updateSecretVoteResult: async (pollid, optionindex) => {
-        if (!pollid || !optionindex)
+        if (!pollid || optionindex === undefined)
             throw "Invalid Arguments";
 
         await redClient.hincrby(keyPrefix.pollResult + pollid, 'SV' + optionindex.toString(), 1);

@@ -28,8 +28,8 @@ module.exports = {
             case 'getInfo':
                 reply = await PollController.getInfo(message);
                 break;
-            case 'getUsersVoteInfo':
-                reply = await PollController.getUsersVoteInfo(message);
+            case 'getUsersVotesByPoll':
+                reply = await PollController.getUsersVotesByPoll(message);
                 break;
             case 'syncPollResults':
                 reply = await PollController.syncPollResults(message);
@@ -39,6 +39,9 @@ module.exports = {
                 break;
             case 'unSubscribeToPollResult':
                 reply = await PollController.unSubscribeToPollResult(message);
+                break;
+            case 'getMyVotes':
+                reply = await PollController.getMyVotes(message);
                 break;
             default:
                 reply = await replyHelper.prepareError(message, null, errors.unknownEvent);

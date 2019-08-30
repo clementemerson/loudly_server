@@ -18,13 +18,21 @@ module.exports = {
         });
     },
 
-    getUsersVoteInfo: async (data) => {
-        console.log('db.pollvotedata.getUsersVoteInfo');
+    getUsersVotesByPoll: async (data) => {
+        console.log('db.pollvotedata.getUsersVotesByPoll');
         return await mongodb().collection(dbtables.PollVoteData)
             .find({
                 user_id: { $in: data.user_ids },
                 pollid: data.pollid
             }).toArray();
     },
+
+    getMyVotes: async (data) => {
+        console.log('db.pollvotedata.getMyVotes');
+        return await mongodb().collection(dbtables.PollVoteData)
+            .find({
+                user_id: data.user_id
+            }).toArray();
+    }
 
 }

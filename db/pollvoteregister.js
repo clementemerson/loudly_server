@@ -3,11 +3,11 @@ var dbtables = require('./dbtables');
 
 module.exports = {
 
-    getVotersList: async (data) => {
+    getVotersList: async (pollid) => {
         console.log('db.pollvoteregister.getVotersList');
         return await mongodb().collection(dbtables.PollVoteRegister)
             .find({ 
-                pollid: data.pollid 
+                pollid: pollid 
             }).toArray();
     },
 

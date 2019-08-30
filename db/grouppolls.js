@@ -43,4 +43,11 @@ module.exports = {
             .toArray();
     },
 
+    getGroupsOfPoll: async (pollid) => {
+        console.log('db.grouppolls.getGroupsOfPoll');
+        return await mongodb().collection(dbtables.GroupPolls)
+            .find({ pollid: pollid })
+            .toArray();
+    }
+
 }

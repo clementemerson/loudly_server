@@ -153,12 +153,11 @@ module.exports = {
                 ]);
             }
 
-            if(data.secretvote == true) {
+            if (data.secretvote == true) {
                 await redHelper.updateSecretVoteResult(data.pollid, data.optionindex);
             } else {
                 await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
             }
-
             //Adding to voted user list
             await redClient.sadd(keyPrefix.pollVotedUsers + data.pollid, data.user_id);
             //This list is used by fanout mechanism, to fanout the updated result to the subscribed users
@@ -171,7 +170,7 @@ module.exports = {
 
             //Todo: Send the vote information to the users of groups where the voted user is in.
             //User needs to send the groupids in which the poll is present.
-            
+
             let replyData = {
                 pollid: data.pollid,
                 status: success.successVoted
@@ -326,13 +325,13 @@ module.exports = {
      * Not sure this is useful.
      * 
      * Tested on: Pending
-     * {"module":"polls", "event":"getUsersVoteInfo", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
+     * {"module":"polls", "event":"getUsersVotesByPoll", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
      *
      * @param {*} message
      * @returns
      */
-    getUsersVoteInfo: async (message) => {
-        console.log('PollController.getUsersVoteInfo');
+    getUsersVotesByPoll: async (message) => {
+        console.log('PollController.getUsersVotesByPoll');
         if (!message.user_id || !message.data || !message.data.pollid
             || !message.data.user_ids)
             return await replyHelper.prepareError(message, null, errors.invalidData);
@@ -343,7 +342,7 @@ module.exports = {
                 pollid: message.data.pollid,
                 user_ids: message.data.user_ids
             }
-            let usersVoteInfo = await PollVoteData.getUsersVoteInfo(data);
+            let usersVoteInfo = await PollVoteData.getUsersVotesByPoll(data);
             return await replyHelper.prepareSuccess(message, usersVoteInfo);
         } catch (err) {
             console.log(err);
@@ -464,12 +463,41 @@ module.exports = {
     },
 
     /**
+     * To get the votes I casted before.
+     *
+     * Tested on: Pending
+     * {"module":"polls", "event":"getMyVotes", "messageid":15156}
+     * 
+     * @param {*} message
+     * @returns
+     */
+    getMyVotes: async (message) => {
+        console.log('PollController.getMyVotes');
+        if (!message.user_id)
+            return await replyHelper.prepareError(message, null, errors.invalidData);
+
+        try {
+            //Prepare data
+            let data = {
+                user_id: message.user_id
+            }
+
+            let myVotes = await PollVoteData.getMyVotes(data);
+            return await replyHelper.prepareSuccess(message, myVotes);
+        } catch (err) {
+            console.log(err);
+            return await replyHelper.prepareError(message, null, errors.unknownError);
+        }
+    },
+
+    /**
      * Delete a poll.
      * Todo: need to decide the conditions when a poll can be deleted.
      * 1. it is not shared to a group.
      * 2. no one has voted, like that...
      * 
      * Tested on: Pending
+     * {"module":"polls", "event":"delete", "messageid":8658, "data": {"pollid":1023}}
      *
      * @param {*} message
      * @returns
@@ -494,6 +522,15 @@ module.exports = {
             if (!isCreator) {
                 return await replyHelper.prepareError(message, dbsession, errors.errorUserNotCreatorOfPoll);
             }
+
+            //Todo: Is shared to a group
+            let groupsOfPoll = await GroupPolls.getGroupsOfPoll(data.pollid);
+            if (groupsOfPoll.length > 0)
+                return await replyHelper.prepareError(message, dbsession, errors.errorPollSharedToGroup);
+
+            //Todo: no one has voted
+            let votesOfPoll = await PollVoteRegister.getVotersList(data.pollid);
+            if(votesOfPoll.length > 1) //Someone else other than the creator has voted
 
             await PollData.delete(data);
             await dbTransactions.commitTransaction(dbsession);

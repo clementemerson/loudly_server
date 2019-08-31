@@ -1,37 +1,36 @@
-var express = require('express');
-var serverapp = express();
-var server;
-serverapp.use(express.json())
+const express = require('express');
+const serverapp = express();
+let server;
+serverapp.use(express.json());
 
-var mongo = require('./db/mongo');
+const mongo = require('./db/mongo');
 const redClient = require('./redis/redclient');
 
-//config
-var listen_to_port = 8081;
+// config
+const listeningPort = 8081;
 
-//Initialize ALL routes including subfolders
-var fs = require('fs');
-var path = require('path');
+// Initialize ALL routes including subfolders
+const fs = require('fs');
+const path = require('path');
 
 function recursiveRoutes(folderName) {
-    fs.readdirSync(folderName).forEach(function (file) {
+  fs.readdirSync(folderName).forEach(function(file) {
+    const fullName = path.join(folderName, file);
+    const stat = fs.lstatSync(fullName);
 
-        var fullName = path.join(folderName, file);
-        var stat = fs.lstatSync(fullName);
-
-        if (stat.isDirectory()) {
-            recursiveRoutes(fullName);
-        } else if (file.toLowerCase().indexOf('.js')) {
-            require('./' + fullName)(serverapp);
-            console.log("require('" + fullName + "')");
-        }
-    });
+    if (stat.isDirectory()) {
+      recursiveRoutes(fullName);
+    } else if (file.toLowerCase().indexOf('.js')) {
+      require('./' + fullName)(serverapp);
+      console.log('require(\'' + fullName + '\')');
+    }
+  });
 }
 
-//Add all routes to app object
+// Add all routes to app object
 recursiveRoutes('routes'); // Initialize it
 
-//Init connection with DB
+// Init connection with DB
 redClient.initRedisClient(initRedis);
 
 function initRedis() {
@@ -40,9 +39,9 @@ function initRedis() {
 }
 
 function initServer() {
-    server = serverapp.listen(listen_to_port, function () {
-        var host = server.address().address
-        var port = server.address().port
-        console.log("Example app listening at http://%s:%s", host, port)
-    })
+  server = serverapp.listen(listeningPort, function() {
+    const host = server.address().address;
+    const port = server.address().port;
+    console.log('Example app listening at http://%s:%s', host, port);
+  });
 }

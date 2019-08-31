@@ -8,7 +8,7 @@ module.exports = {
         return mdb;
     },
     initDbConnection: async (callback) => {
-        const connectionUrl = 'mongodb://localhost:27017/loudly';
+        const connectionUrl = 'mongodb://loudly.loudspeakerdev.net:27017/loudly';
         // Create the database connection
         dbClient = await MongoClient.connect(connectionUrl, {
             poolSize: 10,

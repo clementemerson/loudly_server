@@ -1,14 +1,15 @@
-let UserController = require('../controllers/UserController');
+const UserController = require('../controllers/UserController');
 
 const errors = require('../helpers/errorstousers');
 const replyHelper = require('../helpers/replyhelper');
 
 module.exports = {
     handle: async (message) => {
-        if (!message)
-            throw 'Invalid Arguments';
+        if (!message) {
+            throw new Error('Invalid Arguments');
+        }
 
-        var reply;
+        let reply;
         switch (message.event) {
             case 'getUsersFromPhoneNumbers':
                 reply = await UserController.getUsersFromPhoneNumbers(message);
@@ -29,9 +30,10 @@ module.exports = {
                 reply = await UserController.changeStatusMsg(message);
                 break;
             default:
-                reply = await replyHelper.prepareError(message, null, errors.unknownEvent);
+                reply = await replyHelper.prepareError(message,
+                    null, errors.unknownEvent);
                 break;
         }
         return reply;
-    }
-}
+    },
+};

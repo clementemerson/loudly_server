@@ -1,13 +1,14 @@
-let connections = new Map();
+const connections = new Map();
 
 module.exports = {
-    getConnections: () => {
-        return connections;
-    },
+  getConnections: () => {
+    return connections;
+  },
 
-    inform: async (user_id, data) => {
-        const wsConn = connections.get(user_id);
-        if (!!wsConn)
-            connections.get(user_id).send(JSON.stringify(data));
-    },
-}
+  inform: async (userId, data) => {
+    const wsConn = connections.get(userId);
+    if (!!wsConn) {
+      connections.get(userId).send(JSON.stringify(data));
+    }
+  },
+};

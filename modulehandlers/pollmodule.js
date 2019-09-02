@@ -1,14 +1,15 @@
-let PollController = require('../controllers/PollController');
+const PollController = require('../controllers/PollController');
 
 const errors = require('../helpers/errorstousers');
 const replyHelper = require('../helpers/replyhelper');
 
 module.exports = {
     handle: async (message) => {
-        if (!message)
-            throw 'Invalid Arguments';
+        if (!message) {
+            throw new Error('Invalid Arguments');
+        }
 
-        var reply;
+        let reply;
         switch (message.event) {
             case 'create':
                 reply = await PollController.create(message);
@@ -44,9 +45,10 @@ module.exports = {
                 reply = await PollController.getMyVotes(message);
                 break;
             default:
-                reply = await replyHelper.prepareError(message, null, errors.unknownEvent);
+                reply = await replyHelper.prepareError(message,
+                    null, errors.unknownEvent);
                 break;
         }
         return reply;
-    }
-}
+    },
+};

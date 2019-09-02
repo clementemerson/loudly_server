@@ -1,15 +1,17 @@
-let GroupController = require('../controllers/GroupController');
-let GroupUserController = require('../controllers/GroupUserController');
+const GroupController = require('../controllers/GroupController');
+const GroupUserController = require('../controllers/GroupUserController');
 
 const errors = require('../helpers/errorstousers');
 const replyHelper = require('../helpers/replyhelper');
 
 module.exports = {
     handle: async (message) => {
-        if (!message || !message.event)
-            throw 'Invalid Arguments';
+        if (!message ||
+            !message.event) {
+            throw new Error('Invalid Arguments');
+        }
 
-        var reply;
+        let reply;
         switch (message.event) {
             case 'create':
                 reply = await GroupController.create(message);
@@ -27,7 +29,7 @@ module.exports = {
                 reply = await GroupController.getMyGroupsInfo(message);
                 break;
             case 'changeAvatar':
-                //reply = await GroupController.changeAvatar(message);
+                // reply = await GroupController.changeAvatar(message);
                 break;
             case 'getInfo':
                 reply = await GroupController.getInfo(message);
@@ -51,9 +53,10 @@ module.exports = {
                 reply = await GroupController.getGroupUpdates(message);
                 break;
             default:
-                reply = await replyHelper.prepareError(message, null, errors.unknownEvent);
+                reply = await replyHelper.prepareError(message,
+                    null, errors.unknownEvent);
                 break;
         }
         return reply;
-    }
-}
+    },
+};

@@ -21,7 +21,9 @@ module.exports = {
   errorPollNotAvailable: 'Poll not available',
   errorUserAlreadyVoted: 'User already voted',
   errorUserNotVoted: 'You haven\'t voted yet',
-  errorNotAllowedToSetThisPermission: 'You are not allowed to set the given permission to the user',
+  errorNotAllowedToSetThisPermission: {
+    message: 'You are not allowed to set the given permission to the user',
+  },
   errorUserNotCreatorOfPoll: 'You\'re not the creator of this poll',
   errorPollIsDeleted: 'Poll is deleted. You can share it',
   errorPollSharedToGroup: 'Poll already shared to a group',

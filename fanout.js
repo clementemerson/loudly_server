@@ -17,55 +17,68 @@ if (localServer) {
   const https = require('https');
   const fs = require('fs');
   server = https.createServer({
-    cert: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
-    key: fs.readFileSync('/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem'),
+    cert: fs.readFileSync(
+        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
+    key: fs.readFileSync(
+        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem'),
   });
 }
 
 const wss = new WebSocket.Server({server});
 
-wss.on('connection', async (ws_client, req) => {
+wss.on('connection', async (wsClient, req) => {
   const queryURL = url.parse(req.url, true);
   req.urlparams = queryURL.query;
   if (jwtController.validateJwt(req) == true) {
     const validData = await jwtController.validateJwtData(req);
     if (validData == true) {
-      ws_client.jwtDetails = req.jwtDetails;
-      console.log(ws_client.jwtDetails.user_id);
-      connections.getConnections().set(ws_client.jwtDetails.user_id, ws_client);
+      wsClient.jwtDetails = req.jwtDetails;
+      console.log(wsClient.jwtDetails.user_id);
+      connections.getConnections().set(wsClient.jwtDetails.user_id, wsClient);
     } else {
       console.log('Data not valid');
-      ws_client.close();
+      wsClient.close();
       return;
     }
   } else {
     console.log('Token not valid');
-    ws_client.close();
+    wsClient.close();
     return;
   }
 
-  ws_client.is_alive = true;
-  ws_client.on('pong', () => {
-    ws_client.is_alive = true;
+  wsClient.is_alive = true;
+  wsClient.on('pong', () => {
+    wsClient.is_alive = true;
   });
 
-  ws_client.on('close', () => {
-    console.log('Closing connection - ', ws_client.jwtDetails.user_id);
-    connections.getConnections().delete(ws_client.jwtDetails.user_id);
+  wsClient.on('close', () => {
+    console.log('Closing connection - ', wsClient.jwtDetails.user_id);
+    connections.getConnections().delete(wsClient.jwtDetails.user_id);
   });
 
-  ws_client.send('{"Status":"Success","Details":{"module":"general","event":"connection established","messageid":0,"data":"something"}}');
+  // Sending connection established message
+  const data = {
+    Status: 'Success',
+    Details: {
+      module: 'general',
+      event: 'connection established',
+      messageid: 0,
+      data: 'something',
+    },
+  };
+  wsClient.send(JSON.stringify(data));
 });
 
 // To check whether a client is still alive - 2 mins
 setInterval(function ping() {
-  Array.from(connections.getConnections().values()).forEach(function each(client_stream) {
-    if (!client_stream.is_alive) {
-      client_stream.terminate(); return;
-    }
-    client_stream.is_alive = true; // false?
-    client_stream.ping();
-  });
+  Array.from(connections.getConnections().values())
+      .forEach(function each(client) {
+        if (!client.is_alive) {
+          client.terminate(); return;
+        }
+        client.is_alive = true; // false?
+        client.ping();
+      });
 }, 15000);
 
 // To send updates to the subscribed client - 500 ms
@@ -80,8 +93,9 @@ setInterval(async () => {
 // To clear the elapsed subscriptions - 1 day
 setInterval(function clearElapsedSubscriptions() {
   // get keys starting with pollsub_
-  // check the subscription time, if it elapsed, remove it from the pollsub_pollid
-  // send them detail about subscription clearing
+  // and check the subscription time.
+  // if it elapsed, remove it from the pollsub_pollid.
+  // send them detail about subscription is removed.
 }, 86400000);
 
 // Init connection with DB

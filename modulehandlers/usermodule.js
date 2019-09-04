@@ -1,7 +1,9 @@
-const UserController = require('../controllers/UserController');
+const VError = require('verror');
 
 const errors = require('../helpers/errorstousers');
 const replyHelper = require('../helpers/replyhelper');
+
+const UserController = require('../controllers/UserController');
 
 module.exports = {
   handle: async (message) => {
@@ -12,28 +14,29 @@ module.exports = {
     let reply;
     switch (message.event) {
       case 'getUsersFromPhoneNumbers':
-        reply = await UserController.getUsersFromPhoneNumbers(message);
+        reply = await UserController.getUsersFromPhoneNumbers(
+            message.user_id, message.data.phoneNumbers);
         break;
       case 'getGroups':
-        reply = await UserController.getGroups(message);
+        reply = await UserController.getGroups(message.user_id);
         break;
       case 'getPolls':
-        reply = await UserController.getPolls(message);
+        reply = await UserController.getPolls(message.user_id);
         break;
       case 'getInfo':
-        reply = await UserController.getInfo(message);
+        reply = await UserController.getInfo(message.data.userids);
         break;
       case 'changeName':
-        reply = await UserController.changeName(message);
+        reply = await UserController.changeName(message.user_id,
+            message.data.name);
         break;
       case 'changeStatusMsg':
-        reply = await UserController.changeStatusMsg(message);
+        reply = await UserController.changeStatusMsg(message.user_id,
+            message.data.statusmsg);
         break;
       default:
-        reply = await replyHelper.prepareError(message,
-            null, errors.unknownEvent);
-        break;
+        throw new VError(errors.unknownEvent.message);
     }
-    return reply;
+    return await replyHelper.prepareSuccess(message, reply);
   },
 };

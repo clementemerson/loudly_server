@@ -5,23 +5,50 @@ module.exports = {
       Details: data,
     };
   },
-  unknownError: 'Unknown Error',
-  unknownEvent: 'Unknown Event',
-  invalidData: 'Invalid Data',
-  invalidPhoneNumber: 'Invalid phone number',
-  errorInProcessing: 'Error in processing request',
-  errorOTPMismatchOrExpired: 'OTP Mismatch or Expired',
+
+  // Common Errors
+  internalError: {
+    errno: 100,
+    message: 'Internal Error',
+  },
+  unknownEvent: {
+    errno: 101,
+    message: 'Unknown Event',
+  },
+  invalidData: {
+    errno: 102,
+    message: 'Invalid Data',
+  },
+
+  // Login Errors
+  invalidPhoneNumber: {
+    errno: 1000,
+    message: 'Invalid phone number',
+  },
+  errorInProcessing: {
+    errno: 1001,
+    message: 'Error in processing request',
+  },
+  errorOTPMismatchOrExpired: {
+    errno: 1002,
+    message: 'OTP Mismatch or Expired',
+  },
+
+  // User module errors
+  errorUserNotExists: 'User does not exist',
+
+
+  // Poll module errors
 
   errorPollAlreadyInGroup: 'Poll already available in the group',
   errorUserDoesNotHavePoll: 'User does not have the poll',
   errorUserIsNotMember: 'User is not a member of the group',
   errorUserIsMember: 'User is a member of the group',
-  errorUserNotExists: 'User does not exist',
   errorNotAnAdminUser: 'You\'re NOT an Admin user',
   errorPollNotAvailable: 'Poll not available',
   errorUserAlreadyVoted: 'User already voted',
   errorUserNotVoted: 'You haven\'t voted yet',
-  errorNotAllowedToSetThisPermission: {
+  errorInvalidPermission: {
     message: 'You are not allowed to set the given permission to the user',
   },
   errorUserNotCreatorOfPoll: 'You\'re not the creator of this poll',

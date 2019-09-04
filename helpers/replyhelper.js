@@ -9,7 +9,7 @@ const success = require('../helpers/successtousers');
  *
  * @param {*} incomingMessage The actual message received
  * @param {*} data  The data to be sent to the client
- * @returns
+ * @return {Reply}
  */
 function prepareReply(incomingMessage, data) {
   const reply = {
@@ -28,7 +28,7 @@ module.exports = {
      *
      * @param {*} message
      * @param {*} replyData
-     * @returns
+     * @return {Reply}
      */
   prepareSuccess: async (message, replyData) => {
     const reply = prepareReply(message, replyData);
@@ -41,11 +41,11 @@ module.exports = {
    * @param {*} message
    * @param {*} dbsession
    * @param {*} error
-   * @returns
+   * @return {Reply}
    */
   prepareError: async (message, dbsession, error) => {
     if (dbsession) {
-      await dbTransactions.abortTransaction(dbsession);
+      await dbTransactions.abort(dbsession);
     }
 
     const replyData = {

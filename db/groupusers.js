@@ -62,12 +62,12 @@ module.exports = {
         .toArray();
   },
 
-  isAdmin: async (data) => {
+  isAdmin: async (groupid, userid) => {
     console.log('db.groupusers.isAdmin');
     const adminUser = await mongodb().collection(dbtables.GroupUsers)
         .find({
-          groupid: data.groupid,
-          user_id: data.user_id,
+          groupid: groupid,
+          user_id: userid,
           permission: 'ADMIN',
         })
         .toArray();
@@ -79,12 +79,12 @@ module.exports = {
     }
   },
 
-  isMember: async (data) => {
+  isMember: async (groupid, userId) => {
     console.log('db.groupusers.isMember');
     const user = await mongodb().collection(dbtables.GroupUsers)
         .find({
-          groupid: data.groupid,
-          user_id: data.user_id,
+          groupid: groupid,
+          user_id: userId,
         })
         .toArray();
 

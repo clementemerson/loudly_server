@@ -20,11 +20,11 @@ module.exports = {
     });
   },
 
-  getPollInfo: async (data) => {
+  getPollInfo: async (pollid) => {
     console.log('db.polldata.getPollInfo');
     const polls = await mongodb().collection(dbtables.PollData)
         .find({
-          pollid: data.pollid,
+          pollid: pollid,
         }).toArray();
     return polls[0];
   },
@@ -36,12 +36,12 @@ module.exports = {
         .toArray();
   },
 
-  isCreator: async (data) => {
+  isCreator: async (userid, pollid) => {
     console.log('db.polldata.isCreator');
     const isCreator = await mongodb().collection(dbtables.PollData)
         .find({
-          createdby: data.user_id,
-          pollid: data.pollid,
+          createdby: userid,
+          pollid: pollid,
         })
         .toArray();
 
@@ -52,13 +52,13 @@ module.exports = {
     }
   },
 
-  delete: async (data) => {
+  delete: async (pollid) => {
     console.log('db.polldata.delete');
     const date = new Date();
     const updatedAt = date.getTime();
 
     await mongodb().collection(dbtables.PollData).updateOne(
-        {pollid: data.pollid},
+        {pollid: pollid},
         {
           $set: {
             isdeleted: true,

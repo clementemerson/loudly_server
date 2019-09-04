@@ -89,31 +89,31 @@ module.exports = {
     }
   },
 
-  changeName: async (data) => {
+  changeName: async (userId, name) => {
     console.log('db.users.changeName');
     const date = new Date();
     const updatedAt = date.getTime();
 
     await mongodb().collection(dbtables.UsersInfo).updateOne(
-        {user_id: data.user_id},
+        {user_id: userId},
         {
           $set: {
-            name: data.name,
+            name: name,
             updatedAt: updatedAt,
           },
         });
   },
 
-  changeStatusMsg: async (data) => {
+  changeStatusMsg: async (userId, statusmsg) => {
     console.log('db.users.changeStatusMsg');
     const date = new Date();
     const updatedAt = date.getTime();
 
     await mongodb().collection(dbtables.UsersInfo).updateOne(
-        {user_id: data.user_id},
+        {user_id: userId},
         {
           $set: {
-            statusmsg: data.statusmsg,
+            statusmsg: statusmsg,
             updatedAt: updatedAt,
           },
         });

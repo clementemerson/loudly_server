@@ -24,12 +24,12 @@ module.exports = {
         {upsert: true});
   },
 
-  userHasPoll: async (data) => {
+  userHasPoll: async (userid, pollid) => {
     console.log('db.userpolls.userHasPoll');
     const polls = await mongodb().collection(dbtables.UserPolls)
         .find({
-          pollid: data.pollid,
-          userid: data.user_id,
+          pollid: pollid,
+          userid: userid,
         }).toArray();
     return polls[0];
   },

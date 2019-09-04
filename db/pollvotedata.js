@@ -27,11 +27,11 @@ module.exports = {
         }).toArray();
   },
 
-  getMyVotes: async (data) => {
+  getMyVotes: async (userid) => {
     console.log('db.pollvotedata.getMyVotes');
     return await mongodb().collection(dbtables.PollVoteData)
         .find({
-          user_id: data.user_id,
+          user_id: userid,
         }).toArray();
   },
 

@@ -54,10 +54,10 @@ module.exports = {
     });
   },
 
-  getGroupsInfo: async (data) => {
+  getGroupsInfo: async (groupids) => {
     console.log('db.groupinfo.getGroupsInfo');
     return await mongodb().collection(dbtables.GroupInfo)
-        .find({groupid: {$in: data.groupids}})
+        .find({groupid: {$in: groupids}})
         .toArray();
   },
 };

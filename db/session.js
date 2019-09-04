@@ -1,17 +1,21 @@
 const mongoClient = require('./mongo').getDbClient;
 
 module.exports = {
-  commitTransaction: async (session) => {
+  commit: async (session) => {
     console.log('commitTransaction...');
     await session.commitTransaction();
     session.endSession();
   },
-  abortTransaction: async (session) => {
+  abort: async (session) => {
+    if (!session) {
+      return;
+    }
+
     console.log('abortTransaction...');
     await session.abortTransaction();
     session.endSession();
   },
-  startSession: async () => {
+  start: async () => {
     console.log('startSession...');
     const session = await mongoClient().startSession();
     session.startTransaction();

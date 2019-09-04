@@ -1,5 +1,3 @@
-const dbTransactions = require('../db/session');
-
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
 
@@ -39,15 +37,10 @@ module.exports = {
    *
    *
    * @param {*} message
-   * @param {*} dbsession
    * @param {*} error
    * @return {Reply}
    */
-  prepareError: async (message, dbsession, error) => {
-    if (dbsession) {
-      await dbTransactions.abort(dbsession);
-    }
-
+  prepareError: async (message, error) => {
     const replyData = {
       status: error,
     };

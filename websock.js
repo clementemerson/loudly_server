@@ -4,6 +4,8 @@ const mongo = require('./db/mongo');
 const redClient = require('./redis/redclient');
 const connections = require('./websockets/connections');
 
+const replyHelper = require('./helpers/replyhelper');
+
 const jwtController = require('./controllers/jwtController');
 
 const UsersModuleHandlers = require('./modulehandlers/usermodule');
@@ -94,9 +96,9 @@ setInterval(function ping() {
  * @param {*} ws
  */
 async function toEvent(ws) {
+  let message = null;
   try {
-    const message = JSON.parse(ws.data);
-
+    message = JSON.parse(ws.data);
     if (!message.module) {
       throw new Error('Invalid Arguments');
     }
@@ -117,13 +119,15 @@ async function toEvent(ws) {
         break;
     }
 
+    const outMessage = await replyHelper.prepareSuccess(message, reply);
     connections.getConnections().get(ws.target.jwtDetails.user_id)
-        .send(JSON.stringify(reply));
+        .send(JSON.stringify(outMessage));
   } catch (err) {
-    console.log(err);
+    const outMessage = await replyHelper.prepareError(message, err.message);
+    connections.getConnections().get(ws.target.jwtDetails.user_id)
+        .send(JSON.stringify(outMessage));
   }
 }
-
 
 /**
  * Init DB Connection

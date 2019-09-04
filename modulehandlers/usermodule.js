@@ -1,7 +1,6 @@
 const VError = require('verror');
 
 const errors = require('../helpers/errorstousers');
-const replyHelper = require('../helpers/replyhelper');
 
 const UserController = require('../controllers/UserController');
 
@@ -37,6 +36,6 @@ module.exports = {
       default:
         throw new VError(errors.unknownEvent.message);
     }
-    return await replyHelper.prepareSuccess(message, reply);
+    return reply;
   },
 };

@@ -99,13 +99,21 @@ setInterval(function clearElapsedSubscriptions() {
 }, 86400000);
 
 // Init connection with DB
-redClient.initRedisClient(initRedis);
+redClient.initRedisClient(initMongo);
 
-function initRedis() {
+/**
+ *  Init DB Connection
+ *
+ */
+function initMongo() {
   console.log('Redis connected');
   mongo.initDbConnection(initServer);
 }
 
+/**
+ * Listen to external clients
+ *
+ */
 function initServer() {
   const PORT = process.env.PORT || 8090;
   server.listen(PORT, async () => {

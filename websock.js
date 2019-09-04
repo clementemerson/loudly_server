@@ -29,6 +29,9 @@ if (localServer) {
 
 const wss = new WebSocket.Server({server});
 
+// Init connection with DB
+redClient.initRedisClient(initMongo);
+
 wss.on('connection', async (wsClient, req) => {
   const queryURL = url.parse(req.url, true);
   req.urlparams = queryURL.query;
@@ -85,6 +88,11 @@ setInterval(function ping() {
       });
 }, 5000);
 
+/**
+ * Websocket Message handling function
+ *
+ * @param {*} ws
+ */
 async function toEvent(ws) {
   try {
     const message = JSON.parse(ws.data);
@@ -116,14 +124,20 @@ async function toEvent(ws) {
   }
 }
 
-// Init connection with DB
-redClient.initRedisClient(initRedis);
 
-function initRedis() {
+/**
+ * Init DB Connection
+ *
+ */
+function initMongo() {
   console.log('Redis connected');
   mongo.initDbConnection(initServer);
 }
 
+/**
+ * Listen to external clients
+ *
+ */
 function initServer() {
   const PORT = process.env.PORT || 8080;
   server.listen(PORT, async () => {

@@ -15,5 +15,18 @@
         "ecmaVersion": 2018
     },
     "rules": {
+        "comma-spacing": [
+            "error",
+            {
+                "before": false,
+                "after": true
+            }
+        ],
+        "max-len": [
+            "error",
+            {
+                "ignoreComments": true
+            }
+        ]
     }
 }

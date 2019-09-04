@@ -4,20 +4,23 @@
   "description": "sample",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js --host 127.0.0.1",
-    "ws": "nodemon websock.js --host 127.0.0.1",
-    "fanout": "nodemon fanout.js --host 127.0.0.1"
+    "start": "nodemon server.js",
+    "ws": "nodemon websock.js",
+    "fanout": "nodemon fanout.js",
+    "test": "jest --watch"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.3.0",
     "eslint-config-google": "^0.13.0",
-    "nodemon": "^1.19.0"
+    "nodemon": "^1.19.0",
+    "jest": "^24.9.0"
   },
   "dependencies": {
+    "assert": "^2.0.0",
     "bluebird": "^3.5.5",
+    "check-types": "^10.0.0",
     "crypto-random-string": "^3.0.0",
     "express": "^4.17.0",
     "google-libphonenumber": "^3.2.2",

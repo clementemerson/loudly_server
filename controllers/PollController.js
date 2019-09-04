@@ -139,14 +139,14 @@ module.exports = {
       // Check if poll is available
       const poll = await PollData.getPollInfo(pollid);
       if (poll == null) {
-        throw new VError(errors.errorPollNotAvailable);
+        throw new VError(errors.errorPollNotAvailable.message);
       }
 
       // Check if the user has voted already
       const isUserVoted = await redClient.sismember(
           keyPrefix.pollVotedUsers + pollid, userid);
       if (isUserVoted == true) {
-        throw new VError(errors.errorUserAlreadyVoted);
+        throw new VError(errors.errorUserAlreadyVoted.message);
       }
 
       // Start session
@@ -251,25 +251,25 @@ module.exports = {
       // Check user in group. If he is, then he can share
       const userIsMember = await GroupUsers.isMember(groupid, userid);
       if (!userIsMember) {
-        throw new VError(errors.errorUserIsNotMember);
+        throw new VError(errors.errorUserIsNotMember.message);
       }
 
       // Check user has the poll. If he has, then he can share
       const userHasPoll = await UserPolls.userHasPoll(userid, pollid);
       if (!userHasPoll) {
-        throw new VError(errors.errorUserDoesNotHavePoll);
+        throw new VError(errors.errorUserDoesNotHavePoll.message);
       }
 
       // Check group has the poll already. If it is, then no need to share again
       const pollInGroup = await GroupPolls.groupHasPoll(data);
       if (pollInGroup) {
-        throw new VError(errors.errorPollAlreadyInGroup);
+        throw new VError(errors.errorPollAlreadyInGroup.message);
       }
 
       // Check if poll is deleted
       const isDeleted = await PollData.isDeleted(data);
       if (isDeleted) {
-        throw new VError(errors.errorPollIsDeleted);
+        throw new VError(errors.errorPollIsDeleted.message);
       }
 
       // Start transaction
@@ -393,7 +393,7 @@ module.exports = {
       // Check user has poll. If he has, he can get the vote details.
       const userHasPoll = await UserPolls.userHasPoll(userid, pollid);
       if (!userHasPoll) {
-        throw new VError(errors.errorUserDoesNotHavePoll);
+        throw new VError(errors.errorUserDoesNotHavePoll.message);
       }
 
       // Prepare data
@@ -477,7 +477,7 @@ module.exports = {
       const isUserVoted = await redClient.sismember(
           keyPrefix.pollVotedUsers + data.pollid, data.user_id);
       if (isUserVoted == false) {
-        throw new VError(errors.errorUserNotVoted);
+        throw new VError(errors.errorUserNotVoted.message);
       }
 
       // Adding subscription
@@ -587,13 +587,13 @@ module.exports = {
       // Creator can delete the poll
       const isCreator = await PollData.isCreator(userid, pollid);
       if (!isCreator) {
-        throw new VError(errors.errorUserNotCreatorOfPoll);
+        throw new VError(errors.errorUserNotCreatorOfPoll.message);
       }
 
       // Todo: Is shared to a group
       const groupsOfPoll = await GroupPolls.getGroupsOfPoll(pollid);
       if (groupsOfPoll.length > 0) {
-        throw new VError(errors.errorPollSharedToGroup);
+        throw new VError(errors.errorPollSharedToGroup.message);
       }
 
       // Start transaction

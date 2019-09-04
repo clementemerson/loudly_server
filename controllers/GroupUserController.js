@@ -89,7 +89,7 @@ module.exports = {
       return replyData;
     } catch (err) {
       await dbTransactions.abort(dbsession);
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
@@ -174,7 +174,7 @@ module.exports = {
       return replyData;
     } catch (err) {
       await dbTransactions.abort(dbsession);
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
@@ -245,7 +245,7 @@ module.exports = {
       return replyData;
     } catch (err) {
       await dbTransactions.abort(dbsession);
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
@@ -279,7 +279,7 @@ module.exports = {
       // Todo: use redis
       return await GroupUsers.getUsers(groupid);
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 };

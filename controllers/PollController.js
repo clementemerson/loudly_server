@@ -37,14 +37,14 @@ const ControllerHelper = require('./ControllerHelper');
 module.exports = {
 
   /**
-     * To create a poll.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"polls", "event":"create", "messageid":3435,  "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"}, {"index":1,"desc":"option2"}]}}
-     *
-     * @param {*} message
-     * @return {Status}
-     */
+       * To create a poll.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"polls", "event":"create", "messageid":3435,  "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"}, {"index":1,"desc":"option2"}]}}
+       *
+       * @param {*} message
+       * @return {Status}
+       */
   create: async (message) => {
     console.log('PollController.create');
     if (!message.user_id ||
@@ -54,7 +54,7 @@ module.exports = {
             (message.data.canbeshared === undefined) ||
             !message.data.options) {
       return await replyHelper.prepareError(message,
-          null, errors.invalidData);
+          errors.invalidData);
     }
     try {
       // Start transaction
@@ -92,28 +92,29 @@ module.exports = {
       return replyData;
     } catch (err) {
       console.log(err);
+      await dbTransactions.abort(dbsession);
       return await replyHelper.prepareError(message,
-          dbsession, errors.internalError);
+          errors.internalError);
     }
   },
 
   /**
-     * To vote. And update group users, where the poll is present.
-     *
-     * Tested on: Pending
-     * {"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
-     *
-     * @param {number} userid       ID of the user
-     * @param {number} pollid       ID of the poll
-     * @param {number} option       Option chosen by the user
-     * @param {boolean} secretVote  Is the vote secret?
-     * @return {status}
-     *
-     * @throws {errors.errorPollNotAvailable}
-     *  When the poll does not exist
-     * @throws {errors.errorUserAlreadyVoted}
-     *  When the user has voted already     *
-     */
+       * To vote. And update group users, where the poll is present.
+       *
+       * Tested on: Pending
+       * {"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
+       *
+       * @param {number} userid       ID of the user
+       * @param {number} pollid       ID of the poll
+       * @param {number} option       Option chosen by the user
+       * @param {boolean} secretVote  Is the vote secret?
+       * @return {status}
+       *
+       * @throws {errors.errorPollNotAvailable}
+       *  When the poll does not exist
+       * @throws {errors.errorUserAlreadyVoted}
+       *  When the user has voted already     *
+       */
   vote: async (userid, pollid, option, secretVote) => {
     console.log('PollController.vote');
     assert.ok(check.number(userid),
@@ -205,30 +206,30 @@ module.exports = {
       return replyData;
     } catch (err) {
       await dbTransactions.abort(dbsession);
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * Share a poll to a group, where the poll does not exist previously.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
-     *
-     * @param {number} userid       ID of the user
-     * @param {number} pollid       ID of the poll
-     * @param {number} groupid      ID of the group
-     * @return {Status}
-     *
-     * @throws {errors.errorUserIsNotMember}
-     *  When the user is not a member of the group
-     * @throws {errors.errorUserDoesNotHavePoll}
-     *  When the user does not have the poll
-     * @throws {errors.errorPollAlreadyInGroup}
-     *  When the group has the poll already
-     * @throws {errors.errorPollIsDeleted}
-     *  When the poll has been deleted
-     */
+       * Share a poll to a group, where the poll does not exist previously.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"polls", "event":"shareToGroup", "messageid":89412, "data":{"pollid":1010, "groupid": 1004}}
+       *
+       * @param {number} userid       ID of the user
+       * @param {number} pollid       ID of the poll
+       * @param {number} groupid      ID of the group
+       * @return {Status}
+       *
+       * @throws {errors.errorUserIsNotMember}
+       *  When the user is not a member of the group
+       * @throws {errors.errorUserDoesNotHavePoll}
+       *  When the user does not have the poll
+       * @throws {errors.errorPollAlreadyInGroup}
+       *  When the group has the poll already
+       * @throws {errors.errorPollIsDeleted}
+       *  When the poll has been deleted
+       */
   shareToGroup: async (userid, pollid, groupid) => {
     console.log('PollController.shareToGroup');
     assert.ok(check.number(userid),
@@ -289,20 +290,20 @@ module.exports = {
       return replyData;
     } catch (err) {
       await dbTransactions.abort(dbsession);
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * To get all the polls in all the user's groups. (pollinfo)
-     * May be called once when login.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
-     *
-     * @param {number} userid   ID of the user
-     * @return {PollInfo[]}
-     */
+       * To get all the polls in all the user's groups. (pollinfo)
+       * May be called once when login.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
+       *
+       * @param {number} userid   ID of the user
+       * @return {PollInfo[]}
+       */
   getMyPollsInfo: async (userid) => {
     console.log('PollController.getMyPollsInfo');
     assert.ok(check.number(userid),
@@ -335,20 +336,20 @@ module.exports = {
 
       return await PollData.getPollInfoByPollIds(pollids);
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * To get the pollinfo of the given pollids.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
-     *
-     * @param {number} userid       ID of the user
-     * @param {number[]} pollids    IDs of the polls
-     * @return {PollInfo[]}
-     */
+       * To get the pollinfo of the given pollids.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
+       *
+       * @param {number} userid       ID of the user
+       * @param {number[]} pollids    IDs of the polls
+       * @return {PollInfo[]}
+       */
   getInfo: async (userid, pollids) => {
     console.log('PollController.getInfo');
     assert.ok(check.number(userid),
@@ -359,26 +360,26 @@ module.exports = {
     try {
       return await PollData.getPollInfoByPollIds(pollids);
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * To get the vote information of the given list of users
-     *  for the given poll.
-     * Not sure this is useful.
-     *
-     * Tested on: Pending
-     * {"module":"polls", "event":"getUsersVotesByPoll", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
-     *
-     * @param {number} userid       ID of the user
-     * @param {number} pollid       ID of the poll
-     * @param {number[]} userids    IDs of the users whose vote info is needed
-     * @return {PollVoteData[]}
-     *
-     * @throws {errors.errorUserDoesNotHavePoll}
-     *  When the request user does not have the poll
-     */
+       * To get the vote information of the given list of users
+       *  for the given poll.
+       * Not sure this is useful.
+       *
+       * Tested on: Pending
+       * {"module":"polls", "event":"getUsersVotesByPoll", "messageid":1258, "data":{"user_ids":[2002], "pollid":1007}}
+       *
+       * @param {number} userid       ID of the user
+       * @param {number} pollid       ID of the poll
+       * @param {number[]} userids    IDs of the users whose vote info is needed
+       * @return {PollVoteData[]}
+       *
+       * @throws {errors.errorUserDoesNotHavePoll}
+       *  When the request user does not have the poll
+       */
   getUsersVotesByPoll: async (userid, pollid, userids) => {
     console.log('PollController.getUsersVotesByPoll');
     assert.ok(check.number(userid),
@@ -402,20 +403,20 @@ module.exports = {
       };
       return await PollVoteData.getUsersVotesByPoll(data);
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * To synchronize the poll result of the given polls.
-     * Not sure this is useful.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"pollids":[1033, 1034], "lastsynchedtime":1562059405239}}
-     *
-     * @param {*} message
-     * @return {PollResult[]}
-     */
+       * To synchronize the poll result of the given polls.
+       * Not sure this is useful.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"pollids":[1033, 1034], "lastsynchedtime":1562059405239}}
+       *
+       * @param {*} message
+       * @return {PollResult[]}
+       */
   syncPollResults: async (message) => {
     console.log('PollController.syncPollResults');
     if (!message.user_id ||
@@ -438,26 +439,26 @@ module.exports = {
     } catch (err) {
       console.log(err);
       return await replyHelper.prepareError(message,
-          null, errors.internalError);
+          errors.internalError);
     }
   },
 
   /**
-     * To subscribe to the pollresult.
-     * Subscribed users will get notified by the fanout process.
-     * The subscription will expire in a specific time, if the user
-     * does not unsubscribe it.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
-     *
-     * @param {number} userid    ID of the user
-     * @param {number} pollid    ID of the poll
-     * @return {Status}
-     *
-     * @throws {errors.errorUserNotVoted}
-     *  When the user subscribes for the result before casting his vote
-     */
+       * To subscribe to the pollresult.
+       * Subscribed users will get notified by the fanout process.
+       * The subscription will expire in a specific time, if the user
+       * does not unsubscribe it.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+       *
+       * @param {number} userid    ID of the user
+       * @param {number} pollid    ID of the poll
+       * @return {Status}
+       *
+       * @throws {errors.errorUserNotVoted}
+       *  When the user subscribes for the result before casting his vote
+       */
   subscribeToPollResult: async (userid, pollid) => {
     console.log('PollController.subscribeToPollResult');
     assert.ok(check.number(userid),
@@ -493,21 +494,21 @@ module.exports = {
       };
       return replyData;
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * Unsubscribe to the poll result, if the user subscribed for it.
-     * Else, no change.
-     *
-     * Tested on: Pending
-     * {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
-     *
-     * @param {number} userid    ID of the user
-     * @param {number} pollid    ID of the poll
-     * @return {Status}
-     */
+       * Unsubscribe to the poll result, if the user subscribed for it.
+       * Else, no change.
+       *
+       * Tested on: Pending
+       * {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+       *
+       * @param {number} userid    ID of the user
+       * @param {number} pollid    ID of the poll
+       * @return {Status}
+       */
   unSubscribeToPollResult: async (userid, pollid) => {
     console.log('PollController.unSubscribeToPollResult');
     assert.ok(check.number(userid),
@@ -529,19 +530,19 @@ module.exports = {
       };
       return replyData;
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * To get the votes the user casted before.
-     *
-     * Tested on: Pending
-     * {"module":"polls", "event":"getMyVotes", "messageid":15156}
-     *
-     * @param {number} userid   ID of the user
-     * @return {PollVoteData[]}
-     */
+       * To get the votes the user casted before.
+       *
+       * Tested on: Pending
+       * {"module":"polls", "event":"getMyVotes", "messageid":15156}
+       *
+       * @param {number} userid   ID of the user
+       * @return {PollVoteData[]}
+       */
   getMyVotes: async (userid) => {
     console.log('PollController.getMyVotes');
     assert.ok(check.number(userid),
@@ -550,30 +551,30 @@ module.exports = {
     try {
       return await PollVoteData.getMyVotes(userid);
     } catch (err) {
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 
   /**
-     * Delete a poll.
-     * Todo: need to decide the conditions when a poll can be deleted.
-     * 1. it is not shared to a group.
-     * 2. no one has voted, like that...
-     *
-     * Tested on: Pending
-     * {"module":"polls", "event":"delete", "messageid":8658, "data": {"pollid":1023}}
-     *
-     * @param {number} userid    ID of the user
-     * @param {number} pollid    ID of the poll to delete
-     * @return {Status}
-     *
-     * @throws {errors.errorUserNotCreatorOfPoll}
-     *  When the user is not the creator of the poll
-     * @throws {errors.errorPollSharedToGroup}
-     *  When the poll is shared to atleast one group
-     * @throws {errors.errorPollHasVotes}
-     *  When someone other than the creatot voted for the poll
-     */
+       * Delete a poll.
+       * Todo: need to decide the conditions when a poll can be deleted.
+       * 1. it is not shared to a group.
+       * 2. no one has voted, like that...
+       *
+       * Tested on: Pending
+       * {"module":"polls", "event":"delete", "messageid":8658, "data": {"pollid":1023}}
+       *
+       * @param {number} userid    ID of the user
+       * @param {number} pollid    ID of the poll to delete
+       * @return {Status}
+       *
+       * @throws {errors.errorUserNotCreatorOfPoll}
+       *  When the user is not the creator of the poll
+       * @throws {errors.errorPollSharedToGroup}
+       *  When the poll is shared to atleast one group
+       * @throws {errors.errorPollHasVotes}
+       *  When someone other than the creatot voted for the poll
+       */
   delete: async (userid, pollid) => {
     console.log('PollController.delete');
     assert.ok(check.number(userid),
@@ -614,7 +615,7 @@ module.exports = {
       return replyData;
     } catch (err) {
       await dbTransactions.abort(dbsession);
-      throw new VError(err, errors.internalError.message);
+      errors.wrapError(err);
     }
   },
 };

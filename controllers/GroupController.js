@@ -1,14 +1,15 @@
-const dbTransactions = require('../db/session');
-
-const GroupUsers = require('../db/groupusers');
-const GroupInfo = require('../db/groupinfo');
-const GroupPolls = require('../db/grouppolls');
+const VError = require('verror');
+const assert = require('assert');
+const check = require('check-types');
 
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
-const replyHelper = require('../helpers/replyhelper');
 
-const sequenceCounter = require('../db/sequencecounter');
+const dbTransactions = require('../db/session');
+const seqCounter = require('../db/sequencecounter');
+const GroupUsers = require('../db/groupusers');
+const GroupInfo = require('../db/groupinfo');
+const GroupPolls = require('../db/grouppolls');
 
 const ControllerHelper = require('./ControllerHelper');
 
@@ -16,40 +17,41 @@ const ControllerHelper = require('./ControllerHelper');
 module.exports = {
 
   /**
-     * To create a group.
+     * This function creates a group.
      * The user who creates the group is ADMIN.
      * No one will be notified except the creator.
      *
      * Tested on: 17-Aug-2019
-     * {"module":"groups", "event":"create", "messageid":32352,
-     * "data":{"name":"group name", "desc":"some description about the group"}}
+     * {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
      *
-     * @param {*} message
-     * @returns
+     * @param {number} userid   ID of the user who creates the group
+     * @param {string} name     Name of the group
+     * @param {string} desc     Description of the group
+     * @return {Status}
      */
-  create: async (message) => {
+  create: async (userid, name, desc) => {
     console.log('GroupController.create');
-    if (!message.data ||
-      !message.data.name ||
-      !message.data.desc ||
-      !message.user_id) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.nonEmptyString(name),
+        'argument \'name\' must be a nonEmptyString');
+    assert.ok(check.nonEmptyString(desc),
+        'argument \'desc\' must be a nonEmptyString');
 
+    let dbsession = null;
     try {
       // Start transaction
-      dbsession = await dbTransactions.startSession();
+      dbsession = await dbTransactions.start();
 
-      // Get id for group
-      const groupid = await sequenceCounter.getNextSequenceValue('group');
+      // Get id for the group
+      const groupid = await seqCounter.getNextValue('group');
 
       // Prepare data
       const groupData = {
         id: groupid,
-        name: message.data.name,
-        desc: message.data.desc,
-        createdby: message.user_id,
+        name: name,
+        desc: desc,
+        createdby: userid,
         time: new Date(),
       };
       await GroupInfo.create(groupData);
@@ -57,23 +59,22 @@ module.exports = {
       // Adding user with ADMIN privileges
       const data = {
         groupid: groupid,
-        user_id: message.user_id,
-        addedby: message.user_id,
+        user_id: userid,
+        addedby: userid,
         permission: 'ADMIN',
       };
       await GroupUsers.addUser(data);
-      await dbTransactions.commitTransaction(dbsession);
+      await dbTransactions.commit(dbsession);
 
       const replyData = {
         groupid: groupid,
         createdAt: groupData.time.getTime(),
         status: success.groupCreated,
       };
-      return await replyHelper.prepareSuccess(message, replyData);
+      return replyData;
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          dbsession, errors.unknownError);
+      await dbTransactions.abort(dbsession);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
@@ -86,57 +87,56 @@ module.exports = {
      * then the user should do a fulll scan.
      *
      * Tested on: 17-Aug-2019
-     * {"module":"groups", "event":"changeTitle", "messageid":9912,
-     * "data":{"groupid": 3000, "name":"new group title"}}
+     * {"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
      *
-     * @param {*} message
-     * @returns
+     * @param {number} userid   ID of the user who changes the title
+     * @param {number} groupid  ID of the group
+     * @param {string} name     New title for the group
+     * @return {Status}
+     *
+     * @throws {errors.errorUserIsNotMember}
+     *  When the user is not a member of the group
      */
-  changeTitle: async (message) => {
+  changeTitle: async (userid, groupid, name) => {
     console.log('GroupController.changeTitle');
-    if (!message.data ||
-      !message.data.groupid ||
-      !message.user_id) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.number(groupid),
+        'argument \'groupid\' must be a number');
+    assert.ok(check.nonEmptyString(name),
+        'argument \'name\' must be a nonEmptyString');
+
+    // Check user is a member. If he is, then he can change the title
+    const isMember = await GroupUsers.isMember(groupid, userid);
+    if (isMember == false) {
+      throw new VError(errors.errorUserIsNotMember.message);
     }
 
+    let dbsession = null;
     try {
       // Start transaction
-      dbsession = await dbTransactions.startSession();
-
-      // Check user is a member. If he is, then he can change the title
-      const isMemberData = {
-        groupid: message.data.groupid,
-        user_id: message.user_id,
-      };
-      const isMember = await GroupUsers.isMember(isMemberData);
-      if (isMember == false) {
-        return await replyHelper.prepareError(message,
-            dbsession, errors.errorUserIsNotMember);
-      }
+      dbsession = await dbTransactions.start();
 
       // Change the title
       const data = {
-        groupid: message.data.groupid,
-        name: message.data.name,
-        changedby: message.user_id,
+        groupid: groupid,
+        name: name,
+        changedby: userid,
       };
       await GroupInfo.changeTitle(data);
-      await dbTransactions.commitTransaction(dbsession);
+      await dbTransactions.commit(dbsession);
 
       // TODO: create entries in transaction tables
       // TODO: Notify all the online users of the group (async)
-      ControllerHelper.informGroupUpdate(data.groupid);
+      ControllerHelper.informGroupUpdate(groupid);
 
       const replyData = {
         status: success.groupTitleChanged,
       };
-      return await replyHelper.prepareSuccess(message, replyData);
+      return replyData;
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          dbsession, errors.unknownError);
+      await dbTransactions.abort(dbsession);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
@@ -149,95 +149,92 @@ module.exports = {
      * then the user should do a fulll scan.
      *
      * Tested on: 17-Aug-2019
-     * {"module":"groups", "event":"changeDesc", "messageid":9918,
-     * "data":{"groupid": 3000, "desc":"some new group description"}}
+     * {"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
      *
-     * @param {*} message
-     * @returns
+     * @param {number} userid   ID of the user who changes the desc
+     * @param {number} groupid  ID of the group
+     * @param {string} desc     New description for the group
+     * @return {Status}
+     *
+     * @throws {errors.errorUserIsNotMember}
+     *  When the user is not a member of the group
      */
-  changeDesc: async (message) => {
+  changeDesc: async (userid, groupid, desc) => {
     console.log('GroupController.changeDesc');
-    if (!message.data ||
-      !message.data.groupid ||
-      !message.user_id) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.number(groupid),
+        'argument \'groupid\' must be a number');
+    assert.ok(check.nonEmptyString(desc),
+        'argument \'desc\' must be a nonEmptyString');
+
+    // Check user is a member. If he is, then he can change the title
+    const isMember = await GroupUsers.isMember(groupid, userid);
+    if (isMember == false) {
+      throw new VError(errors.errorUserIsNotMember.message);
     }
 
+    let dbsession = null;
     try {
       // Start transaction
-      dbsession = await dbTransactions.startSession();
-
-      // Check user is a member. If he is, then he can change the title
-      const isMemberData = {
-        groupid: message.data.groupid,
-        user_id: message.user_id,
-      };
-      const isMember = await GroupUsers.isMember(isMemberData);
-      if (isMember == false) {
-        return await replyHelper.prepareError(message,
-            dbsession, errors.errorUserIsNotMember);
-      }
+      dbsession = await dbTransactions.start();
 
       // Change the desc
       const data = {
-        groupid: message.data.groupid,
-        desc: message.data.desc,
-        changedby: message.user_id,
+        groupid: groupid,
+        desc: desc,
+        changedby: userid,
       };
       await GroupInfo.changeDesc(data);
-      await dbTransactions.commitTransaction(dbsession);
+      await dbTransactions.commit(dbsession);
 
-      // TODO: create entries in transaction tables
-      // TODO: Notify all the online users of the group (async)
-      ControllerHelper.informGroupUpdate(data.groupid);
+      // Send update to group members
+      ControllerHelper.informGroupUpdate(groupid);
 
       const replyData = {
         status: success.groupDescChanged,
       };
-      return await replyHelper.prepareSuccess(message, replyData);
+      return replyData;
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          dbsession, errors.unknownError);
+      await dbTransactions.abort(dbsession);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
      * Not usable until now.
      * No idea of deleting a group.
+     * ONLY ADMINs can call this.
      *
-     * @param {*} message
-     * @returns
+     * @param {number} userid   ID of the user
+     * @param {number} groupid  ID of the group
+     * @return {Status}
+     *
+     * @throws {errors.errorNotAnAdminUser}
+     *  When the user is not an ADMIN of the group
      */
-  delete: async (message) => {
+  delete: async (userid, groupid) => {
     console.log('GroupController.delete');
-    if (!message.data ||
-      !message.data.groupid ||
-      !message.user_id) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.number(groupid),
+        'argument \'groupid\' must be a number');
 
+    let dbsession = null;
     try {
-      // Start transaction
-      dbsession = await dbTransactions.startSession();
-
       // Check the user is an ADMIN.
       // If he is, then he can delete the group.
-      const isAdminData = {
-        groupid: message.data.groupid,
-        user_id: message.user_id,
-      };
-      const isAdmin = await GroupUsers.isAdmin(isAdminData);
+      const isAdmin = await GroupUsers.isAdmin(groupid, userid);
       if (isAdmin == false) {
-        return await replyHelper.prepareError(message,
-            dbsession, errors.errorNotAnAdminUser);
+        throw new VError(errors.errorNotAnAdminUser.message);
       }
 
+      // Start transaction
+      dbsession = await dbTransactions.start();
+
       const data = {
-        groupid: message.data.groupid,
-        deleteby: message.user_id,
+        groupid: groupid,
+        deleteby: userid,
       };
       await GroupInfo.delete(data); // mark as deleted
 
@@ -246,12 +243,14 @@ module.exports = {
       // TODO: Notify all the online users of the group (async) ...
       // ... prior to delete all users take the list and then delete
 
-      await dbTransactions.commitTransaction(dbsession);
-      return success.groupDeleted;
+      await dbTransactions.commit(dbsession);
+      const replyData = {
+        status: success.groupDeleted,
+      };
+      return replyData;
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          dbsession, errors.unknownError);
+      await dbTransactions.abort(dbsession);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
@@ -262,65 +261,49 @@ module.exports = {
      * Tested on: 17-Aug-2019
      * {"module":"groups", "event":"getMyGroupsInfo", "messageid":4641}
      *
-     * @param {*} message
-     * @returns
+     * @param {number} userid   ID of the user
+     * @return {GroupInfo[]}
      */
-  getMyGroupsInfo: async (message) => {
+  getMyGroupsInfo: async (userid) => {
     console.log('UserController.getGroups');
-    if (!message.user_id) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
 
     try {
-      const groups = await GroupUsers.getGroupsOfUser(message.user_id);
+      // Get user groups
+      const groups = await GroupUsers.getGroupsOfUser(userid);
 
+      // Populate groupids array
       const groupids = [];
       groups.forEach((groupUser) => {
         groupids.push(groupUser.groupid);
       });
 
-      // Prepare data
-      const data = {
-        groupids: groupids,
-      };
-      const groupsInfo = await GroupInfo.getGroupsInfo(data);
-      return await replyHelper.prepareSuccess(message, groupsInfo);
+      // Get groupinfo
+      return await GroupInfo.getGroupsInfo(groupids);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
-     * To get group information for the given groupids.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"groups", "event":"getInfo", "messageid":8971,
-     * "data":{"groupids":[3001, 3002]}}
-     *
-     * @param {*} message
-     * @returns
-     */
-  getInfo: async (message) => {
-    if (!message.data ||
-      !message.data.groupids) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
-    }
-
+       * To get group information for the given groupids.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3001, 3002]}}
+       *
+       * @param {number[]} groupids IDs of groups for which info is needed
+       * @return {GroupInfo[]}
+       */
+  getInfo: async (groupids) => {
     console.log('GroupController.getGroupsInfo');
+    assert.ok(check.array.of.number(groupids),
+        'argument \'groupids\' must be number[]');
+
     try {
-      const data = {
-        groupids: message.data.groupids,
-      };
-      const groupsInfo = await GroupInfo.getGroupsInfo(data);
-      return await replyHelper.prepareSuccess(message, groupsInfo);
+      return await GroupInfo.getGroupsInfo(groupids);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
@@ -329,42 +312,34 @@ module.exports = {
      * To get pollinfo or pollresult, the user should call the respective fn()
      *
      * Tested on: 19-06-2019
-     * {"module":"groups", "event":"getPolls", "messageid":8435,
-     * "data":{"groupid": 1004}}
-     * @param {*} message
-     * @returns
+     * {"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
+     *
+     * @param {number} userid   ID of the user
+     * @param {number} groupid  ID of the group
+     * @return {GroupPolls[]}
+     *
+     * @throws {errors.errorUserIsNotMember}
+     *  When the user is not a member of the group
      */
-  getPolls: async (message) => {
+  getPolls: async (userid, groupid) => {
     console.log('GroupController.getPolls');
-    if (!message.data ||
-      !message.data.groupid ||
-      !message.user_id) {
-      return await replyHelper.prepareError(message,
-          null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.number(groupid),
+        'argument \'groupid\' must be a number');
 
     try {
-      // Prepare data
-      const data = {
-        groupid: message.data.groupid,
-        user_id: message.user_id,
-      };
-
       // Check user in group. If he is, then he can get the requested info
       // Todo: use redis
-      const userIsMember = await GroupUsers.isMember(data);
+      const userIsMember = await GroupUsers.isMember(groupid, userid);
       if (!userIsMember) {
-        return await replyHelper.prepareError(message,
-            null, errors.errorUserIsNotMember);
+        throw new VError(errors.errorUserIsNotMember.message);
       }
 
       // Todo: use redis
-      const pollsInGroup = await GroupPolls.getPolls(data.groupid);
-      return await replyHelper.prepareSuccess(message, pollsInGroup);
+      return await GroupPolls.getPolls(groupid);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 };

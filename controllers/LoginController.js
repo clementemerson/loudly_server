@@ -4,15 +4,13 @@ const https = require('https');
 const cryptoRandomString = require('crypto-random-string');
 const crypto = require('crypto');
 
-const dbTransactions = require('../db/session');
-const loginProcess = require('../db/loginprocess');
-const Users = require('../db/users');
-
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
 
 const sequenceCounter = require('../db/sequencecounter');
-
+const dbTransactions = require('../db/session');
+const loginProcess = require('../db/loginprocess');
+const Users = require('../db/users');
 
 // this key is for testing purposes
 const otpAPIKey = 'c9fb601d-ecf3-11e8-a895-0200cd936042';
@@ -31,11 +29,13 @@ module.exports = {
       }
 
       if (phoneUtil.isPossibleNumber(number) &&
-        phoneUtil.isValidNumber(number) &&
-        phoneUtil.isValidNumberForRegion(number, 'IN')) {
+                phoneUtil.isValidNumber(number) &&
+                phoneUtil.isValidNumberForRegion(number, 'IN')) {
         // phonenumber is valid
-        const otpRequestUrl = 'https://2factor.in/API/V1/' + otpAPIKey + '/SMS/' + req.params.phonenumber + '/AUTOGEN/PhoneAuthLoudSpeaker';
-        https.get(otpRequestUrl, (resp) => {
+        const reqUrl = 'https://2factor.in/API/V1/' + otpAPIKey +
+                    '/SMS/' + req.params.phonenumber +
+                    '/AUTOGEN/PhoneAuthLoudSpeaker';
+        https.get(reqUrl, (resp) => {
           let data = '';
 
           // A chunk of data has been recieved.
@@ -74,8 +74,9 @@ module.exports = {
       const sessionId = req.body.sessionid;
       const otpEnteredByUser = req.body.otp;
 
-      const otpRequestUrl = 'https://2factor.in/API/V1/' + otpAPIKey + '/SMS/VERIFY/' + sessionId + '/' + otpEnteredByUser;
-      https.get(otpRequestUrl, (resp) => {
+      const reqUrl = 'https://2factor.in/API/V1/' + otpAPIKey +
+                '/SMS/VERIFY/' + sessionId + '/' + otpEnteredByUser;
+      https.get(reqUrl, (resp) => {
         let data = '';
 
         // A chunk of data has been recieved.
@@ -141,19 +142,19 @@ module.exports = {
 
   createUserInfo: async (req, res, next) => {
     console.log('LoginController.prepareCreateUser');
-    let dbsession;
+    let dbsession = null;
     try {
-      dbsession = await dbTransactions.startSession();
+      dbsession = await dbTransactions.start();
 
       await privateFunctions.prepareCreateUser(req);
       await privateFunctions.createUser(req.body.user_data);
       await privateFunctions.createUserInfo(req.body.user_data);
 
-      await dbTransactions.commitTransaction(dbsession);
+      await dbTransactions.commit(dbsession);
       return next();
     } catch (err) {
       console.log(err);
-      await dbTransactions.abortTransaction(dbsession);
+      await dbTransactions.abort(dbsession);
       return res.status(400).send();
     }
   },
@@ -178,7 +179,7 @@ privateFunctions = {
     const phonenumber = req.body.phonenumber;
     if (!req.body.user) {
       // Create New User
-      const userId = await sequenceCounter.getNextSequenceValue('user');
+      const userId = await sequenceCounter.getNextValue('user');
       userData = {
         user_id: userId,
         phonenumber: phonenumber,

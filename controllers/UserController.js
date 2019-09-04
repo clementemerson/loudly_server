@@ -1,9 +1,12 @@
-const Users = require('../db/users');
-const dbTransactions = require('../db/session');
+const VError = require('verror');
+const assert = require('assert');
+const check = require('check-types');
 
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
-const replyHelper = require('../helpers/replyhelper');
+
+const dbTransactions = require('../db/session');
+const Users = require('../db/users');
 const GroupUsers = require('../db/groupusers');
 const UserPolls = require('../db/userpolls');
 
@@ -15,202 +18,179 @@ module.exports = {
     const phoneNumbers = req.body.phoneNumbers;
 
     const users = await Users.getUsersByPhoneNumbers(phoneNumbers);
-    const userIds = [];
+    const userids = [];
     users.forEach((oneUser) => {
-      userIds.push(oneUser.user_id);
+      userids.push(oneUser.user_id);
     });
 
-    const userinfos = await Users.getUserInfoByUserIds(userIds);
+    const userinfos = await Users.getUserInfoByUserIds(userids);
     res.status(200).send({userslist: userinfos});
   },
 
   /**
-     * Get userinfo from their phonenumbers
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432,
-     *  "data": {"phoneNumbers":["+919884386484"]}}
-     *
-     * @param {*} message
-     * @returns
-     */
-  getUsersFromPhoneNumbers: async (message) => {
+       * Get userinfo from their phonenumbers
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data": {"phoneNumbers":["+919884386484"]}}
+       *
+       * @param {number} userid           ID of the user
+       * @param {string[]} phoneNumbers   Phonenumbers of the user's contact
+       * @return {UsersInfo[]}
+       */
+  getUsersFromPhoneNumbers: async (userid, phoneNumbers) => {
     console.log('UserController.getUsersFromPhoneNumbers');
-    if (!message.user_id || !message.data || !message.data.phoneNumbers) {
-      return await replyHelper.prepareError(message, null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.array.of.nonEmptyString(phoneNumbers),
+        'argument \'phoneNumbers\' must be nonEmptyString[]');
 
     try {
       const users =
-        await redHelper.getUserIdsByPhone(message.data.phoneNumbers);
+                await redHelper.getUserIdsByPhone(phoneNumbers);
 
-      const userIds = [];
+      const userids = [];
       users.forEach((oneUser) => {
-        userIds.push(parseInt(oneUser.id));
+        userids.push(parseInt(oneUser.id));
       });
 
-      const userinfos = await Users.getUserInfoByUserIds(userIds);
-      return await replyHelper.prepareSuccess(message, userinfos);
+      return await Users.getUserInfoByUserIds(userids);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message, null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
-     * Get user's group. One time usage, when user is logging in.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"users", "event":"getGroups", "messageid":4641}
-     *
-     * @param {*} message
-     * @returns
-     */
-  getGroups: async (message) => {
+       * Get user's group. One time usage, when user is logging in.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"users", "event":"getGroups", "messageid":4641}
+       *
+       * @param {number} userid    ID of the user
+       * @return {GroupUser[]}
+       */
+  getGroups: async (userid) => {
     console.log('UserController.getGroups');
-    if (!message.user_id) {
-      return await replyHelper.prepareError(message, null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
 
     try {
-      const groups = await GroupUsers.getGroupsOfUser(message.user_id);
-      return await replyHelper.prepareSuccess(message, groups);
+      return await GroupUsers.getGroupsOfUser(userid);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message, null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
-     * To get user created polls. One time usage, when user is logging in.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"users", "event":"getPolls", "messageid":4641}
-     *
-     * @param {*} message
-     * @returns
-     */
-  getPolls: async (message) => {
+       * To get user created polls. One time usage, when user is logging in.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"users", "event":"getPolls", "messageid":4641}
+       *
+       * @param {number} userid    ID of the user
+       * @return {UserPoll[]}
+       */
+  getPolls: async (userid) => {
     console.log('UserController.getPolls');
-    if (!message.user_id) {
-      return await replyHelper.prepareError(message, null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
 
     try {
-      const polls = await UserPolls.getPolls(message.user_id);
-      return await replyHelper.prepareSuccess(message, polls);
+      return await UserPolls.getPolls(userid);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message, null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
-     * To get userinfo for the given userids.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"users", "event":"getInfo", "messageid":9961, "
-     *  data":{"userids":[2000,2001]}}
-     *
-     * @param {*} message
-     * @returns
-     */
-  getInfo: async (message) => {
+       * To get userinfo for the given userids.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+       *
+       * @param {number[]} userids    IDs of the users
+       * @return {UsersInfo[]}
+       */
+  getInfo: async (userids) => {
     console.log('UserController.getInfo');
-    if (!message.user_id || !message.data || !message.data.userids) {
-      return await replyHelper.prepareError(message, null, errors.invalidData);
-    }
+    assert.ok(check.array.of.number(userids),
+        'argument \'userids\' must be number[]');
 
     try {
-      const userinfos = await Users.getUserInfoByUserIds(message.data.userids);
-      return await replyHelper.prepareSuccess(message, userinfos);
+      return await Users.getUserInfoByUserIds(userids);
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message, null, errors.unknownError);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
-     * To change one's display name.
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"users", "event":"changeName", "messageid":2154,
-     *  "data":{"name":"Clement"}}
-     *
-     * @param {*} message
-     * @returns
-     */
-  changeName: async (message) => {
+       * To change one's display name.
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
+       *
+       * @param {number} userid    ID of the user
+       * @param {string} name      New name of the user
+       * @return {Status}
+       */
+  changeName: async (userid, name) => {
     console.log('UserController.changeName');
-    if (!message.user_id || !message.data || !message.data.name) {
-      return await replyHelper.prepareError(message, null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.nonEmptyString(name),
+        'argument \'name\' must be a nonEmptyString');
 
-    let dbsession;
+    let dbsession = null;
     try {
       // Start transaction
-      dbsession = await dbTransactions.startSession();
-
-      // Prepare data
-      const data = {
-        user_id: message.user_id,
-        name: message.data.name,
-      };
+      dbsession = await dbTransactions.start();
 
       // Change the name
-      await Users.changeName(data);
-      await dbTransactions.commitTransaction(dbsession);
+      await Users.changeName(userid, name);
+      await dbTransactions.commit(dbsession);
 
       const replyData = {
         status: success.userNameChanged,
       };
-      return await replyHelper.prepareSuccess(message, replyData);
+      return replyData;
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          dbsession, errors.unknownError);
+      await dbTransactions.abort(dbsession);
+      throw new VError(err, errors.internalError.message);
     }
   },
 
   /**
-     * To change one's status message
-     *
-     * Tested on: 17-Aug-2019
-     * {"module":"users", "event":"changeStatusMsg", "messageid":4641,
-     *  "data":{"statusmsg":"some status"}}
-     *
-     * @param {*} message
-     * @returns
-     */
-  changeStatusMsg: async (message) => {
+       * To change one's status message
+       *
+       * Tested on: 17-Aug-2019
+       * {"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}    //eslint-disable-line
+       *
+       * @param {number} userid        ID of the user
+       * @param {string} statusmsg     New statusmsg of the user
+       * @return {Status}
+       */
+  changeStatusMsg: async (userid, statusmsg) => {
     console.log('UserController.changeStatusMsg');
-    if (!message.user_id || !message.data || !message.data.statusmsg) {
-      return await replyHelper.prepareError(message, null, errors.invalidData);
-    }
+    assert.ok(check.number(userid),
+        'argument \'userid\' must be a number');
+    assert.ok(check.nonEmptyString(statusmsg),
+        'argument \'statusmsg\' must be a nonEmptyString');
 
-    let dbsession;
+    let dbsession = null;
     try {
       // Start transaction
-      dbsession = await dbTransactions.startSession();
+      dbsession = await dbTransactions.start();
 
-      // Prepare data
-      const data = {
-        user_id: message.user_id,
-        statusmsg: message.data.statusmsg,
-      };
-
-      // Change the name
-      await Users.changeStatusMsg(data);
-      await dbTransactions.commitTransaction(dbsession);
+      // Change the msg
+      await Users.changeStatusMsg(userid, statusmsg);
+      await dbTransactions.commit(dbsession);
 
       const replyData = {
         status: success.userStatusChanged,
       };
-      return await replyHelper.prepareSuccess(message, replyData);
+      return replyData;
     } catch (err) {
-      console.log(err);
-      return await replyHelper.prepareError(message,
-          dbsession, errors.unknownError);
+      await dbTransactions.abort(dbsession);
+      throw new VError(err, errors.internalError.message);
     }
   },
 };

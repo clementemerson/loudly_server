@@ -1,3 +1,5 @@
+const check = require('check-types');
+
 const WebSocket = require('ws');
 const url = require('url');
 const mongo = require('./db/mongo');
@@ -30,9 +32,7 @@ if (localServer) {
 }
 
 const wss = new WebSocket.Server({server});
-
-// Init connection with DB
-redClient.initRedisClient(initMongo);
+initDB();
 
 wss.on('connection', async (wsClient, req) => {
   const queryURL = url.parse(req.url, true);
@@ -88,7 +88,7 @@ setInterval(function ping() {
         client.is_alive = true;
         client.ping();
       });
-}, 5000);
+}, 15000);
 
 /**
  * Websocket Message handling function
@@ -98,11 +98,22 @@ setInterval(function ping() {
 async function toEvent(ws) {
   let message = null;
   try {
-    message = JSON.parse(ws.data);
-    if (!message.module) {
-      throw new Error('Invalid Arguments');
+    if (checkMessageFormat(ws.data) == false) {
+      const outMessage = {
+        Status: 'Error',
+        Details: {
+          module: 'general',
+          event: 'not applicable',
+          messageid: 0,
+          data: 'Invalid message format',
+        },
+      };
+      connections.getConnections().get(ws.target.jwtDetails.user_id)
+          .send(JSON.stringify(outMessage));
+      return;
     }
 
+    message = JSON.parse(ws.data);
     message.user_id = ws.target.jwtDetails.user_id;
     let reply;
     switch (message.module) {
@@ -127,15 +138,48 @@ async function toEvent(ws) {
     connections.getConnections().get(ws.target.jwtDetails.user_id)
         .send(JSON.stringify(outMessage));
   }
+
+  /**
+     * To check the validity of the received message
+     *
+     * @param {*} data
+     * @return {boolean} Whether the format is correct or not
+     */
+  function checkMessageFormat(data) {
+    try {
+      const message = JSON.parse(data);
+      const bValid = check.all(check.map(message, {
+        module: check.string,
+        event: check.string,
+        messageid: check.number,
+      }));
+
+      return bValid;
+    } catch (err) {
+      return false;
+    }
+  }
+}
+
+/**
+ * Init DB
+ *
+ */
+async function initDB() {
+  // Init connection with DB
+  await redClient.initRedisClient();
+  console.log('Redis connected');
+  await initMongo();
+  console.log('Mongo connected');
+  initServer();
 }
 
 /**
  * Init DB Connection
  *
  */
-function initMongo() {
-  console.log('Redis connected');
-  mongo.initDbConnection(initServer);
+async function initMongo() {
+  await mongo.initDbConnection();
 }
 
 /**

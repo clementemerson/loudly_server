@@ -99,7 +99,9 @@ setInterval(function clearElapsedSubscriptions() {
 }, 86400000);
 
 // Init connection with DB
-redClient.initRedisClient(initMongo);
+redClient.initRedisClient().then(() => {
+  initMongo();
+});
 
 /**
  *  Init DB Connection

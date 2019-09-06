@@ -16,7 +16,9 @@ recursiveRoutes('routes');
 
 let server;
 // Init connection with DB and establish connection one by one
-redClient.initRedisClient(initMongo);
+redClient.initRedisClient().then(() => {
+  initMongo();
+});
 
 // --------------------------------------------------------------------------------
 

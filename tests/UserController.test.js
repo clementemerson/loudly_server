@@ -9,8 +9,8 @@ const success = require('../helpers/successtousers');
 const UserController = require('../controllers/UserController');
 
 // For Mocking
-const dbUsers = require('../db/users');
 const dbTransactions = require('../db/session');
+const dbUsers = require('../db/users');
 const GroupUsers = require('../db/groupusers');
 const UserPolls = require('../db/userpolls');
 const redHelper = require('../redis/redhelper');

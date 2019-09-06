@@ -5,6 +5,8 @@ const check = require('check-types');
 const errors = require('../helpers/errorstousers');
 
 const PollController = require('../controllers/PollController');
+const PollOpController = require('../controllers/PollOpController');
+const PollSubsController = require('../controllers/PollSubsController');
 
 module.exports = {
   handle: async (message) => {
@@ -36,7 +38,7 @@ module.exports = {
         reply = await getUsersVotesByPoll(message);
         break;
       case 'syncPollResults':
-        reply = await PollController.syncPollResults(message);
+        reply = await PollOpController.syncPollResults(message);
         break;
       case 'subscribeToPollResult':
         reply = await subscribeToPollResult(message);
@@ -64,7 +66,7 @@ async function getMyVotes(message) {
   assert.ok(check.all(check.map(message, {
     user_id: check.number,
   })), 'Invalid message');
-  reply = await PollController.getMyVotes(message.user_id);
+  reply = await PollOpController.getMyVotes(message.user_id);
   return reply;
 }
 
@@ -99,7 +101,7 @@ async function subscribeToPollResult(message) {
       pollid: check.number,
     },
   })), 'Invalid message');
-  reply = await PollController.subscribeToPollResult(message.user_id,
+  reply = await PollSubsController.subscribeToPollResult(message.user_id,
       message.data.pollid);
   return reply;
 }
@@ -118,7 +120,7 @@ async function getUsersVotesByPoll(message) {
       user_ids: check.array.of.number,
     },
   })), 'Invalid message');
-  reply = await PollController.getUsersVotesByPoll(message.user_id,
+  reply = await PollSubsController.getUsersVotesByPoll(message.user_id,
       message.data.pollid,
       message.data.user_ids);
   return reply;
@@ -170,7 +172,7 @@ async function shareToGroup(message) {
       groupid: check.number,
     },
   })), 'Invalid message');
-  reply = await PollController.shareToGroup(message.user_id,
+  reply = await PollOpController.shareToGroup(message.user_id,
       message.data.pollid,
       message.data.groupid);
   return reply;

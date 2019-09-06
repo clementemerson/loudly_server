@@ -7,22 +7,24 @@ bluebird.promisifyAll(redis);
 let redClient;
 
 module.exports = {
-  initRedisClient: async (callback) => {
-    try {
-      redClient = redis.createClient(6379, 'loudly.loudspeakerdev.net');
-      redClient.on('connect', function() {
-        redClient.auth(password, () => {
-          console.log('Redis client connected');
-          callback();
+  initRedisClient: async () => {
+    return new Promise((resolve, reject) => {
+      try {
+        redClient = redis.createClient(6379, 'loudly.loudspeakerdev.net');
+        redClient.on('connect', function() {
+          redClient.auth(password, () => {
+            resolve();
+          });
         });
-      });
 
-      redClient.on('error', function(err) {
-        console.log('Something went wrong ' + err);
-      });
-    } catch (err) {
-      console.log(err);
-    }
+        redClient.on('error', function(err) {
+          console.log('Something went wrong ' + err);
+        });
+      } catch (err) {
+        console.log(err);
+        reject(err);
+      }
+    });
   },
   // -----------------------------------------------------------------//
   //      COMMON FUNCTIONS

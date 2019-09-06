@@ -1,26 +1,12 @@
 const VError = require('verror');
+const internalError = {
+  errno: 100,
+  message: 'Internal Error',
+};
 
 module.exports = {
-  sendData: function(data) {
-    return {
-      Status: 'Error',
-      Details: data,
-    };
-  },
-  wrapError: function(err) {
-    console.log(err.message);
-    if ((err instanceof VError) == false) {
-      throw new VError(err, errors.internalError.message);
-    } else {
-      throw err;
-    }
-  },
-
   // Common Errors
-  internalError: {
-    errno: 100,
-    message: 'Internal Error',
-  },
+  internalError,
   unknownEvent: {
     errno: 101,
     message: 'Unknown Event',
@@ -103,4 +89,21 @@ module.exports = {
     errno: 7004,
     message: 'You are not allowed to set the given permission to the user',
   },
+
+  sendData: function(data) {
+    return {
+      Status: 'Error',
+      Details: data,
+    };
+  },
+  wrapError: function(err) {
+    console.log(err.message);
+    if ((err instanceof VError) == false) {
+      throw new VError(err, internalError.message);
+    } else {
+      throw err;
+    }
+  },
+
+
 };

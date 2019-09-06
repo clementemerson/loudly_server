@@ -67,11 +67,11 @@ module.exports = {
         });
   },
 
-  isDeleted: async (data) => {
+  isDeleted: async (pollid) => {
     console.log('db.polldata.isDeleted');
     const isDeleted = await mongodb().collection(dbtables.PollData)
         .find({
-          pollid: data.pollid,
+          pollid: pollid,
           isdeleted: true,
         })
         .toArray();

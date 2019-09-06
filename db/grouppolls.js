@@ -26,12 +26,12 @@ module.exports = {
     await redClient.sadd(keyPrefix.pollsOfGroup + data.groupid, data.pollid);
   },
 
-  groupHasPoll: async (data) => {
+  groupHasPoll: async (pollid, groupid) => {
     console.log('db.grouppolls.isGroupHasPoll');
     const polls = await mongodb().collection(dbtables.GroupPolls)
         .find({
-          pollid: data.pollid,
-          groupid: data.groupid,
+          pollid: pollid,
+          groupid: groupid,
         }).toArray();
     return polls[0];
   },

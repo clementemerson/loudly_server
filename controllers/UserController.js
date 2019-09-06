@@ -12,20 +12,6 @@ const UserPolls = require('../db/userpolls');
 const redHelper = require('../redis/redhelper');
 
 module.exports = {
-  getUsersByPhoneNumbers: async (req, res) => {
-    console.log('UserController.getUsersByPhoneNumbers');
-    const phoneNumbers = req.body.phoneNumbers;
-
-    const users = await Users.getUsersByPhoneNumbers(phoneNumbers);
-    const userids = [];
-    users.forEach((oneUser) => {
-      userids.push(oneUser.user_id);
-    });
-
-    const userinfos = await Users.getUserInfoByUserIds(userids);
-    res.status(200).send({userslist: userinfos});
-  },
-
   /**
          * Get userinfo from their phonenumbers
          *
@@ -161,7 +147,7 @@ module.exports = {
          * To change one's status message
          *
          * Tested on: 17-Aug-2019
-         * {"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}    //eslint-disable-line
+         * {"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
          *
          * @param {number} userid        ID of the user
          * @param {string} statusmsg     New statusmsg of the user
@@ -182,7 +168,7 @@ module.exports = {
       // Change the msg
       await Users.changeStatusMsg(userid, statusmsg);
       await dbTransactions.commit(dbsession);
-
+      console.log('commited');
       const replyData = {
         status: success.userStatusChanged,
       };

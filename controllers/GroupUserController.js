@@ -14,25 +14,25 @@ const ControllerHelper = require('./ControllerHelper');
 module.exports = {
 
   /**
-       * To add an user to the group.
-       * Only ADMINs can add an user to the group.
-       *
-       * Tested on: 19-Aug-2019
-       * {"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
-       *
-       * @param {number} userid        ID of the user, who makes the request
-       * @param {number} useridToAdd   ID of the user, to be added
-       * @param {number} groupid       ID of the group
-       * @param {string} permission    Permission of the new user
-       * @return {Status}
-       *
-       * @throws {errors.errorNotAnAdminUser}
-       *  When the user who made the request is not ADMIN
-       * @throws {errors.errorUserNotExists}
-       *  When the useridToAdd does not
-       * @throws {errors.errorUserIsMember}
-       *  When the useridToAdd is already a member of the group
-       */
+         * To add an user to the group.
+         * Only ADMINs can add an user to the group.
+         *
+         * Tested on: 19-Aug-2019
+         * {"module":"groups", "event":"addUser", "messageid":5818, "data":{"groupid": 3000, "user_id":2001, "permission":"USER"}}
+         *
+         * @param {number} userid        ID of the user, who makes the request
+         * @param {number} useridToAdd   ID of the user, to be added
+         * @param {number} groupid       ID of the group
+         * @param {string} permission    Permission of the new user
+         * @return {Status}
+         *
+         * @throws {errors.errorNotAnAdminUser}
+         *  When the user who made the request is not ADMIN
+         * @throws {errors.errorUserNotExists}
+         *  When the useridToAdd does not
+         * @throws {errors.errorUserIsMember}
+         *  When the useridToAdd is already a member of the group
+         */
   addUser: async (userid, useridToAdd, groupid, permission) => {
     console.log('GroupController.addUser');
     assert.ok(check.number(userid),
@@ -71,10 +71,10 @@ module.exports = {
 
       // Now add the user
       const data = {
-        groupid: message.data.groupid,
-        user_id: message.data.user_id,
-        addedby: message.user_id,
-        permission: message.data.permission,
+        groupid: groupid,
+        user_id: useridToAdd,
+        addedby: userid,
+        permission: permission,
         operation: 'addUser',
       };
       await GroupUsers.addUser(data);
@@ -94,25 +94,25 @@ module.exports = {
   },
 
   /**
-       * To change user's permission in the group.
-       * Only ADMINs can change other users' permission.
-       *
-       * Tested on: 19-Aug-2019
-       * {"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
-       *
-       * @param {number} userid            ID of the user, who makes the request
-       * @param {number} useridToUpdate    ID of the user, to update permission
-       * @param {number} groupid           ID of the group
-       * @param {string} permission        Permission of the user
-       * @return {Status}
-       *
-       * @throws {errors.errorNotAnAdminUser}
-       *  When the user who made the request is not ADMIN
-       * @throws {errors.errorUserIsNotMember}
-       *  When the useridToUpdate is not a member of the group
-       * @throws {errors.errorInvalidPermission}
-       *  When the permission is not 'ADMIN' or 'USER'
-       */
+         * To change user's permission in the group.
+         * Only ADMINs can change other users' permission.
+         *
+         * Tested on: 19-Aug-2019
+         * {"module":"groups", "event":"changeUserPermission", "messageid":1515, "data":{"groupid": 3000, "user_id":2001, "permission":"ADMIN"}}
+         *
+         * @param {number} userid            ID of the user, who makes the request
+         * @param {number} useridToUpdate    ID of the user, to update permission
+         * @param {number} groupid           ID of the group
+         * @param {string} permission        Permission of the user
+         * @return {Status}
+         *
+         * @throws {errors.errorNotAnAdminUser}
+         *  When the user who made the request is not ADMIN
+         * @throws {errors.errorUserIsNotMember}
+         *  When the useridToUpdate is not a member of the group
+         * @throws {errors.errorInvalidPermission}
+         *  When the permission is not 'ADMIN' or 'USER'
+         */
   changeUserPermission: async (userid, useridToUpdate, groupid, permission) => {
     console.log('GroupController.changeUserPermission');
     assert.ok(check.number(userid),
@@ -137,8 +137,8 @@ module.exports = {
     }
 
     // Permission can be ADMIN or USER. Cant be CREATOR
-    if (message.data.permission != 'ADMIN' &&
-            message.data.permission != 'USER') {
+    if (permission != 'ADMIN' &&
+            permission != 'USER') {
       throw new VError(errors.errorInvalidPermission.message);
     }
 
@@ -149,10 +149,11 @@ module.exports = {
     try {
       // Start transaction
       dbsession = await dbTransactions.start();
+
       const data = {
-        groupid: message.data.groupid,
-        user_id: message.data.user_id,
-        permission: message.data.permission,
+        groupid: groupid,
+        user_id: useridToUpdate,
+        permission: permission,
         operation: 'changeUser',
       };
       await GroupUsers.changeUserPermission(data);
@@ -179,22 +180,22 @@ module.exports = {
   },
 
   /**
-       * To remove an user from the group.
-       * Only ADMINs can remove an user from the group.
-       *
-       * Tested on: Pending
-       * {"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}-
-       *
-       * @param {number} userid            ID of the user, who makes the request
-       * @param {number} useridToRemove    ID of the user, to remove
-       * @param {number} groupid           ID of the group
-       * @return {Status}
-       *
-       * @throws {errors.errorNotAnAdminUser}
-       *  When the user who made the request is not ADMIN
-       * @throws {errors.errorUserIsNotMember}
-       *  When the useridToRemove is not a member of the group
-       */
+         * To remove an user from the group.
+         * Only ADMINs can remove an user from the group.
+         *
+         * Tested on: Pending
+         * {"module":"groups", "event":"removeUser", "messageid":874984, "data":{"groupid": 3000, "user_id":2001}}-
+         *
+         * @param {number} userid            ID of the user, who makes the request
+         * @param {number} useridToRemove    ID of the user, to remove
+         * @param {number} groupid           ID of the group
+         * @return {Status}
+         *
+         * @throws {errors.errorNotAnAdminUser}
+         *  When the user who made the request is not ADMIN
+         * @throws {errors.errorUserIsNotMember}
+         *  When the useridToRemove is not a member of the group
+         */
   removeUser: async (userid, useridToRemove, groupid) => {
     console.log('GroupController.removeUser');
     assert.ok(check.number(userid),
@@ -223,8 +224,8 @@ module.exports = {
 
       // remove the user.
       const data = {
-        groupid: message.data.groupid,
-        user_id: message.data.user_id,
+        groupid: groupid,
+        user_id: userid,
       };
       await GroupUsers.removeUser(data);
       await dbTransactions.commit(dbsession);
@@ -250,18 +251,18 @@ module.exports = {
   },
 
   /**
-       * Get all users of a group. (user_ids only)
-       *
-       * Tested on: Pending
-       * {"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupid":1001}}
-       *
-       * @param {number} userid    ID of the user, who makes the request
-       * @param {number} groupid   ID of the group
-       * @return {GroupUsers[]}
-       *
-       * @throws {errors.errorUserIsNotMember}
-       *  When the user is not a member of the group
-       */
+         * Get all users of a group. (user_ids only)
+         *
+         * Tested on: Pending
+         * {"module":"groups", "event":"getUsersOfGroups", "messageid":15185, "data":{"groupid":1001}}
+         *
+         * @param {number} userid    ID of the user, who makes the request
+         * @param {number} groupid   ID of the group
+         * @return {GroupUsers[]}
+         *
+         * @throws {errors.errorUserIsNotMember}
+         *  When the user is not a member of the group
+         */
   getUsersOfGroup: async (userid, groupid) => {
     console.log('GroupController.getUsersOfGroups');
     assert.ok(check.number(userid),

@@ -169,17 +169,9 @@ async function initDB() {
   // Init connection with DB
   await redClient.initRedisClient();
   console.log('Redis connected');
-  await initMongo();
+  await mongo.initDbConnection();
   console.log('Mongo connected');
   initServer();
-}
-
-/**
- * Init DB Connection
- *
- */
-async function initMongo() {
-  await mongo.initDbConnection();
 }
 
 /**

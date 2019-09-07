@@ -13,6 +13,7 @@ module.exports = {
       pollid: data.pollid,
       user_id: data.user_id,
       optionindex: data.optionindex,
+      secretvote: data.secretvote,
       createdAt: createdAt,
       updatedAt: updatedAt,
     });
@@ -24,6 +25,7 @@ module.exports = {
         .find({
           user_id: {$in: data.user_ids},
           pollid: data.pollid,
+          secretvote: false,
         }).toArray();
   },
 

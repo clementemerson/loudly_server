@@ -25,7 +25,7 @@ module.exports = {
        *
        * @param {number} userid       ID of the user
        * @param {number} pollid       ID of the poll
-       * @param {number} groupid      ID of the group
+       * @param {number} groupids      ID of the group
        * @return {Status}
        *
        * @throws {errors.errorUserIsNotMember}
@@ -37,26 +37,26 @@ module.exports = {
        * @throws {errors.errorPollIsDeleted}
        *  When the poll has been deleted
        */
-  shareToGroup: async (userid, pollid, groupid) => {
+  shareToGroup: async (userid, pollid, groupids) => {
     console.log('PollController.shareToGroup');
     assert.ok(check.number(userid),
         'argument \'userid\' must be a number');
     assert.ok(check.number(pollid),
         'argument \'pollid\' must be a number');
-    assert.ok(check.number(groupid),
-        'argument \'groupid\' must be a number');
+    assert.ok(check.number(groupids),
+        'argument \'groupids\' must be a number[]');
 
     let dbsession = null;
     try {
       // Prepare data
       const data = {
         pollid: pollid,
-        groupid: groupid,
+        groupid: groupids,
         user_id: userid,
       };
 
       // Check user in group. If he is, then he can share
-      const userIsMember = await GroupUsers.isMember(groupid, userid);
+      const userIsMember = await GroupUsers.isMember(groupids, userid);
       if (!userIsMember) {
         throw new VError(errors.errorUserIsNotMember.message);
       }

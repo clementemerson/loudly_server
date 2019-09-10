@@ -136,6 +136,7 @@ module.exports = {
 
             // Check if poll is available
             const poll = await PollData.getPollInfo(pollid);
+            console.log(poll);
             if (poll == null) {
                 throw new VError(errors.errorPollNotAvailable.message);
             }
@@ -154,7 +155,7 @@ module.exports = {
             const updatePollResult = PollResult.updatePollResult(data);
             // Update poll voter list
             const updatePollVoterList = VoteRegister.updatePollVoterList(data);
-            //Save the vote
+            // Save the vote
             const updatePollPublicVotes = PollVoteData.saveVote(data);
 
             // Await for all operations.
@@ -220,18 +221,18 @@ module.exports = {
             });
 
             const pollids = [];
-            groupids.forEach(async (groupid) => {
+            for (const groupid of groupids) {
                 const pollsInGroup = await GroupPolls.getPolls(groupid);
                 pollsInGroup.forEach((poll) => {
                     if (pollids.indexOf(poll.pollid) == -1) {
                         pollids.push(poll.pollid);
                     }
                 });
-            });
+            }
 
             const userPolls = await UserPolls.getPolls(userid);
             userPolls.forEach((poll) => {
-                if (pollids.indexOf(poll.pollid) < 0) {
+                if (pollids.indexOf(poll.pollid) == -1) {
                     pollids.push(poll.pollid);
                 }
             });
@@ -257,7 +258,7 @@ module.exports = {
         assert.ok(check.number(userid),
             'argument \'userid\' must be a number');
         assert.ok(check.array.of.number(pollids),
-            'argument \'pollids\' must be number[]');
+            'argument \'pollids\' must be a number[]');
 
         try {
             return await PollData.getPollInfoByPollIds(pollids);
@@ -307,20 +308,19 @@ module.exports = {
                 throw new VError(errors.errorPollSharedToGroup.message);
             }
 
+            const votesOfPoll = await VoteRegister.getVotersList(pollid);
+            if (votesOfPoll.length > 1) {
+                throw new VError(errors.errorPollVoteCasted.message);
+            }
+
             // Start transaction
             dbsession = await dbTransactions.start();
 
-            // Todo: no one has voted
-            const votesOfPoll = await VoteRegister.getVotersList(pollid);
-            if (votesOfPoll.length > 1) {
-                // Someone else other than the creator has voted
-            } else {
-                await PollData.delete(data);
-            }
+            await PollData.delete(pollid);
             await dbTransactions.commit(dbsession);
 
             const replyData = {
-                pollid: data.pollid,
+                pollid: pollid,
                 status: success.successPollDeleted,
             };
             return replyData;

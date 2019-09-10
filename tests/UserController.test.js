@@ -1,8 +1,5 @@
 const expect = require('expect');
 
-const redClient = require('../redis/redclient');
-const mongo = require('../db/mongo');
-
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
 
@@ -19,8 +16,6 @@ jest.mock('../db/users');
 jest.mock('../redis/redhelper');
 
 beforeAll(async () => {
-  await redClient.initRedisClient();
-  await mongo.initDbConnection();
   console.log = () => {};
 });
 
@@ -113,7 +108,7 @@ describe('getUsersFromPhoneNumbers', () => {
   test('should return user info', async () => {
     // Mocks
     redHelper.getUserIdsByPhone
-        .mockImplementation(() => [{id: 456}, {id: 565}]);
+        .mockImplementation(() => [{id: 456}, {id: 565}, null]);
     // Data
     const userid = 2004;
     const phoneNumbers = ['1545151215', 'sfadfadf'];

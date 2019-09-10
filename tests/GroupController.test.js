@@ -1,8 +1,5 @@
 const expect = require('expect');
 
-const redClient = require('../redis/redclient');
-const mongo = require('../db/mongo');
-
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
 
@@ -17,8 +14,6 @@ const GroupInfo = require('../db/groupinfo');
 const GroupPolls = require('../db/grouppolls');
 
 beforeAll(async () => {
-  await redClient.initRedisClient();
-  await mongo.initDbConnection();
   console.log = () => { };
 });
 
@@ -52,8 +47,9 @@ describe('create', () => {
       const userid = '2004';
       const name = 'groupName';
       const desc = 'group desc';
+      const userids = [2004, 2005];
       // Tests
-      await GroupController.create(userid, name, desc);
+      await GroupController.create(userid, name, desc, userids);
     } catch (err) {
       // Expects
       expect(err.message).toEqual('argument \'userid\' must be a number');
@@ -67,8 +63,9 @@ describe('create', () => {
       const userid = 2004;
       const name = 5151;
       const desc = 'group desc';
+      const userids = [2004, 2005];
       // Tests
-      await GroupController.create(userid, name, desc);
+      await GroupController.create(userid, name, desc, userids);
     } catch (err) {
       // Expects
       expect(err.message).toEqual('argument \'name\' must be a nonEmptyString');
@@ -82,8 +79,9 @@ describe('create', () => {
       const userid = 2004;
       const name = '';
       const desc = 'group desc';
+      const userids = [2004, 2005];
       // Tests
-      await GroupController.create(userid, name, desc);
+      await GroupController.create(userid, name, desc, userids);
     } catch (err) {
       // Expects
       expect(err.message).toEqual('argument \'name\' must be a nonEmptyString');
@@ -97,8 +95,9 @@ describe('create', () => {
       const userid = 2004;
       const name = 'group name';
       const desc = 37974;
+      const userids = [2004, 2005];
       // Tests
-      await GroupController.create(userid, name, desc);
+      await GroupController.create(userid, name, desc, userids);
     } catch (err) {
       // Expects
       expect(err.message).toEqual('argument \'desc\' must be a nonEmptyString');
@@ -112,11 +111,44 @@ describe('create', () => {
       const userid = 2004;
       const name = 'group name';
       const desc = '';
+      const userids = [2004, 2005];
       // Tests
-      await GroupController.create(userid, name, desc);
+      await GroupController.create(userid, name, desc, userids);
     } catch (err) {
       // Expects
       expect(err.message).toEqual('argument \'desc\' must be a nonEmptyString');
+    }
+  });
+
+  test('should fail for string array userids', async () => {
+    expect.assertions(1);
+    try {
+      // Data
+      const userid = 2004;
+      const name = 'group name';
+      const desc = 'group desc';
+      const userids = ['2004', '2005'];
+      // Tests
+      await GroupController.create(userid, name, desc, userids);
+    } catch (err) {
+      // Expects
+      expect(err.message).toEqual('argument \'userids\' must be a number[]');
+    }
+  });
+
+  test('should fail for non-array userids', async () => {
+    expect.assertions(1);
+    try {
+      // Data
+      const userid = 2004;
+      const name = 'group name';
+      const desc = 'group desc';
+      const userids = 2005;
+      // Tests
+      await GroupController.create(userid, name, desc, userids);
+    } catch (err) {
+      // Expects
+      expect(err.message).toEqual('argument \'userids\' must be a number[]');
     }
   });
 
@@ -131,8 +163,9 @@ describe('create', () => {
       const userid = 2004;
       const name = 'group name';
       const desc = 'group desc';
+      const userids = [2004, 2005];
       // Tests
-      await GroupController.create(userid, name, desc);
+      await GroupController.create(userid, name, desc, userids);
     } catch (err) {
       // Expects
       expect(err.message).toContain(errors.internalError.message);
@@ -158,8 +191,9 @@ describe('create', () => {
     const userid = 2004;
     const name = 'group name';
     const desc = 'group desc';
+    const userids = [2004, 2005];
     // Tests
-    await GroupController.create(userid, name, desc);
+    await GroupController.create(userid, name, desc, userids);
     // Expects
     expect(dbTransactions.start).toHaveBeenCalled();
     expect(dbTransactions.commit).toHaveBeenCalled();
@@ -171,13 +205,23 @@ describe('create', () => {
       time: new Date(), // Mock
     };
     expect(GroupInfo.create).toHaveBeenCalledWith(groupData);
-    const userData = {
+    const adminData = {
       groupid: 30125,
       user_id: userid,
       addedby: userid,
       permission: 'ADMIN',
     };
-    expect(GroupUsers.addUser).toHaveBeenCalledWith(userData);
+    expect(GroupUsers.addUser).toHaveBeenCalledWith(adminData);
+
+    userids.forEach((user) => {
+      const memberData = {
+        groupid: 30125,
+        user_id: user,
+        addedby: userid,
+        permission: 'USER',
+      };
+      expect(GroupUsers.addUser).toHaveBeenCalledWith(memberData);
+    });
     expect(dbTransactions.abort).not.toHaveBeenCalled();
   });
 });

@@ -70,6 +70,10 @@ module.exports = {
     errno: 5008,
     message: 'Poll already shared to a group',
   },
+  errorPollVoteCasted: {
+    errno: 5009,
+    message: 'Users voted for this poll',
+  },
 
 
   // Group module errors
@@ -88,6 +92,14 @@ module.exports = {
   errorInvalidPermission: {
     errno: 7004,
     message: 'You are not allowed to set the given permission to the user',
+  },
+  errorNoUserToAdd: {
+    errno: 7005,
+    message: 'Users already member of the group or not a valid user',
+  },
+  errorNoGroupsToShare: {
+    errno: 7006,
+    message: 'Groups have the poll or user is not a member of the groups',
   },
 
   sendData: function(data) {

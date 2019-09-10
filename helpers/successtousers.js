@@ -15,7 +15,7 @@ module.exports = {
     message: 'You\'ve successfully changed the description of a group',
   },
   groupDeleted: 'You\'ve successfully deleted a group',
-  userAddedToGroup: 'You\'ve added an user to a group',
+  userAddedToGroup: 'You\'ve added users to a group',
   userPermissionChangedInGroup: {
     message: 'You\'ve changed the permission of an user in a group',
   },

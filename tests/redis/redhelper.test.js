@@ -1,9 +1,10 @@
 const expect = require('expect');
+const testUtil = require('../testutil');
 
-//Testing
+// Testing
 const redHelper = require('../../redis/redhelper');
 
-//Dependents
+// Dependents
 const redClient = require('../../redis/redclient');
 const keyPrefix = require('../../redis/key_prefix');
 
@@ -11,26 +12,16 @@ beforeAll(async () => {
     console.log = () => { };
 });
 
-beforeEach(() => {
-});
+beforeEach(() => { });
 
-afterEach(() => {
-});
+afterEach(() => { });
 
-afterAll(() => {
-});
+afterAll(() => { });
 
 describe('createUser', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.createUser).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.createUser).toBe('function');
-    });
-
+    testUtil.shouldExist(redHelper.createUser);
+    testUtil.shouldBeAFunction(redHelper.createUser);
+    
     test('should fail for invalid userid', async () => {
         expect.assertions(1);
         try {
@@ -60,7 +51,7 @@ describe('createUser', () => {
     });
 
     test('should pass', async () => {
-        //Mocks
+        // Mocks
         redClient.hmset = jest.fn();
         // Data
         const userid = 2004;
@@ -68,20 +59,17 @@ describe('createUser', () => {
         // Tests
         await redHelper.createUser(userid, phoneNumber);
         // Expects
-        expect(redClient.hmset).toHaveBeenCalledWith(keyPrefix.phoneNumber + phoneNumber, 'id', userid)
+        expect(redClient.hmset).toHaveBeenCalledWith(
+            keyPrefix.phoneNumber + phoneNumber,
+            'id',
+            userid
+        );
     });
 });
 
 describe('addGroupUser', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.addGroupUser).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.addGroupUser).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.addGroupUser);
+    testUtil.shouldBeAFunction(redHelper.addGroupUser);
 
     test('should fail for invalid userid', async () => {
         expect.assertions(1);
@@ -112,32 +100,30 @@ describe('addGroupUser', () => {
     });
 
     test('should pass', async () => {
-
+        // Mocks
+        redClient.exists = jest.fn().mockImplementation(() => 1);
+        redClient.sadd = jest.fn();
+        // Data
+        const userid = 2004;
+        const groupid = 3010;
+        // Tests
+        await redHelper.addGroupUser(groupid, userid);
+        // Expects
+        expect(redClient.sadd).toHaveBeenCalledWith(
+            keyPrefix.usersOfGroup + groupid,
+            userid
+        );
     });
 });
 
 describe('createPollResult', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.createPollResult).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.createPollResult).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.createPollResult);
+    testUtil.shouldBeAFunction(redHelper.createPollResult);
 });
 
 describe('updateOpenVoteResult', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.updateOpenVoteResult).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.updateOpenVoteResult).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.updateOpenVoteResult);
+    testUtil.shouldBeAFunction(redHelper.updateOpenVoteResult);
 
     test('should fail for invalid pollid', async () => {
         expect.assertions(1);
@@ -165,19 +151,28 @@ describe('updateOpenVoteResult', () => {
             // Expects
             expect(err.message).toEqual('argument \'optionindex\' must be a number');
         }
+    });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.hincrby = jest.fn();
+        // Data
+        const pollid = 2004;
+        const optionindex = 0;
+        // Tests
+        await redHelper.updateOpenVoteResult(pollid, optionindex);
+        // Expects
+        expect(redClient.hincrby).toHaveBeenCalledWith(
+            keyPrefix.pollResult + pollid,
+            'OV' + optionindex.toString(),
+            1
+        );
     });
 });
 
 describe('updateSecretVoteResult', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.updateSecretVoteResult).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.updateSecretVoteResult).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.updateSecretVoteResult);
+    testUtil.shouldBeAFunction(redHelper.updateSecretVoteResult);
 
     test('should fail for invalid pollid', async () => {
         expect.assertions(1);
@@ -206,18 +201,27 @@ describe('updateSecretVoteResult', () => {
             expect(err.message).toEqual('argument \'optionindex\' must be a number');
         }
     });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.hincrby = jest.fn();
+        // Data
+        const pollid = 2004;
+        const optionindex = 0;
+        // Tests
+        await redHelper.updateSecretVoteResult(pollid, optionindex);
+        // Expects
+        expect(redClient.hincrby).toHaveBeenCalledWith(
+            keyPrefix.pollResult + pollid,
+            'SV' + optionindex.toString(),
+            1
+        );
+    });
 });
 
 describe('getUserIdsByPhone', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.getUserIdsByPhone).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.getUserIdsByPhone).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.getUserIdsByPhone);
+    testUtil.shouldBeAFunction(redHelper.getUserIdsByPhone);
 
     test('should fail for non-array phoneNumbers', async () => {
         expect.assertions(1);
@@ -228,8 +232,9 @@ describe('getUserIdsByPhone', () => {
             await redHelper.getUserIdsByPhone(phoneNumbers);
         } catch (err) {
             // Expects
-            expect(err.message)
-                .toEqual('argument \'phoneNumbers\' must be a nonEmptyString[]');
+            expect(err.message).toEqual(
+                'argument \'phoneNumbers\' must be a nonEmptyString[]'
+            );
         }
     });
 
@@ -242,8 +247,9 @@ describe('getUserIdsByPhone', () => {
             await redHelper.getUserIdsByPhone(phoneNumbers);
         } catch (err) {
             // Expects
-            expect(err.message)
-                .toEqual('argument \'phoneNumbers\' must be a nonEmptyString[]');
+            expect(err.message).toEqual(
+                'argument \'phoneNumbers\' must be a nonEmptyString[]'
+            );
         }
     });
 
@@ -256,34 +262,75 @@ describe('getUserIdsByPhone', () => {
             await redHelper.getUserIdsByPhone(phoneNumbers);
         } catch (err) {
             // Expects
-            expect(err.message)
-                .toEqual('argument \'phoneNumbers\' must be a nonEmptyString[]');
+            expect(err.message).toEqual(
+                'argument \'phoneNumbers\' must be a nonEmptyString[]'
+            );
         }
+    });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.multiget = jest.fn();
+        // Data
+        const phoneNumbers = ['1545151215', '19846216'];
+        // Tests
+        await redHelper.getUserIdsByPhone(phoneNumbers);
+        // Expects
+        expect(redClient.multiget).toHaveBeenCalledWith(
+            keyPrefix.phoneNumber,
+            phoneNumbers
+        );
     });
 });
 
 describe('getPollResults', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.getPollResults).toBeDefined();
+    testUtil.shouldExist(redHelper.getPollResults);
+    testUtil.shouldBeAFunction(redHelper.getPollResults);
+
+    test('should fail for non-array pollids', async () => {
+        expect.assertions(1);
+        try {
+            // Data
+            const pollids = '12156515';
+            // Tests
+            await redHelper.getPollResults(pollids);
+        } catch (err) {
+            // Expects
+            expect(err.message).toEqual('argument \'pollids\' must be a number[]');
+        }
     });
 
-    test('should be a function', () => {
+    test('should fail for non-number array phoneNumbers', async () => {
+        expect.assertions(1);
+        try {
+            // Data
+            const pollids = ['514651', '148515'];
+            // Tests
+            await redHelper.getPollResults(pollids);
+        } catch (err) {
+            // Expects
+            expect(err.message).toEqual('argument \'pollids\' must be a number[]');
+        }
+    });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.multiget = jest.fn();
+        // Data
+        const pollids = [1002, 1006];
+        // Tests
+        await redHelper.getPollResults(pollids);
         // Expects
-        expect(typeof redHelper.getPollResults).toBe('function');
+        expect(redClient.multiget).toHaveBeenCalledWith(
+            keyPrefix.pollResult,
+            pollids
+        );
     });
 });
 
 describe('getPollResult', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.getPollResult).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.getPollResult).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.getPollResult);
+    testUtil.shouldBeAFunction(redHelper.getPollResult);
 
     test('should fail for invalid pollid', async () => {
         expect.assertions(1);
@@ -297,18 +344,24 @@ describe('getPollResult', () => {
             expect(err.message).toEqual('argument \'pollid\' must be a number');
         }
     });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.hgetall = jest.fn();
+        // Data
+        const pollid = 1005;
+        // Tests
+        await redHelper.getPollResult(pollid);
+        // Expects
+        expect(redClient.hgetall).toHaveBeenCalledWith(
+            keyPrefix.pollResult + pollid
+        );
+    });
 });
 
 describe('getSubscribedUsers', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.getSubscribedUsers).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.getSubscribedUsers).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.createUser);
+    testUtil.shouldBeAFunction(redHelper.createUser);
 
     test('should fail for invalid pollid', async () => {
         expect.assertions(1);
@@ -322,18 +375,26 @@ describe('getSubscribedUsers', () => {
             expect(err.message).toEqual('argument \'pollid\' must be a number');
         }
     });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.zrangebyscore = jest.fn();
+        // Data
+        const pollid = 1005;
+        // Tests
+        await redHelper.getSubscribedUsers(pollid);
+        // Expects
+        expect(redClient.zrangebyscore).toHaveBeenCalledWith(
+            keyPrefix.pollSubsription + pollid,
+            '-inf',
+            '+inf'
+        );
+    });
 });
 
 describe('getSubscribedUsersUntilTime', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.getSubscribedUsersUntilTime).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.getSubscribedUsersUntilTime).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.getSubscribedUsersUntilTime);
+    testUtil.shouldBeAFunction(redHelper.getSubscribedUsersUntilTime);
 
     test('should fail for invalid pollid', async () => {
         expect.assertions(1);
@@ -342,7 +403,10 @@ describe('getSubscribedUsersUntilTime', () => {
             const pollid = '2004';
             const timeUntilSubscriptionMade = 165498461;
             // Tests
-            await redHelper.getSubscribedUsersUntilTime(pollid, timeUntilSubscriptionMade);
+            await redHelper.getSubscribedUsersUntilTime(
+                pollid,
+                timeUntilSubscriptionMade
+            );
         } catch (err) {
             // Expects
             expect(err.message).toEqual('argument \'pollid\' must be a number');
@@ -356,24 +420,41 @@ describe('getSubscribedUsersUntilTime', () => {
             const pollid = 2004;
             const timeUntilSubscriptionMade = '165498461';
             // Tests
-            await redHelper.getSubscribedUsersUntilTime(pollid, timeUntilSubscriptionMade);
+            await redHelper.getSubscribedUsersUntilTime(
+                pollid,
+                timeUntilSubscriptionMade
+            );
         } catch (err) {
             // Expects
-            expect(err.message).toEqual('argument \'timeUntilSubscriptionMade\' must be a number');
+            expect(err.message).toEqual(
+                'argument \'timeUntilSubscriptionMade\' must be a number'
+            );
         }
+    });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.zrangebyscore = jest.fn();
+        // Data
+        const pollid = 1005;
+        const timeUntilSubscriptionMade = 165498461;
+        // Tests
+        await redHelper.getSubscribedUsersUntilTime(
+            pollid,
+            timeUntilSubscriptionMade
+        );
+        // Expects
+        expect(redClient.zrangebyscore).toHaveBeenCalledWith(
+            keyPrefix.pollSubsription + pollid,
+            '-inf',
+            timeUntilSubscriptionMade
+        );
     });
 });
 
 describe('removeElapsedSubscriptions', () => {
-    test('should exist', () => {
-        // Expects
-        expect(redHelper.removeElapsedSubscriptions).toBeDefined();
-    });
-
-    test('should be a function', () => {
-        // Expects
-        expect(typeof redHelper.removeElapsedSubscriptions).toBe('function');
-    });
+    testUtil.shouldExist(redHelper.removeElapsedSubscriptions);
+    testUtil.shouldBeAFunction(redHelper.removeElapsedSubscriptions);
 
     test('should fail for invalid pollid', async () => {
         expect.assertions(1);
@@ -382,7 +463,10 @@ describe('removeElapsedSubscriptions', () => {
             const pollid = '2004';
             const timeUntilSubscriptionMade = 165498461;
             // Tests
-            await redHelper.removeElapsedSubscriptions(pollid, timeUntilSubscriptionMade);
+            await redHelper.removeElapsedSubscriptions(
+                pollid,
+                timeUntilSubscriptionMade
+            );
         } catch (err) {
             // Expects
             expect(err.message).toEqual('argument \'pollid\' must be a number');
@@ -396,10 +480,34 @@ describe('removeElapsedSubscriptions', () => {
             const pollid = 2004;
             const timeUntilSubscriptionMade = '165498461';
             // Tests
-            await redHelper.removeElapsedSubscriptions(pollid, timeUntilSubscriptionMade);
+            await redHelper.removeElapsedSubscriptions(
+                pollid,
+                timeUntilSubscriptionMade
+            );
         } catch (err) {
             // Expects
-            expect(err.message).toEqual('argument \'timeUntilSubscriptionMade\' must be a number');
+            expect(err.message).toEqual(
+                'argument \'timeUntilSubscriptionMade\' must be a number'
+            );
         }
+    });
+
+    test('should pass', async () => {
+        // Mocks
+        redClient.zremrangebyscore = jest.fn();
+        // Data
+        const pollid = 1005;
+        const timeUntilSubscriptionMade = 165498461;
+        // Tests
+        await redHelper.removeElapsedSubscriptions(
+            pollid,
+            timeUntilSubscriptionMade
+        );
+        // Expects
+        expect(redClient.zremrangebyscore).toHaveBeenCalledWith(
+            keyPrefix.pollSubsription + pollid,
+            '-inf',
+            timeUntilSubscriptionMade
+        );
     });
 });

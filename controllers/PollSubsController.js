@@ -13,21 +13,21 @@ const connections = require('../websockets/connections');
 
 module.exports = {
   /**
-       * To subscribe to the pollresult.
-       * Subscribed users will get notified by the fanout process.
-       * The subscription will expire in a specific time, if the user
-       * does not unsubscribe it.
-       *
-       * Tested on: 17-Aug-2019
-       * {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
-       *
-       * @param {number} userid    ID of the user
-       * @param {number} pollid    ID of the poll
-       * @return {Status}
-       *
-       * @throws {errors.errorUserNotVoted}
-       *  When the user subscribes for the result before casting his vote
-       */
+   * To subscribe to the pollresult.
+   * Subscribed users will get notified by the fanout process.
+   * The subscription will expire in a specific time, if the user
+   * does not unsubscribe it.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+   *
+   * @param {number} userid    ID of the user
+   * @param {number} pollid    ID of the poll
+   * @return {Status}
+   *
+   * @throws {errors.errorUserNotVoted}
+   *  When the user subscribes for the result before casting his vote
+   */
   subscribeToPollResult: async (userid, pollid) => {
     console.log('PollController.subscribeToPollResult');
     assert.ok(check.number(userid),
@@ -44,15 +44,20 @@ module.exports = {
 
       // Check if the user has voted already
       const isUserVoted = await redClient.sismember(
-          keyPrefix.pollVotedUsers + data.pollid, data.user_id);
+          keyPrefix.pollVotedUsers + data.pollid,
+          data.user_id
+      );
       if (isUserVoted == false) {
         throw new VError(errors.errorUserNotVoted.message);
       }
 
       // Adding subscription
-      const score = (new Date()).getTime();
-      redClient.zadd(keyPrefix.pollSubsription + data.pollid,
-          data.user_id, score);
+      const score = new Date().getTime();
+      redClient.zadd(
+          keyPrefix.pollSubsription + data.pollid,
+          data.user_id,
+          score
+      );
 
       // Send latest result to the user
       const pollResult = await redHelper.getPollResult(data.pollid);
@@ -68,16 +73,16 @@ module.exports = {
   },
 
   /**
-         * Unsubscribe to the poll result, if the user subscribed for it.
-         * Else, no change.
-         *
-         * Tested on: Pending
-         * {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
-         *
-         * @param {number} userid    ID of the user
-         * @param {number} pollid    ID of the poll
-         * @return {Status}
-         */
+   * Unsubscribe to the poll result, if the user subscribed for it.
+   * Else, no change.
+   *
+   * Tested on: Pending
+   * {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}
+   *
+   * @param {number} userid    ID of the user
+   * @param {number} pollid    ID of the poll
+   * @return {Status}
+   */
   unSubscribeToPollResult: async (userid, pollid) => {
     console.log('PollController.unSubscribeToPollResult');
     assert.ok(check.number(userid),

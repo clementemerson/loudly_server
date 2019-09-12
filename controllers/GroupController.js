@@ -15,21 +15,20 @@ const ControllerHelper = require('./ControllerHelper');
 
 // This file all functions to create and modify group info.
 module.exports = {
-
   /**
-             * This function creates a group.
-             * The user who creates the group is ADMIN.
-             * No one will be notified except the creator.
-             *
-             * Tested on: 17-Aug-2019
-             * {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
-             *
-             * @param {number}      userid      ID of the user who creates the group
-             * @param {string}      name        Name of the group
-             * @param {string}      desc        Description of the group
-             * @param {number[]}    userids     IDs of the users to be added to the group
-             * @return {Status}
-             */
+   * This function creates a group.
+   * The user who creates the group is ADMIN.
+   * No one will be notified except the creator.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"groups", "event":"create", "messageid":32352, "data":{"name":"group name", "desc":"some description about the group"}}
+   *
+   * @param {number}      userid      ID of the user who creates the group
+   * @param {string}      name        Name of the group
+   * @param {string}      desc        Description of the group
+   * @param {number[]}    userids     IDs of the users to be added to the group
+   * @return {Status}
+   */
   create: async (userid, name, desc, userids) => {
     console.log('GroupController.create');
     assert.ok(check.number(userid),
@@ -93,24 +92,24 @@ module.exports = {
   },
 
   /**
-             * To change the title of the group.
-             * Online users will get notification through fanout process.
-             * Offline users can update themselves when they come online.
-             * The 'update' information is redis will expire in 30 days.
-             * If a user comes online after 30 days,
-             * then the user should do a fulll scan.
-             *
-             * Tested on: 17-Aug-2019
-             * {"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
-             *
-             * @param {number} userid   ID of the user who changes the title
-             * @param {number} groupid  ID of the group
-             * @param {string} name     New title for the group
-             * @return {Status}
-             *
-             * @throws {errors.errorUserIsNotMember}
-             *  When the user is not a member of the group
-             */
+   * To change the title of the group.
+   * Online users will get notification through fanout process.
+   * Offline users can update themselves when they come online.
+   * The 'update' information is redis will expire in 30 days.
+   * If a user comes online after 30 days,
+   * then the user should do a fulll scan.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"groups", "event":"changeTitle", "messageid":9912, "data":{"groupid": 3000, "name":"new group title"}}
+   *
+   * @param {number} userid   ID of the user who changes the title
+   * @param {number} groupid  ID of the group
+   * @param {string} name     New title for the group
+   * @return {Status}
+   *
+   * @throws {errors.errorUserIsNotMember}
+   *  When the user is not a member of the group
+   */
   changeTitle: async (userid, groupid, name) => {
     console.log('GroupController.changeTitle');
     assert.ok(check.number(userid),
@@ -155,24 +154,24 @@ module.exports = {
   },
 
   /**
-             * To change the description of the group.
-             * Online users will get notification through fanout process.
-             * Offline users can update themselves when they come online.
-             * The 'update' information is redis will expire in 30 days.
-             * If a user comes online after 30 days,
-             * then the user should do a fulll scan.
-             *
-             * Tested on: 17-Aug-2019
-             * {"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
-             *
-             * @param {number} userid   ID of the user who changes the desc
-             * @param {number} groupid  ID of the group
-             * @param {string} desc     New description for the group
-             * @return {Status}
-             *
-             * @throws {errors.errorUserIsNotMember}
-             *  When the user is not a member of the group
-             */
+   * To change the description of the group.
+   * Online users will get notification through fanout process.
+   * Offline users can update themselves when they come online.
+   * The 'update' information is redis will expire in 30 days.
+   * If a user comes online after 30 days,
+   * then the user should do a fulll scan.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"groups", "event":"changeDesc", "messageid":9918, "data":{"groupid": 3000, "desc":"some new group description"}}
+   *
+   * @param {number} userid   ID of the user who changes the desc
+   * @param {number} groupid  ID of the group
+   * @param {string} desc     New description for the group
+   * @return {Status}
+   *
+   * @throws {errors.errorUserIsNotMember}
+   *  When the user is not a member of the group
+   */
   changeDesc: async (userid, groupid, desc) => {
     console.log('GroupController.changeDesc');
     assert.ok(check.number(userid),
@@ -216,15 +215,15 @@ module.exports = {
   },
 
   /**
-             * To get the user's group info.
-             * //Todo: Need to check whether this is usable.
-             *
-             * Tested on: 17-Aug-2019
-             * {"module":"groups", "event":"getMyGroupsInfo", "messageid":4641}
-             *
-             * @param {number} userid   ID of the user
-             * @return {GroupInfo[]}
-             */
+   * To get the user's group info.
+   * //Todo: Need to check whether this is usable.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"groups", "event":"getMyGroupsInfo", "messageid":4641}
+   *
+   * @param {number} userid   ID of the user
+   * @return {GroupInfo[]}
+   */
   getMyGroupsInfo: async (userid) => {
     console.log('UserController.getGroups');
     assert.ok(check.number(userid),
@@ -252,14 +251,14 @@ module.exports = {
   },
 
   /**
-               * To get group information for the given groupids.
-               *
-               * Tested on: 17-Aug-2019
-               * {"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3001, 3002]}}
-               *
-               * @param {number[]} groupids IDs of groups for which info is needed
-               * @return {GroupInfo[]}
-               */
+   * To get group information for the given groupids.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"groups", "event":"getInfo", "messageid":8971, "data":{"groupids":[3001, 3002]}}
+   *
+   * @param {number[]} groupids IDs of groups for which info is needed
+   * @return {GroupInfo[]}
+   */
   getInfo: async (groupids) => {
     console.log('GroupController.getGroupsInfo');
     assert.ok(check.array.of.number(groupids),
@@ -273,19 +272,19 @@ module.exports = {
   },
 
   /**
-             * To get polls of a group (only the metainfo).
-             * To get pollinfo or pollresult, the user should call the respective fn()
-             *
-             * Tested on: 19-06-2019
-             * {"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
-             *
-             * @param {number} userid   ID of the user
-             * @param {number} groupid  ID of the group
-             * @return {GroupPolls[]}
-             *
-             * @throws {errors.errorUserIsNotMember}
-             *  When the user is not a member of the group
-             */
+   * To get polls of a group (only the metainfo).
+   * To get pollinfo or pollresult, the user should call the respective fn()
+   *
+   * Tested on: 19-06-2019
+   * {"module":"groups", "event":"getPolls", "messageid":8435, "data":{"groupid": 1004}}
+   *
+   * @param {number} userid   ID of the user
+   * @param {number} groupid  ID of the group
+   * @return {GroupPolls[]}
+   *
+   * @throws {errors.errorUserIsNotMember}
+   *  When the user is not a member of the group
+   */
   getPolls: async (userid, groupid) => {
     console.log('GroupController.getPolls');
     assert.ok(check.number(userid),

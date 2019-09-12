@@ -33,26 +33,26 @@ const redHelper = require('../redis/redhelper');
 const connections = require('../websockets/connections');
 
 module.exports = {
-
     /**
-           * To create a poll.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"polls", "event":"create", "messageid":3435,  "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"}, {"index":1,"desc":"option2"}]}}
-           *
-           * @param {*} message
-           * @return {Status}
-           */
+     * To create a poll.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"create", "messageid":3435,  "data":{"title":"Poll title sample", "resultispublic": false, "canbeshared": true, "options":[{"index":0, "desc":"option1"}, {"index":1,"desc":"option2"}]}}
+     *
+     * @param {*} message
+     * @return {Status}
+     */
     create: async (message) => {
         console.log('PollController.create');
-        if (!message.user_id ||
+        if (
+            !message.user_id ||
             !message.data ||
             !message.data.title ||
-            (message.data.resultispublic === undefined) ||
-            (message.data.canbeshared === undefined) ||
-            !message.data.options) {
-            return await replyHelper.prepareError(message,
-                errors.invalidData);
+            message.data.resultispublic === undefined ||
+            message.data.canbeshared === undefined ||
+            !message.data.options
+        ) {
+            return await replyHelper.prepareError(message, errors.invalidData);
         }
         try {
             // Start transaction
@@ -91,28 +91,27 @@ module.exports = {
         } catch (err) {
             console.log(err);
             await dbTransactions.abort(dbsession);
-            return await replyHelper.prepareError(message,
-                errors.internalError);
+            return await replyHelper.prepareError(message, errors.internalError);
         }
     },
 
     /**
-           * To vote. And update group users, where the poll is present.
-           *
-           * Tested on: Pending
-           * {"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
-           *
-           * @param {number} userid       ID of the user
-           * @param {number} pollid       ID of the poll
-           * @param {number} option       Option chosen by the user
-           * @param {boolean} secretVote  Is the vote secret?
-           * @return {Status}
-           *
-           * @throws {errors.errorPollNotAvailable}
-           *  When the poll does not exist
-           * @throws {errors.errorUserAlreadyVoted}
-           *  When the user has voted already     *
-           */
+     * To vote. And update group users, where the poll is present.
+     *
+     * Tested on: Pending
+     * {"module":"polls", "event":"vote", "messageid":8498, "data":{"pollid":1007, "optionindex": 0, "secretvote": false}}
+     *
+     * @param {number} userid       ID of the user
+     * @param {number} pollid       ID of the poll
+     * @param {number} option       Option chosen by the user
+     * @param {boolean} secretVote  Is the vote secret?
+     * @return {Status}
+     *
+     * @throws {errors.errorPollNotAvailable}
+     *  When the poll does not exist
+     * @throws {errors.errorUserAlreadyVoted}
+     *  When the user has voted already     *
+     */
     vote: async (userid, pollid, option, secretVote) => {
         console.log('PollController.vote');
         assert.ok(check.number(userid),
@@ -152,27 +151,20 @@ module.exports = {
             dbsession = await dbTransactions.start();
 
             // Update poll result
-            const updatePollResult = PollResult.updatePollResult(data);
             // Update poll voter list
-            const updatePollVoterList = VoteRegister.updatePollVoterList(data);
             // Save the vote
-            const updatePollPublicVotes = PollVoteData.saveVote(data);
-
             // Await for all operations.
             await Promise.all([
-                updatePollResult,
-                updatePollVoterList,
-                updatePollPublicVotes,
+                await PollResult.updatePollResult(data),
+                VoteRegister.updatePollVoterList(data),
+                PollVoteData.saveVote(data),
             ]);
 
-            if (data.secretvote == true) {
-                await redHelper.updateSecretVoteResult(data.pollid, data.optionindex);
-            } else {
-                await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
-            }
             // Adding to voted user list
-            await redClient.sadd(keyPrefix.pollVotedUsers + data.pollid,
-                data.user_id);
+            await redClient.sadd(
+                keyPrefix.pollVotedUsers + data.pollid,
+                data.user_id
+            );
             // This list is used by fanout mechanism,
             // to fanout the updated result to the subscribed users
             await redClient.sadd(keyPrefix.pollUpdates, data.pollid);
@@ -198,15 +190,15 @@ module.exports = {
     },
 
     /**
-           * To get all the polls in all the user's groups. (pollinfo)
-           * May be called once when login.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
-           *
-           * @param {number} userid   ID of the user
-           * @return {PollInfo[]}
-           */
+     * To get all the polls in all the user's groups. (pollinfo)
+     * May be called once when login.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"getMyPollsInfo", "messageid":15156}
+     *
+     * @param {number} userid   ID of the user
+     * @return {PollInfo[]}
+     */
     getMyPollsInfo: async (userid) => {
         console.log('PollController.getMyPollsInfo');
         assert.ok(check.number(userid),
@@ -244,15 +236,15 @@ module.exports = {
     },
 
     /**
-           * To get the pollinfo of the given pollids.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
-           *
-           * @param {number} userid       ID of the user
-           * @param {number[]} pollids    IDs of the polls
-           * @return {PollInfo[]}
-           */
+     * To get the pollinfo of the given pollids.
+     *
+     * Tested on: 17-Aug-2019
+     * {"module":"polls", "event":"getInfo", "messageid":89412, "data":{"pollids":[1002]}}
+     *
+     * @param {number} userid       ID of the user
+     * @param {number[]} pollids    IDs of the polls
+     * @return {PollInfo[]}
+     */
     getInfo: async (userid, pollids) => {
         console.log('PollController.getInfo');
         assert.ok(check.number(userid),
@@ -268,25 +260,25 @@ module.exports = {
     },
 
     /**
-           * Delete a poll.
-           * Todo: need to decide the conditions when a poll can be deleted.
-           * 1. it is not shared to a group.
-           * 2. no one has voted, like that...
-           *
-           * Tested on: Pending
-           * {"module":"polls", "event":"delete", "messageid":8658, "data": {"pollid":1023}}
-           *
-           * @param {number} userid    ID of the user
-           * @param {number} pollid    ID of the poll to delete
-           * @return {Status}
-           *
-           * @throws {errors.errorUserNotCreatorOfPoll}
-           *  When the user is not the creator of the poll
-           * @throws {errors.errorPollSharedToGroup}
-           *  When the poll is shared to atleast one group
-           * @throws {errors.errorPollHasVotes}
-           *  When someone other than the creatot voted for the poll
-           */
+     * Delete a poll.
+     * Todo: need to decide the conditions when a poll can be deleted.
+     * 1. it is not shared to a group.
+     * 2. no one has voted, like that...
+     *
+     * Tested on: Pending
+     * {"module":"polls", "event":"delete", "messageid":8658, "data": {"pollid":1023}}
+     *
+     * @param {number} userid    ID of the user
+     * @param {number} pollid    ID of the poll to delete
+     * @return {Status}
+     *
+     * @throws {errors.errorUserNotCreatorOfPoll}
+     *  When the user is not the creator of the poll
+     * @throws {errors.errorPollSharedToGroup}
+     *  When the poll is shared to atleast one group
+     * @throws {errors.errorPollHasVotes}
+     *  When someone other than the creatot voted for the poll
+     */
     delete: async (userid, pollid) => {
         console.log('PollController.delete');
         assert.ok(check.number(userid),

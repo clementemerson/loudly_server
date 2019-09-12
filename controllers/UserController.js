@@ -13,15 +13,15 @@ const redHelper = require('../redis/redhelper');
 
 module.exports = {
   /**
-           * Get userinfo from their phonenumbers
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data": {"phoneNumbers":["+919884386484"]}}
-           *
-           * @param {number} userid           ID of the user
-           * @param {string[]} phoneNumbers   Phonenumbers of the user's contact
-           * @return {UsersInfo[]}
-           */
+   * Get userinfo from their phonenumbers
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"users", "event":"getUsersFromPhoneNumbers", "messageid":3432, "data": {"phoneNumbers":["+919884386484"]}}
+   *
+   * @param {number} userid           ID of the user
+   * @param {string[]} phoneNumbers   Phonenumbers of the user's contact
+   * @return {UsersInfo[]}
+   */
   getUsersFromPhoneNumbers: async (userid, phoneNumbers) => {
     console.log('UserController.getUsersFromPhoneNumbers');
     assert.ok(check.number(userid),
@@ -30,8 +30,7 @@ module.exports = {
         'argument \'phoneNumbers\' must be nonEmptyString[]');
 
     try {
-      const users =
-                await redHelper.getUserIdsByPhone(phoneNumbers);
+      const users = await redHelper.getUserIdsByPhone(phoneNumbers);
 
       const userids = [];
       users.forEach((oneUser) => {
@@ -47,14 +46,14 @@ module.exports = {
   },
 
   /**
-           * Get user's group. One time usage, when user is logging in.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"users", "event":"getGroups", "messageid":4641}
-           *
-           * @param {number} userid    ID of the user
-           * @return {GroupUser[]}
-           */
+   * Get user's group. One time usage, when user is logging in.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"users", "event":"getGroups", "messageid":4641}
+   *
+   * @param {number} userid    ID of the user
+   * @return {GroupUser[]}
+   */
   getGroups: async (userid) => {
     console.log('UserController.getGroups');
     assert.ok(check.number(userid),
@@ -68,14 +67,14 @@ module.exports = {
   },
 
   /**
-           * To get user created polls. One time usage, when user is logging in.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"users", "event":"getPolls", "messageid":4641}
-           *
-           * @param {number} userid    ID of the user
-           * @return {UserPoll[]}
-           */
+   * To get user created polls. One time usage, when user is logging in.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"users", "event":"getPolls", "messageid":4641}
+   *
+   * @param {number} userid    ID of the user
+   * @return {UserPoll[]}
+   */
   getPolls: async (userid) => {
     console.log('UserController.getPolls');
     assert.ok(check.number(userid),
@@ -89,14 +88,14 @@ module.exports = {
   },
 
   /**
-           * To get userinfo for the given userids.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
-           *
-           * @param {number[]} userids    IDs of the users
-           * @return {UsersInfo[]}
-           */
+   * To get userinfo for the given userids.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"users", "event":"getInfo", "messageid":9961, "data":{"userids":[2000,2001]}}
+   *
+   * @param {number[]} userids    IDs of the users
+   * @return {UsersInfo[]}
+   */
   getInfo: async (userids) => {
     console.log('UserController.getInfo');
     assert.ok(check.array.of.number(userids),
@@ -110,15 +109,15 @@ module.exports = {
   },
 
   /**
-           * To change one's display name.
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
-           *
-           * @param {number} userid    ID of the user
-           * @param {string} name      New name of the user
-           * @return {Status}
-           */
+   * To change one's display name.
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"users", "event":"changeName", "messageid":2154, "data":{"name":"Clement"}}
+   *
+   * @param {number} userid    ID of the user
+   * @param {string} name      New name of the user
+   * @return {Status}
+   */
   changeName: async (userid, name) => {
     console.log('UserController.changeName');
     assert.ok(check.number(userid),
@@ -146,15 +145,15 @@ module.exports = {
   },
 
   /**
-           * To change one's status message
-           *
-           * Tested on: 17-Aug-2019
-           * {"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
-           *
-           * @param {number} userid        ID of the user
-           * @param {string} statusmsg     New statusmsg of the user
-           * @return {Status}
-           */
+   * To change one's status message
+   *
+   * Tested on: 17-Aug-2019
+   * {"module":"users", "event":"changeStatusMsg", "messageid":4641, "data":{"statusmsg":"some status"}}
+   *
+   * @param {number} userid        ID of the user
+   * @param {string} statusmsg     New statusmsg of the user
+   * @return {Status}
+   */
   changeStatusMsg: async (userid, statusmsg) => {
     console.log('UserController.changeStatusMsg');
     assert.ok(check.number(userid),

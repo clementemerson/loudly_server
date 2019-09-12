@@ -6,13 +6,12 @@ const keyPrefix = require('../redis/key_prefix');
 const redHelper = require('../redis/redhelper');
 
 module.exports = {
-
   /**
-     * To send pollresult updates to the subscribed users.
-     *
-     * Tested on: Pending
-     *
-     */
+   * To send pollresult updates to the subscribed users.
+   *
+   * Tested on: Pending
+   *
+   */
   sendPollUpdates: async () => {
     // pop a pollid from pollupdates list from redis
     let pollid;
@@ -54,11 +53,11 @@ module.exports = {
   },
 
   /**
-     * To send groupinfo updates to the online users
-     *
-     * Tested on: 19-Aug-2019
-     *
-     */
+   * To send groupinfo updates to the online users
+   *
+   * Tested on: 19-Aug-2019
+   *
+   */
   sendGroupUpdate: async () => {
     let cursor = 0;
     do {
@@ -89,16 +88,18 @@ module.exports = {
   },
 
   /**
-     * To send groupuser related updates to the online users.
-     *
-     * Tested on: 19-Aug-2019
-     *
-     */
+   * To send groupuser related updates to the online users.
+   *
+   * Tested on: 19-Aug-2019
+   *
+   */
   sendGroupUserUpdate: async () => {
     let cursor = 0;
     do {
-      const result =
-        await redClient.scan(cursor, keyPrefix.groupUserUpdate + '*');
+      const result = await redClient.scan(
+          cursor,
+          keyPrefix.groupUserUpdate + '*'
+      );
       cursor = result[0];
       if (!!result[1]) {
         result[1].forEach(async (updateKey) => {
@@ -110,8 +111,10 @@ module.exports = {
               module: 'sync',
               event: 'groupUserInfo',
             };
-            const reply =
-              await replyHelper.prepareSuccess(message, groupUserChanges);
+            const reply = await replyHelper.prepareSuccess(
+                message,
+                groupUserChanges
+            );
             wsConn.send(JSON.stringify(reply));
             redClient.del(updateKey);
           }
@@ -121,11 +124,11 @@ module.exports = {
   },
 
   /**
-     * To send newpoll added to the group
-     *
-     * Tested on: 19-Aug-2019
-     *
-     */
+   * To send newpoll added to the group
+   *
+   * Tested on: 19-Aug-2019
+   *
+   */
   sendGroupPollUpdate: async () => {
     let cursor = 0;
     do {

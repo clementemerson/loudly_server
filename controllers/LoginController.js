@@ -2,7 +2,7 @@ const phoneUtil = require('google-libphonenumber')
     .PhoneNumberUtil.getInstance();
 const https = require('https');
 const cryptoRandomString = require('crypto-random-string');
-const crypto = require('crypto');
+const bcrypt = require('bcrypt');
 
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
@@ -28,36 +28,45 @@ module.exports = {
         return res.status(400).send();
       }
 
-      if (phoneUtil.isPossibleNumber(number) &&
-                phoneUtil.isValidNumber(number) &&
-                phoneUtil.isValidNumberForRegion(number, 'IN')) {
+      if (
+        phoneUtil.isPossibleNumber(number) &&
+        phoneUtil.isValidNumber(number) &&
+        phoneUtil.isValidNumberForRegion(number, 'IN')
+      ) {
         // phonenumber is valid
-        const reqUrl = 'https://2factor.in/API/V1/' + otpAPIKey +
-                    '/SMS/' + req.params.phonenumber +
-                    '/AUTOGEN/PhoneAuthLoudSpeaker';
-        https.get(reqUrl, (resp) => {
-          let data = '';
+        const reqUrl =
+          'https://2factor.in/API/V1/' +
+          otpAPIKey +
+          '/SMS/' +
+          req.params.phonenumber +
+          '/AUTOGEN/PhoneAuthLoudSpeaker';
+        https
+            .get(reqUrl, (resp) => {
+              let data = '';
 
-          // A chunk of data has been recieved.
-          resp.on('data', (chunk) => {
-            data += chunk;
-          });
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                data += chunk;
+              });
 
-          resp.on('end', () => {
-            // Got reply from 2factor
-            const response = JSON.parse(data);
-            const loginInfo = {};
-            loginInfo.session_id = response.Details;
-            loginInfo.phonenumber = req.params.phonenumber;
-            // insert the data in db
-            loginProcess.insert(loginInfo);
-            // send reply
-            return res.status(200).json(success.sendData(loginInfo.session_id));
-          });
-        }).on('error', (err) => {
-          // error in 2factor
-          return res.status(500).send();
-        });
+              resp.on('end', () => {
+              // Got reply from 2factor
+                const response = JSON.parse(data);
+                const loginInfo = {};
+                loginInfo.session_id = response.Details;
+                loginInfo.phonenumber = req.params.phonenumber;
+                // insert the data in db
+                loginProcess.insert(loginInfo);
+                // send reply
+                return res
+                    .status(200)
+                    .json(success.sendData(loginInfo.session_id));
+              });
+            })
+            .on('error', (err) => {
+            // error in 2factor
+              return res.status(500).send();
+            });
       } else {
         // phonenumber is invalid
         return res.status(422).send();
@@ -73,38 +82,45 @@ module.exports = {
     try {
       const sessionId = req.body.sessionid;
       const otpEnteredByUser = req.body.otp;
-      if(otpEnteredByUser == '111111') {
+      if (otpEnteredByUser == '111111') {
         req.body = {
-            session_id: sessionId,
-          };
+          session_id: sessionId,
+        };
         return next();
       }
 
-      const reqUrl = 'https://2factor.in/API/V1/' + otpAPIKey +
-                '/SMS/VERIFY/' + sessionId + '/' + otpEnteredByUser;
-      https.get(reqUrl, (resp) => {
-        let data = '';
+      const reqUrl =
+        'https://2factor.in/API/V1/' +
+        otpAPIKey +
+        '/SMS/VERIFY/' +
+        sessionId +
+        '/' +
+        otpEnteredByUser;
+      https
+          .get(reqUrl, (resp) => {
+            let data = '';
 
-        // A chunk of data has been recieved.
-        resp.on('data', (chunk) => {
-          data += chunk;
-        });
+            // A chunk of data has been recieved.
+            resp.on('data', (chunk) => {
+              data += chunk;
+            });
 
-        // The whole response has been received. Print out the result.
-        resp.on('end', () => {
-          const response = JSON.parse(data);
-          if (response.Details === 'OTP Matched') {
-            req.body = {
-              session_id: sessionId,
-            };
-            return next();
-          } else {
-            return res.json(errors.errorOTPMismatchOrExpired);
-          }
-        });
-      }).on('error', (err) => {
-        return res.status(500).send();
-      });
+            // The whole response has been received. Print out the result.
+            resp.on('end', () => {
+              const response = JSON.parse(data);
+              if (response.Details === 'OTP Matched') {
+                req.body = {
+                  session_id: sessionId,
+                };
+                return next();
+              } else {
+                return res.json(errors.errorOTPMismatchOrExpired);
+              }
+            });
+          })
+          .on('error', (err) => {
+            return res.status(500).send();
+          });
     } catch (err) {
       console.log(err);
       return res.status(400).send();
@@ -175,11 +191,7 @@ privateFunctions = {
 
     // create user secret and hash
     const userSecret = cryptoRandomString({length: 24, type: 'base64'});
-    const salt = crypto.randomBytes(16).toString('base64');
-    const hash = crypto.createHmac('sha512', salt)
-        .update(userSecret)
-        .digest('base64');
-    const userSecretHashed = salt + '$' + hash;
+    const userSecretHashed = await bcrypt.hash(userSecret, 16);
 
     let userData;
     const phonenumber = req.body.phonenumber;

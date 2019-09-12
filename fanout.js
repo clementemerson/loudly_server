@@ -18,9 +18,11 @@ if (localServer) {
   const fs = require('fs');
   server = https.createServer({
     cert: fs.readFileSync(
-        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
+        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'
+    ),
     key: fs.readFileSync(
-        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem'),
+        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem'
+    ),
   });
 }
 
@@ -71,14 +73,16 @@ wss.on('connection', async (wsClient, req) => {
 
 // To check whether a client is still alive - 2 mins
 setInterval(function ping() {
-  Array.from(connections.getConnections().values())
-      .forEach(function each(client) {
-        if (!client.is_alive) {
-          client.terminate(); return;
-        }
-        client.is_alive = true; // false?
-        client.ping();
-      });
+  Array.from(connections.getConnections().values()).forEach(function each(
+      client
+  ) {
+    if (!client.is_alive) {
+      client.terminate();
+      return;
+    }
+    client.is_alive = true; // false?
+    client.ping();
+  });
 }, 15000);
 
 // To send updates to the subscribed client - 500 ms
@@ -99,7 +103,7 @@ setInterval(function clearElapsedSubscriptions() {
 }, 86400000);
 
 // Init connection with DB
-redClient.initRedisClient().then(() => {
+redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 0).then(() => {
   initMongo();
 });
 

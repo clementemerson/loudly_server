@@ -25,9 +25,11 @@ if (localServer) {
   const fs = require('fs');
   server = https.createServer({
     cert: fs.readFileSync(
-        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'),
+        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/fullchain.pem'
+    ),
     key: fs.readFileSync(
-        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem'),
+        '/etc/letsencrypt/live/loudly.loudspeakerdev.net/privkey.pem'
+    ),
   });
 }
 
@@ -80,14 +82,16 @@ wss.on('connection', async (wsClient, req) => {
 setInterval(function ping() {
   console.log(connections.getConnections().keys());
 
-  Array.from(connections.getConnections().values())
-      .forEach(function each(client) {
-        if (!client.is_alive) {
-          client.terminate(); return;
-        }
-        client.is_alive = true;
-        client.ping();
-      });
+  Array.from(connections.getConnections().values()).forEach(function each(
+      client
+  ) {
+    if (!client.is_alive) {
+      client.terminate();
+      return;
+    }
+    client.is_alive = true;
+    client.ping();
+  });
 }, 15000);
 
 /**
@@ -108,7 +112,9 @@ async function toEvent(ws) {
           data: 'Invalid message format',
         },
       };
-      connections.getConnections().get(ws.target.jwtDetails.user_id)
+      connections
+          .getConnections()
+          .get(ws.target.jwtDetails.user_id)
           .send(JSON.stringify(outMessage));
       return;
     }
@@ -131,28 +137,34 @@ async function toEvent(ws) {
     }
 
     const outMessage = await replyHelper.prepareSuccess(message, reply);
-    connections.getConnections().get(ws.target.jwtDetails.user_id)
+    connections
+        .getConnections()
+        .get(ws.target.jwtDetails.user_id)
         .send(JSON.stringify(outMessage));
   } catch (err) {
     const outMessage = await replyHelper.prepareError(message, err.message);
-    connections.getConnections().get(ws.target.jwtDetails.user_id)
+    connections
+        .getConnections()
+        .get(ws.target.jwtDetails.user_id)
         .send(JSON.stringify(outMessage));
   }
 
   /**
-     * To check the validity of the received message
-     *
-     * @param {*} data
-     * @return {boolean} Whether the format is correct or not
-     */
+   * To check the validity of the received message
+   *
+   * @param {*} data
+   * @return {boolean} Whether the format is correct or not
+   */
   function checkMessageFormat(data) {
     try {
       const message = JSON.parse(data);
-      const bValid = check.all(check.map(message, {
-        module: check.string,
-        event: check.string,
-        messageid: check.number,
-      }));
+      const bValid = check.all(
+          check.map(message, {
+            module: check.string,
+            event: check.string,
+            messageid: check.number,
+          })
+      );
 
       return bValid;
     } catch (err) {
@@ -167,7 +179,7 @@ async function toEvent(ws) {
  */
 async function initDB() {
   // Init connection with DB
-  await redClient.initRedisClient();
+  await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 0);
   console.log('Redis connected');
   await mongo.initDbConnection();
   console.log('Mongo connected');

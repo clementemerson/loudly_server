@@ -1,6 +1,3 @@
-const fs = require('fs');
-const path = require('path');
-
 const express = require('express');
 const serverapp = express();
 serverapp.use(express.json());
@@ -12,7 +9,7 @@ const redClient = require('./redis/redclient');
 const listenPort = 8081;
 
 // Initialize ALL routes including subfolders
-recursiveRoutes('routes');
+configRoutes();
 
 let server;
 // Init connection with DB and establish connection one by one
@@ -23,20 +20,9 @@ initDB();
 /**
  *  Add all routes to the app
  *
- * @param {string} folderName
  */
-function recursiveRoutes(folderName) {
-    fs.readdirSync(folderName).forEach(function (file) {
-        const fullName = path.join(folderName, file);
-        const stat = fs.lstatSync(fullName);
-
-        if (stat.isDirectory()) {
-            recursiveRoutes(fullName);
-        } else if (file.toLowerCase().indexOf('.js')) {
-            require('./' + fullName)(serverapp);
-            console.log('require(\'' + fullName + '\')');
-        }
-    });
+function configRoutes() {
+  require('./routes/loginuers')(serverapp);
 }
 
 /**
@@ -44,12 +30,12 @@ function recursiveRoutes(folderName) {
  *
  */
 async function initDB() {
-    // Init connection with DB
-    await redClient.initRedisClient();
-    console.log('Redis connected');
-    await mongo.initDbConnection();
-    console.log('Mongo connected');
-    initServer();
+  // Init connection with DB
+  await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 0);
+  console.log('Redis connected');
+  await mongo.initDbConnection();
+  console.log('Mongo connected');
+  initServer();
 }
 
 /**
@@ -57,9 +43,9 @@ async function initDB() {
  *
  */
 function initServer() {
-    server = serverapp.listen(listenPort, function () {
-        const host = server.address().address;
-        const port = server.address().port;
-        console.log('Example app listening at http://%s:%s', host, port);
-    });
+  server = serverapp.listen(listenPort, function() {
+    const host = server.address().address;
+    const port = server.address().port;
+    console.log('Example app listening at http://%s:%s', host, port);
+  });
 }

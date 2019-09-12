@@ -7,19 +7,23 @@
     "start": "nodemon server.js",
     "ws": "nodemon websock.js",
     "fanout": "nodemon fanout.js",
-    "test": "jest --detectOpenHandles",
-    "cc": "jest --coverage --collectCoverageFrom=**/*.js"
+    "uttest": "jest tests --detectOpenHandles",
+    "cc": "jest --coverage --collectCoverageFrom=**/*.js",
+    "apitest": "jest apitests --detectOpenHandles"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.3.0",
     "eslint-config-google": "^0.13.0",
-    "nodemon": "^1.19.0",
-    "jest": "^24.9.0"
+    "eslint-plugin-prettier": "^3.1.0",
+    "eslint-plugin-security": "^1.4.0",
+    "jest": "^24.9.0",
+    "nodemon": "^1.19.0"
   },
   "dependencies": {
     "assert": "^2.0.0",
+    "bcrypt": "^3.0.6",
     "bluebird": "^3.5.5",
     "check-types": "^10.0.0",
     "crypto-random-string": "^3.0.0",
@@ -29,6 +33,7 @@
     "mongodb": "^3.2.5",
     "mysql": "^2.17.1",
     "redis": "^2.8.0",
+    "safe-compare": "^1.1.4",
     "url": "^0.11.0",
     "verror": "^1.10.0",
     "winston": "^3.2.1",

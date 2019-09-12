@@ -29,11 +29,9 @@ beforeEach(() => {
   UserPolls.getPolls = jest.fn();
 });
 
-afterEach(() => {
-});
+afterEach(() => {});
 
-afterAll(() => {
-});
+afterAll(() => {});
 
 describe('getUsersFromPhoneNumbers', () => {
   test('should exist', () => {
@@ -70,8 +68,9 @@ describe('getUsersFromPhoneNumbers', () => {
       await UserController.getUsersFromPhoneNumbers(userid, phoneNumbers);
     } catch (err) {
       // Expects
-      expect(err.message)
-          .toEqual('argument \'phoneNumbers\' must be nonEmptyString[]');
+      expect(err.message).toEqual(
+          'argument \'phoneNumbers\' must be nonEmptyString[]'
+      );
     }
   });
 
@@ -85,8 +84,9 @@ describe('getUsersFromPhoneNumbers', () => {
       await UserController.getUsersFromPhoneNumbers(userid, phoneNumbers);
     } catch (err) {
       // Expects
-      expect(err.message)
-          .toEqual('argument \'phoneNumbers\' must be nonEmptyString[]');
+      expect(err.message).toEqual(
+          'argument \'phoneNumbers\' must be nonEmptyString[]'
+      );
     }
   });
 
@@ -100,15 +100,19 @@ describe('getUsersFromPhoneNumbers', () => {
       await UserController.getUsersFromPhoneNumbers(userid, phoneNumbers);
     } catch (err) {
       // Expects
-      expect(err.message)
-          .toEqual('argument \'phoneNumbers\' must be nonEmptyString[]');
+      expect(err.message).toEqual(
+          'argument \'phoneNumbers\' must be nonEmptyString[]'
+      );
     }
   });
 
   test('should return user info', async () => {
     // Mocks
-    redHelper.getUserIdsByPhone
-        .mockImplementation(() => [{id: 456}, {id: 565}, null]);
+    redHelper.getUserIdsByPhone.mockImplementation(() => [
+      {id: 456},
+      {id: 565},
+      null,
+    ]);
     // Data
     const userid = 2004;
     const phoneNumbers = ['1545151215', 'sfadfadf'];
@@ -120,10 +124,9 @@ describe('getUsersFromPhoneNumbers', () => {
 
   test('should fail if got error', async () => {
     // Mocks
-    redHelper.getUserIdsByPhone
-        .mockImplementation(() => {
-          throw new Error('');
-        });
+    redHelper.getUserIdsByPhone.mockImplementation(() => {
+      throw new Error('');
+    });
     expect.assertions(1);
     try {
       // Data
@@ -171,10 +174,9 @@ describe('getGroups', () => {
 
   test('should fail on error', async () => {
     // Mocks
-    GroupUsers.getGroupsOfUser = jest.fn()
-        .mockImplementation(() => {
-          throw new Error('');
-        });
+    GroupUsers.getGroupsOfUser = jest.fn().mockImplementation(() => {
+      throw new Error('');
+    });
     expect.assertions(1);
     try {
       // Data
@@ -221,10 +223,9 @@ describe('getPolls', () => {
 
   test('should fail on error', async () => {
     // Mocks
-    UserPolls.getPolls = jest.fn()
-        .mockImplementation(() => {
-          throw new Error('');
-        });
+    UserPolls.getPolls = jest.fn().mockImplementation(() => {
+      throw new Error('');
+    });
     expect.assertions(1);
     try {
       // Data
@@ -310,10 +311,9 @@ describe('getInfo', () => {
 
   test('should fail on error', async () => {
     // Mocks
-    dbUsers.getUserInfoByUserIds = jest.fn()
-        .mockImplementation(() => {
-          throw new Error('');
-        });
+    dbUsers.getUserInfoByUserIds = jest.fn().mockImplementation(() => {
+      throw new Error('');
+    });
     expect.assertions(1);
     try {
       // Data
@@ -381,7 +381,7 @@ describe('changeName', () => {
 
   test('should change name of the user', async () => {
     // Mocks
-    const dbUsersChangeName = dbUsers.changeName.mockImplementation(() => { });
+    const dbUsersChangeName = dbUsers.changeName.mockImplementation(() => {});
     // Data
     const userid = 2004;
     const name = 'new name _testing';
@@ -456,8 +456,9 @@ describe('changeStatusMsg', () => {
       await UserController.changeStatusMsg(userid, statusmsg);
     } catch (err) {
       // Expects
-      expect(err.message)
-          .toEqual('argument \'statusmsg\' must be a nonEmptyString');
+      expect(err.message).toEqual(
+          'argument \'statusmsg\' must be a nonEmptyString'
+      );
     }
   });
 
@@ -471,15 +472,17 @@ describe('changeStatusMsg', () => {
       await UserController.changeStatusMsg(userid, statusmsg);
     } catch (err) {
       // Expects
-      expect(err.message)
-          .toEqual('argument \'statusmsg\' must be a nonEmptyString');
+      expect(err.message).toEqual(
+          'argument \'statusmsg\' must be a nonEmptyString'
+      );
     }
   });
 
   test('should change statusmsg of the user', async () => {
     // Mocks
-    const dbUsersChangeStatusMsg = dbUsers.changeStatusMsg
-        .mockImplementation(() => { });
+    const dbUsersChangeStatusMsg = dbUsers.changeStatusMsg.mockImplementation(
+        () => {}
+    );
     // Data
     const userid = 2004;
     const statusmsg = 'new status msg _testing';
@@ -498,10 +501,11 @@ describe('changeStatusMsg', () => {
 
   test('should throw error if Users.changeStatusMsg failed', async () => {
     // Mocks
-    const dbUsersChangeStatusMsg = dbUsers.changeStatusMsg
-        .mockImplementation(() => {
+    const dbUsersChangeStatusMsg = dbUsers.changeStatusMsg.mockImplementation(
+        () => {
           throw new Error('');
-        });
+        }
+    );
     expect.assertions(5);
     try {
       // Data

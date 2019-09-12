@@ -1,14 +1,11 @@
 const expect = require('expect');
 
-const errors = require('../helpers/errorstousers');
-const success = require('../helpers/successtousers');
-
 const dbTransactions = require('../db/session');
 
 const UpdateController = require('../controllers/UpdateController');
 
 beforeAll(async () => {
-  console.log = () => { };
+  console.log = () => {};
 });
 
 beforeEach(() => {
@@ -17,11 +14,9 @@ beforeEach(() => {
   dbTransactions.abort = jest.fn();
 });
 
-afterEach(() => {
-});
+afterEach(() => {});
 
-afterAll(() => {
-});
+afterAll(() => {});
 
 describe('sendPollUpdates', () => {
   test('should exist', () => {

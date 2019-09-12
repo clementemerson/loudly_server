@@ -1,14 +1,11 @@
 const expect = require('expect');
 
-const errors = require('../helpers/errorstousers');
-const success = require('../helpers/successtousers');
-
 const dbTransactions = require('../db/session');
 
 const jwtController = require('../controllers/jwtController');
 
 beforeAll(async () => {
-  console.log = () => { };
+  console.log = () => {};
 });
 
 beforeEach(() => {
@@ -17,23 +14,9 @@ beforeEach(() => {
   dbTransactions.abort = jest.fn();
 });
 
-afterEach(() => {
-});
+afterEach(() => {});
 
-afterAll(() => {
-});
-
-describe('validJWTNeeded', () => {
-  test('should exist', () => {
-    // Expects
-    expect(jwtController.validJWTNeeded).toBeDefined();
-  });
-
-  test('should be a function', () => {
-    // Expects
-    expect(typeof jwtController.validJWTNeeded).toBe('function');
-  });
-});
+afterAll(() => {});
 
 describe('validateJwt', () => {
   test('should exist', () => {
@@ -56,18 +39,6 @@ describe('validateJwtData', () => {
   test('should be a function', () => {
     // Expects
     expect(typeof jwtController.validateJwtData).toBe('function');
-  });
-});
-
-describe('validJWTDataNeeded', () => {
-  test('should exist', () => {
-    // Expects
-    expect(jwtController.validJWTDataNeeded).toBeDefined();
-  });
-
-  test('should be a function', () => {
-    // Expects
-    expect(typeof jwtController.validJWTDataNeeded).toBe('function');
   });
 });
 

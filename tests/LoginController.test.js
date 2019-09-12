@@ -1,14 +1,11 @@
 const expect = require('expect');
 
-const errors = require('../helpers/errorstousers');
-const success = require('../helpers/successtousers');
-
 const dbTransactions = require('../db/session');
 
 const LoginController = require('../controllers/LoginController');
 
 beforeAll(async () => {
-  console.log = () => { };
+  console.log = () => {};
 });
 
 beforeEach(() => {
@@ -17,11 +14,9 @@ beforeEach(() => {
   dbTransactions.abort = jest.fn();
 });
 
-afterEach(() => {
-});
+afterEach(() => {});
 
-afterAll(() => {
-});
+afterAll(() => {});
 
 describe('getotp', () => {
   test('should exist', () => {
@@ -67,7 +62,9 @@ describe('getExistingUserInfoFromPhoneNumber', () => {
 
   test('should be a function', () => {
     // Expects
-    expect(typeof LoginController.getExistingUserInfoFromPhoneNumber).toBe('function');
+    expect(typeof LoginController.getExistingUserInfoFromPhoneNumber).toBe(
+        'function'
+    );
   });
 });
 

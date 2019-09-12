@@ -36,7 +36,6 @@ module.exports = {
     message: 'User does not exist',
   },
 
-
   // Poll module errors
   errorPollNotAvailable: {
     errno: 5001,
@@ -75,7 +74,6 @@ module.exports = {
     message: 'Users voted for this poll',
   },
 
-
   // Group module errors
   errorUserIsNotMember: {
     errno: 7001,
@@ -110,12 +108,10 @@ module.exports = {
   },
   wrapError: function(err) {
     console.log(err.message);
-    if ((err instanceof VError) == false) {
+    if (err instanceof VError == false) {
       throw new VError(err, internalError.message);
     } else {
       throw err;
     }
   },
-
-
 };

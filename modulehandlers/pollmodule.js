@@ -63,9 +63,14 @@ module.exports = {
  * @return {*}
  */
 async function getMyVotes(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+          })
+      ),
+      'Invalid message'
+  );
   reply = await PollOpController.getMyVotes(message.user_id);
   return reply;
 }
@@ -77,14 +82,21 @@ async function getMyVotes(message) {
  * @return {*}
  */
 async function unSubscribeToPollResult(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await PollController.unSubscribeToPollResult(message.user_id,
-      message.data.pollid);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await PollController.unSubscribeToPollResult(
+      message.user_id,
+      message.data.pollid
+  );
   return reply;
 }
 
@@ -95,14 +107,21 @@ async function unSubscribeToPollResult(message) {
  * @return {*}
  */
 async function subscribeToPollResult(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await PollSubsController.subscribeToPollResult(message.user_id,
-      message.data.pollid);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await PollSubsController.subscribeToPollResult(
+      message.user_id,
+      message.data.pollid
+  );
   return reply;
 }
 
@@ -113,16 +132,23 @@ async function subscribeToPollResult(message) {
  * @return {*}
  */
 async function getUsersVotesByPoll(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollid: check.number,
-      user_ids: check.array.of.number,
-    },
-  })), 'Invalid message');
-  reply = await PollSubsController.getUsersVotesByPoll(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollid: check.number,
+              user_ids: check.array.of.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await PollSubsController.getUsersVotesByPoll(
+      message.user_id,
       message.data.pollid,
-      message.data.user_ids);
+      message.data.user_ids
+  );
   return reply;
 }
 
@@ -133,14 +159,18 @@ async function getUsersVotesByPoll(message) {
  * @return {*}
  */
 async function getInfo(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollids: check.array.of.number,
-    },
-  })), 'Invalid message');
-  reply = await PollController.getInfo(message.user_id,
-      message.data.pollids);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollids: check.array.of.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await PollController.getInfo(message.user_id, message.data.pollids);
   return reply;
 }
 
@@ -151,9 +181,14 @@ async function getInfo(message) {
  * @return {*}
  */
 async function getMyPollsInfo(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+          })
+      ),
+      'Invalid message'
+  );
   reply = await PollController.getMyPollsInfo(message.user_id);
   return reply;
 }
@@ -165,16 +200,23 @@ async function getMyPollsInfo(message) {
  * @return {*}
  */
 async function shareToGroup(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollid: check.number,
-      groupid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await PollOpController.shareToGroup(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollid: check.number,
+              groupid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await PollOpController.shareToGroup(
+      message.user_id,
       message.data.pollid,
-      message.data.groupid);
+      message.data.groupid
+  );
   return reply;
 }
 
@@ -185,18 +227,25 @@ async function shareToGroup(message) {
  * @return {*}
  */
 async function vote(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollid: check.number,
-      optionindex: check.number,
-      secretvote: check.boolean,
-    },
-  })), 'Invalid message');
-  reply = await PollController.vote(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollid: check.number,
+              optionindex: check.number,
+              secretvote: check.boolean,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await PollController.vote(
+      message.user_id,
       message.data.pollid,
       message.data.optionindex,
-      message.data.secretvote);
+      message.data.secretvote
+  );
   return reply;
 }
 
@@ -207,13 +256,20 @@ async function vote(message) {
  * @return {*}
  */
 async function handleDelete(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      pollid: check.number,
-    },
-  })), 'Invalid message');
-  const reply = await PollController.delete(message.user_id,
-      message.data.pollid);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              pollid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  const reply = await PollController.delete(
+      message.user_id,
+      message.data.pollid
+  );
   return reply;
 }

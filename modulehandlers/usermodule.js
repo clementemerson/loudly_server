@@ -46,14 +46,21 @@ module.exports = {
  * @return {*}
  */
 async function changeStatusMsg(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      statusmsg: check.string,
-    },
-  })), 'Invalid message');
-  reply = await UserController.changeStatusMsg(message.user_id,
-      message.data.statusmsg);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              statusmsg: check.string,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await UserController.changeStatusMsg(
+      message.user_id,
+      message.data.statusmsg
+  );
   return reply;
 }
 
@@ -64,14 +71,18 @@ async function changeStatusMsg(message) {
  * @return {*}
  */
 async function changeName(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      name: check.string,
-    },
-  })), 'Invalid message');
-  reply = await UserController.changeName(message.user_id,
-      message.data.name);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              name: check.string,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await UserController.changeName(message.user_id, message.data.name);
   return reply;
 }
 
@@ -82,11 +93,16 @@ async function changeName(message) {
  * @return {*}
  */
 async function getInfo(message) {
-  assert.ok(check.all(check.map(message, {
-    data: {
-      user_id: check.array.of.number,
-    },
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            data: {
+              user_id: check.array.of.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
   reply = await UserController.getInfo(message.data.userids);
   return reply;
 }
@@ -98,9 +114,14 @@ async function getInfo(message) {
  * @return {*}
  */
 async function getPolls(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+          })
+      ),
+      'Invalid message'
+  );
   reply = await UserController.getPolls(message.user_id);
   return reply;
 }
@@ -112,9 +133,14 @@ async function getPolls(message) {
  * @return {*}
  */
 async function getGroups(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+          })
+      ),
+      'Invalid message'
+  );
   reply = await UserController.getGroups(message.user_id);
   return reply;
 }
@@ -126,13 +152,20 @@ async function getGroups(message) {
  * @return {*}
  */
 async function getUsersFromPhoneNumbers(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      phoneNumbers: check.array.of.nonEmptyString,
-    },
-  })), 'Invalid message');
-  reply = await UserController.getUsersFromPhoneNumbers(message.user_id,
-      message.data.phoneNumbers);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              phoneNumbers: check.array.of.nonEmptyString,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await UserController.getUsersFromPhoneNumbers(
+      message.user_id,
+      message.data.phoneNumbers
+  );
   return reply;
 }

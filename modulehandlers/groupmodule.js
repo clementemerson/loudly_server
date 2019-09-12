@@ -9,8 +9,7 @@ const GroupUserController = require('../controllers/GroupUserController');
 
 module.exports = {
   handle: async (message) => {
-    if (!message ||
-            !message.event) {
+    if (!message || !message.event) {
       throw new Error('Invalid Arguments');
     }
 
@@ -69,14 +68,21 @@ module.exports = {
  * @return {*}
  */
 async function getUsersOfGroup(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      groupid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await GroupUserController.getUsersOfGroup(message.user_id,
-      message.data.groupid);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              groupid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupUserController.getUsersOfGroup(
+      message.user_id,
+      message.data.groupid
+  );
   return reply;
 }
 
@@ -87,16 +93,23 @@ async function getUsersOfGroup(message) {
  * @return {*}
  */
 async function removeUser(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      user_id: check.number,
-      groupid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await GroupUserController.removeUser(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              user_id: check.number,
+              groupid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupUserController.removeUser(
+      message.user_id,
       message.data.user_id,
-      message.data.groupid);
+      message.data.groupid
+  );
   return reply;
 }
 
@@ -107,18 +120,25 @@ async function removeUser(message) {
  * @return {*}
  */
 async function changeUserPermission(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      user_id: check.number,
-      groupid: check.number,
-      permission: check.string,
-    },
-  })), 'Invalid message');
-  reply = await GroupUserController.changeUserPermission(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              user_id: check.number,
+              groupid: check.number,
+              permission: check.string,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupUserController.changeUserPermission(
+      message.user_id,
       message.data.user_id,
       message.data.groupid,
-      message.data.permission);
+      message.data.permission
+  );
   return reply;
 }
 
@@ -129,18 +149,25 @@ async function changeUserPermission(message) {
  * @return {*}
  */
 async function addUser(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      user_id: check.number,
-      groupid: check.number,
-      permission: check.in(['ADMIN', 'USER']),
-    },
-  })), 'Invalid message');
-  reply = await GroupUserController.addUser(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              user_id: check.number,
+              groupid: check.number,
+              permission: check.in(['ADMIN', 'USER']),
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupUserController.addUser(
+      message.user_id,
       message.data.user_id,
       message.data.groupid,
-      message.data.permission);
+      message.data.permission
+  );
   return reply;
 }
 
@@ -151,14 +178,18 @@ async function addUser(message) {
  * @return {*}
  */
 async function getPolls(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      groupid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await GroupController.getPolls(message.user_id,
-      message.data.groupid);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              groupid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupController.getPolls(message.user_id, message.data.groupid);
   return reply;
 }
 
@@ -169,11 +200,16 @@ async function getPolls(message) {
  * @return {*}
  */
 async function getInfo(message) {
-  assert.ok(check.all(check.map(message, {
-    data: {
-      groupids: check.array.of.number,
-    },
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            data: {
+              groupids: check.array.of.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
   reply = await GroupController.getInfo(message.data.groupids);
   return reply;
 }
@@ -185,9 +221,14 @@ async function getInfo(message) {
  * @return {*}
  */
 async function getMyGroupsInfo(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-  })), 'Invalid message');
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+          })
+      ),
+      'Invalid message'
+  );
   reply = await GroupController.getMyGroupsInfo(message.user_id);
   return reply;
 }
@@ -199,14 +240,18 @@ async function getMyGroupsInfo(message) {
  * @return {*}
  */
 async function handleDelete(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      groupid: check.number,
-    },
-  })), 'Invalid message');
-  reply = await GroupController.delete(message.user_id,
-      message.data.groupid);
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              groupid: check.number,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupController.delete(message.user_id, message.data.groupid);
   return reply;
 }
 
@@ -217,16 +262,23 @@ async function handleDelete(message) {
  * @return {*}
  */
 async function changeDesc(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      groupid: check.number,
-      desc: check.string,
-    },
-  })), 'Invalid message');
-  reply = await GroupController.changeDesc(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              groupid: check.number,
+              desc: check.string,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupController.changeDesc(
+      message.user_id,
       message.data.groupid,
-      message.data.desc);
+      message.data.desc
+  );
   return reply;
 }
 
@@ -237,16 +289,23 @@ async function changeDesc(message) {
  * @return {*}
  */
 async function changeTitle(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      groupid: check.number,
-      name: check.string,
-    },
-  })), 'Invalid message');
-  reply = await GroupController.changeTitle(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              groupid: check.number,
+              name: check.string,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupController.changeTitle(
+      message.user_id,
       message.data.groupid,
-      message.data.name);
+      message.data.name
+  );
   return reply;
 }
 
@@ -257,16 +316,22 @@ async function changeTitle(message) {
  * @return {*}
  */
 async function create(message) {
-  assert.ok(check.all(check.map(message, {
-    user_id: check.number,
-    data: {
-      name: check.string,
-      desc: check.string,
-    },
-  })), 'Invalid message');
-  reply = await GroupController.create(message.user_id,
+  assert.ok(
+      check.all(
+          check.map(message, {
+            user_id: check.number,
+            data: {
+              name: check.string,
+              desc: check.string,
+            },
+          })
+      ),
+      'Invalid message'
+  );
+  reply = await GroupController.create(
+      message.user_id,
       message.data.name,
-      message.data.desc);
+      message.data.desc
+  );
   return reply;
 }
-

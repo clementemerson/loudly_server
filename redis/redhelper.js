@@ -1,4 +1,3 @@
-const VError = require('verror');
 const assert = require('assert');
 const check = require('check-types');
 
@@ -20,26 +19,40 @@ module.exports = {
         assert.ok(check.number(userid),
             'argument \'userid\' must be a number');
 
-        if (await redClient.exists(keyPrefix.usersOfGroup + groupid) == 1) {
+        // Check if the group exists
+        if ((await redClient.exists(keyPrefix.usersOfGroup + groupid)) == 1) {
+            // Yes
             return await redClient.sadd(keyPrefix.usersOfGroup + groupid, userid);
         } else {
+            // No
+            // Todo: create the key with 30 day expiry
+            // Add current users to the group
+            // Add this user
             return await redClient.sadd(keyPrefix.usersOfGroup + groupid, userid);
         }
     },
     createPollResult: async (pollid, options, createdAt, updatedAt) => {
-        if (!pollid ||
-            !options ||
-            !createdAt ||
-            !updatedAt) {
+        if (!pollid || !options || !createdAt || !updatedAt) {
             throw new Error('Invalid Arguments');
         }
 
-        await redClient.hmset(keyPrefix.pollResult + pollid, 'id', pollid,
-            'at1', createdAt, 'at2', updatedAt);
+        await redClient.hmset(
+            keyPrefix.pollResult + pollid,
+            'id',
+            pollid,
+            'at1',
+            createdAt,
+            'at2',
+            updatedAt
+        );
         options.forEach(async (option, index) => {
-            await redClient.hmset(keyPrefix.pollResult + pollid,
-                'OV' + index.toString(), 0,
-                'SV' + index.toString(), 0);
+            await redClient.hmset(
+                keyPrefix.pollResult + pollid,
+                'OV' + index.toString(),
+                0,
+                'SV' + index.toString(),
+                0
+            );
         });
     },
     updateOpenVoteResult: async (pollid, optionindex) => {
@@ -48,8 +61,11 @@ module.exports = {
         assert.ok(check.number(optionindex),
             'argument \'optionindex\' must be a number');
 
-        await redClient.hincrby(keyPrefix.pollResult + pollid,
-            'OV' + optionindex.toString(), 1);
+        await redClient.hincrby(
+            keyPrefix.pollResult + pollid,
+            'OV' + optionindex.toString(),
+            1
+        );
     },
     updateSecretVoteResult: async (pollid, optionindex) => {
         assert.ok(check.number(pollid),
@@ -57,8 +73,11 @@ module.exports = {
         assert.ok(check.number(optionindex),
             'argument \'optionindex\' must be a number');
 
-        await redClient.hincrby(keyPrefix.pollResult + pollid,
-            'SV' + optionindex.toString(), 1);
+        await redClient.hincrby(
+            keyPrefix.pollResult + pollid,
+            'SV' + optionindex.toString(),
+            1
+        );
     },
     getUserIdsByPhone: async (phoneNumbers) => {
         assert.ok(check.array.of.nonEmptyString(phoneNumbers),
@@ -67,7 +86,7 @@ module.exports = {
         return await redClient.multiget(keyPrefix.phoneNumber, phoneNumbers);
     },
     getPollResults: async (pollids) => {
-        assert.ok(check.array.of.nonEmptyString(pollids),
+        assert.ok(check.array.of.number(pollids),
             'argument \'pollids\' must be a number[]');
 
         return await redClient.multiget(keyPrefix.pollResult, pollids);
@@ -82,12 +101,11 @@ module.exports = {
         assert.ok(check.number(pollid),
             'argument \'pollid\' must be a number');
 
-        try {
-            return await redClient
-                .zrangebyscore(keyPrefix.pollSubsription + pollid, '-inf', '+inf');
-        } catch (err) {
-            console.log(err);
-        }
+        return await redClient.zrangebyscore(
+            keyPrefix.pollSubsription + pollid,
+            '-inf',
+            '+inf'
+        );
     },
     getSubscribedUsersUntilTime: async (pollid, timeUntilSubscriptionMade) => {
         assert.ok(check.number(pollid),
@@ -95,8 +113,11 @@ module.exports = {
         assert.ok(check.number(timeUntilSubscriptionMade),
             'argument \'timeUntilSubscriptionMade\' must be a number');
 
-        return await redClient.zrangebyscore(keyPrefix.pollSubsription + pollid,
-            '-inf', timeUntilSubscriptionMade);
+        return await redClient.zrangebyscore(
+            keyPrefix.pollSubsription + pollid,
+            '-inf',
+            timeUntilSubscriptionMade
+        );
     },
     removeElapsedSubscriptions: async (pollid, timeUntilSubscriptionMade) => {
         assert.ok(check.number(pollid),
@@ -104,7 +125,10 @@ module.exports = {
         assert.ok(check.number(timeUntilSubscriptionMade),
             'argument \'timeUntilSubscriptionMade\' must be a number');
 
-        return await redClient.zremrangebyscore(keyPrefix.pollSubsription + pollid,
-            '-inf', timeUntilSubscriptionMade);
+        return await redClient.zremrangebyscore(
+            keyPrefix.pollSubsription + pollid,
+            '-inf',
+            timeUntilSubscriptionMade
+        );
     },
 };

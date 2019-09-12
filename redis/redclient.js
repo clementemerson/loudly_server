@@ -1,180 +1,202 @@
-// mongo
+const VError = require('verror');
+const assert = require('assert');
+const check = require('check-types');
+
 const redis = require('redis');
 const bluebird = require('bluebird');
 const password = 'jbhfjahfje8243752bdsaBHFJ754KJGNJGDF8673BJGgijuhgjihuuit';
 
 bluebird.promisifyAll(redis);
-let redClient;
+let red;
 
 module.exports = {
-  initRedisClient: async () => {
-    return new Promise((resolve, reject) => {
-      try {
-        redClient = redis.createClient(6379, 'loudly.loudspeakerdev.net');
-        redClient.on('connect', function() {
-          redClient.auth(password, () => {
-            resolve();
-          });
+    initRedisClient: async (host, port, db) => {
+        return new Promise((resolve, reject) => {
+            try {
+                red = redis.createClient(port, host, { db: db });
+                red.on('connect', function () {
+                    red.auth(password, () => {
+                        resolve();
+                    });
+                });
+
+                red.on('error', function (err) {
+                    console.log('Something went wrong ' + err);
+                });
+            } catch (err) {
+                console.log(err);
+                reject(err);
+            }
+        });
+    },
+    // -----------------------------------------------------------------//
+    //      COMMON FUNCTIONS
+    // -----------------------------------------------------------------//
+    exists: async (key) => {
+        if (check.string(key) === false) {
+            throw new VError('argument \'key\' must be a string');
+        }
+
+        return await red.existsAsync(key);
+    },
+    multiget: async (keyPrefix, ids) => {
+        if (check.string(keyPrefix) === false)
+            throw new VError('argument \'keyPrefix\' must be a string');
+        if (check.array.of.nonEmptyString(ids) === false)
+            throw new VError('argument \'ids\' must be a nonEmptyString[]');
+
+        const multiCmd = red.multi({ pipeline: false });
+
+        ids.forEach(async (id) => {
+            multiCmd.hgetall(keyPrefix + id);
         });
 
-        redClient.on('error', function(err) {
-          console.log('Something went wrong ' + err);
-        });
-      } catch (err) {
-        console.log(err);
-        reject(err);
-      }
-    });
-  },
-  // -----------------------------------------------------------------//
-  //      COMMON FUNCTIONS
-  // -----------------------------------------------------------------//
-  exists: async (keyName) => {
-    if (!keyName) {
-      throw new Error('Invalid Arguments');
-    }
+        return await multiCmd.execAsync();
+    },
+    scan: async (cursor, keyMatch) => {
+        if (check.number(cursor) === false)
+            throw new VError('argument \'cursor\' must be a number');
+        if (check.string(keyMatch) === false)
+            throw new VError('argument \'keyMatch\' must be a string');
 
-    return await redClient.existsAsync(keyName);
-  },
-  multiget: async (prefixKey, ids) => {
-    if (!prefixKey || !ids) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.scanAsync(cursor, 'MATCH', match);
+    },
+    del: async (key) => {
+        if (check.string(key) === false) {
+            throw new VError('argument \'key\' must be a string');
+        }
 
-    const multiCmd = redClient.multi({pipeline: false});
+        return await red.delAsync(key);
+    },
+    // -----------------------------------------------------------------//
+    //      UNSORTED SET FUNCTIONS
+    // -----------------------------------------------------------------//
+    sadd: async (key, value, expirySecs = null) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.assigned(value) === false)
+            throw new VError('argument \'value\' must be a defined');
+        if (check.null(expirySecs) === false && check.number(expirySecs) === false)
+            throw new VError('argument \'expirySecs\' must be null or a number');
 
-    ids.forEach(async (id) => {
-      multiCmd.hgetall(prefixKey + id);
-    });
+        if (!!expirySecs) {
+            const exists = await red.existsAsync(key);
+            if (exists == false) {
+                const saddReturn = await red.saddAsync([key, value]);
+                await red.expireAsync(key, expirySecs);
+                return saddReturn;
+            }
+        }
 
-    return await multiCmd.execAsync();
-  },
-  scan: async (cursor, match) => {
-    if (!match) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.saddAsync([key, value]);
+    },
+    srem: async (key, value) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.assigned(value) === false)
+            throw new VError('argument \'value\' must be a defined');
 
-    return await redClient.scanAsync(cursor, 'MATCH', match);
-  },
-  del: async (key) => {
-    if (!key) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.sremAsync([key, value]);
+    },
+    spop: async (key) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
 
-    return await redClient.delAsync(key);
-  },
-  // -----------------------------------------------------------------//
-  //      UNSORTED SET FUNCTIONS
-  // -----------------------------------------------------------------//
-  sadd: async (setKey, value, expirySecs) => {
-    if (!setKey || !value) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.spopAsync(key);
+    },
+    smembers: async (key) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
 
-    if (!!expirySecs) {
-      const exists = await redClient.existsAsync(setKey);
-      if (exists == false) {
-        const saddReturn = await redClient.saddAsync([setKey, value]);
-        await redClient.expire(setKey, expirySecs);
-        return saddReturn;
-      }
-    }
+        return await red.smembersAsync(key);
+    },
+    sismember: async (key, value) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.assigned(value) === false)
+            throw new VError('argument \'value\' must be a defined');
 
-    return await redClient.saddAsync([setKey, value]);
-  },
-  srem: async (setKey, value) => {
-    if (!setKey || !value) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.sismemberAsync(key, value);
+    },
+    // -----------------------------------------------------------------//
+    //      SORTED SET FUNCTIONS
+    // -----------------------------------------------------------------//
+    zadd: async (key, value, score) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.assigned(value) === false)
+            throw new VError('argument \'value\' must be a defined');
+        if (check.number(score) === false)
+            throw new VError('argument \'score\' must be a number');
 
-    return await redClient.sremAsync([setKey, value]);
-  },
-  spop: async (setKey) => {
-    if (!setKey) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.zaddAsync(key, score, value);
+    },
+    zrem: async (key, value) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.assigned(value) === false)
+            throw new VError('argument \'value\' must be a defined');
 
-    return await redClient.spopAsync(setKey);
-  },
-  smembers: async (setKey) => {
-    if (!setKey) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.zremAsync(key, value);
+    },
+    zrangebyscore: async (key, scoreMin, scoreMax) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.string(scoreMin) === false &&
+            check.number(scoreMin) === false)
+            throw new VError('argument \'scoreMin\' must be a number or string');
+        if (check.string(scoreMax) === false &&
+            check.number(scoreMax) === false)
+            throw new VError('argument \'scoreMax\' must be a number or string');
 
-    return await redClient.smembersAsync(setKey);
-  },
-  sismember: async (setKey, value) => {
-    if (!setKey || !value) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.zrangebyscoreAsync(key, scoreMin, scoreMax);
+    },
+    zremrangebyscore: async (key, scoreMin, scoreMax) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.string(scoreMin) === false &&
+            check.number(scoreMin) === false)
+            throw new VError('argument \'scoreMin\' must be a number or string');
+        if (check.string(scoreMax) === false &&
+            check.number(scoreMax) === false)
+            throw new VError('argument \'scoreMax\' must be a number or string');
 
-    return await redClient.sismemberAsync(setKey, value);
-  },
-  // -----------------------------------------------------------------//
-  //      SORTED SET FUNCTIONS
-  // -----------------------------------------------------------------//
-  zadd: async (setKey, value, score) => {
-    if (!setKey || !value || !score) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.zremrangebyscoreAsync(key, scoreMin, scoreMax);
+    },
+    // -----------------------------------------------------------------//
+    //      LIST FUNCTIONS
+    // -----------------------------------------------------------------//
+    lpush: async (key, value) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.assigned(value) === false)
+            throw new VError('argument \'value\' must be a defined');
 
-    return await redClient.zaddAsync(setKey, score, value);
-  },
-  zrem: async (setKey, value) => {
-    if (!setKey || !value) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.lpushAsync(key, value);
+    },
+    // -----------------------------------------------------------------//
+    //      HASH FUNCTIONS
+    // -----------------------------------------------------------------//
+    hmset: async (key, ...args) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
 
-    return await redClient.zremAsync(setKey, value);
-  },
-  zrangebyscore: async (setKey, scoreMin, scoreMax) => {
-    if (!setKey || !scoreMin || !scoreMax) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.hmsetAsync(key, args);
+    },
+    hincrby: async (key, field, incrBy) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
+        if (check.string(field) === false)
+            throw new VError('argument \'field\' must be a string');
+        if (check.number(incrBy) === false)
+            throw new VError('argument \'incrBy\' must be a number');
 
-    return await redClient.zrangebyscoreAsync(setKey, scoreMin, scoreMax);
-  },
-  zremrangebyscore: async (setKey, scoreMin, scoreMax) => {
-    if (!setKey || !scoreMin || !scoreMax) {
-      throw new Error('Invalid Arguments');
-    }
+        return await red.hincrbyAsync(key, field, incrBy);
+    },
+    hgetall: async (key) => {
+        if (check.string(key) === false)
+            throw new VError('argument \'key\' must be a string');
 
-    return await redClient.zremrangebyscoreAsync(setKey, scoreMin, scoreMax);
-  },
-  // -----------------------------------------------------------------//
-  //      LIST FUNCTIONS
-  // -----------------------------------------------------------------//
-  lpush: async (listKey, value) => {
-    if (!listKey || !value) {
-      throw new Error('Invalid Arguments');
-    }
-
-    return await redClient.lpushAsync(listKey, value);
-  },
-  // -----------------------------------------------------------------//
-  //      HASH FUNCTIONS
-  // -----------------------------------------------------------------//
-  hmset: async (hashKey, ...args) => {
-    if (!hashKey) {
-      throw new Error('Invalid Arguments');
-    }
-
-    return await redClient.hmsetAsync(hashKey, args);
-  },
-  hincrby: async (hashKey, field, incrBy) => {
-    if (!hashKey || !field || !incrBy) {
-      throw new Error('Invalid Arguments');
-    }
-
-    return await redClient.hincrbyAsync(hashKey, field, incrBy);
-  },
-  hgetall: async (hashKey) => {
-    if (!hashKey) {
-      throw new Error('Invalid Arguments');
-    }
-
-    return await redClient.hgetallAsync(hashKey);
-  },
+        return await red.hgetallAsync(key);
+    },
 };
-
-

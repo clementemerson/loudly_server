@@ -10,7 +10,8 @@ module.exports = {
             {sequenceName: sequenceName},
             {
               $inc: {sequenceValue: 1},
-            });
+            }
+        );
 
     return sequenceDocument.value.sequenceValue;
   },

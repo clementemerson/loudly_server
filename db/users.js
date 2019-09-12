@@ -11,13 +11,15 @@ module.exports = {
     const createdAt = date.getTime();
     const updatedAt = date.getTime();
 
-    await mongodb().collection(dbtables.Users).insertOne({
-      user_id: data.user_id,
-      phonenumber: data.phonenumber,
-      user_secret: data.user_secret_hashed,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    });
+    await mongodb()
+        .collection(dbtables.Users)
+        .insertOne({
+          user_id: data.user_id,
+          phonenumber: data.phonenumber,
+          user_secret: data.user_secret_hashed,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        });
 
     await redHelper.createUser(data.user_id, data.phonenumber);
   },
@@ -28,12 +30,14 @@ module.exports = {
     const createdAt = date.getTime();
     const updatedAt = date.getTime();
 
-    const existingUsers = await mongodb().collection(dbtables.UsersInfo)
+    const existingUsers = await mongodb()
+        .collection(dbtables.UsersInfo)
         .find({user_id: data.user_id})
         .toArray();
 
     if (!existingUsers[0]) {
-      await mongodb().collection(dbtables.UsersInfo)
+      await mongodb()
+          .collection(dbtables.UsersInfo)
           .insertOne({
             user_id: data.user_id,
             name: '~',
@@ -47,7 +51,8 @@ module.exports = {
   // -------------------------------------------------------------------------
   getOneByPhoneNumber: async (phonenumber) => {
     console.log('db.users.getOneByPhoneNumber');
-    const users = await mongodb().collection(dbtables.Users)
+    const users = await mongodb()
+        .collection(dbtables.Users)
         .find({phonenumber: phonenumber})
         .toArray();
     return users[0];
@@ -55,28 +60,34 @@ module.exports = {
   // -------------------------------------------------------------------------
   deleteOldUserInfo: async (phonenumber) => {
     console.log('db.users.deleteOldUserInfo');
-    await mongodb().collection(dbtables.Users)
+    await mongodb()
+        .collection(dbtables.Users)
         .deleteMany({phonenumber: phonenumber});
   },
   // -------------------------------------------------------------------------
   getUsersByPhoneNumbers: async (phoneNumbers) => {
     console.log('db.users.getUsersByPhoneNumbers');
-    return await mongodb().collection(dbtables.Users)
-        .find({phonenumber: {$in: phoneNumbers}},
-            {user_id: 1, phonenumber: 1})
+    return await mongodb()
+        .collection(dbtables.Users)
+        .find(
+            {phonenumber: {$in: phoneNumbers}},
+            {user_id: 1, phonenumber: 1}
+        )
         .toArray();
   },
 
   getUserInfoByUserIds: async (userIds) => {
     console.log('db.users.getUserInfoByUserIds');
-    return await mongodb().collection(dbtables.UsersInfo)
+    return await mongodb()
+        .collection(dbtables.UsersInfo)
         .find({user_id: {$in: userIds}})
         .toArray();
   },
 
   isUserExist: async (userId) => {
     console.log('db.users.isUserExist');
-    const user = await mongodb().collection(dbtables.UsersInfo)
+    const user = await mongodb()
+        .collection(dbtables.UsersInfo)
         .find({
           user_id: userId,
         })
@@ -94,14 +105,17 @@ module.exports = {
     const date = new Date();
     const updatedAt = date.getTime();
 
-    await mongodb().collection(dbtables.UsersInfo).updateOne(
-        {user_id: userId},
-        {
-          $set: {
-            name: name,
-            updatedAt: updatedAt,
-          },
-        });
+    await mongodb()
+        .collection(dbtables.UsersInfo)
+        .updateOne(
+            {user_id: userId},
+            {
+              $set: {
+                name: name,
+                updatedAt: updatedAt,
+              },
+            }
+        );
   },
 
   changeStatusMsg: async (userId, statusmsg) => {
@@ -109,13 +123,16 @@ module.exports = {
     const date = new Date();
     const updatedAt = date.getTime();
 
-    await mongodb().collection(dbtables.UsersInfo).updateOne(
-        {user_id: userId},
-        {
-          $set: {
-            statusmsg: statusmsg,
-            updatedAt: updatedAt,
-          },
-        });
+    await mongodb()
+        .collection(dbtables.UsersInfo)
+        .updateOne(
+            {user_id: userId},
+            {
+              $set: {
+                statusmsg: statusmsg,
+                updatedAt: updatedAt,
+              },
+            }
+        );
   },
 };

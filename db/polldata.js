@@ -7,38 +7,44 @@ module.exports = {
     const createdAt = data.time.getTime();
     const updatedAt = data.time.getTime();
 
-    await mongodb().collection(dbtables.PollData).insertOne({
-      pollid: data.pollid,
-      title: data.title,
-      isdeleted: false,
-      resultispublic: data.resultispublic,
-      canbeshared: data.canbeshared,
-      createdby: data.createdby,
-      options: data.options,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    });
+    await mongodb()
+        .collection(dbtables.PollData)
+        .insertOne({
+          pollid: data.pollid,
+          title: data.title,
+          isdeleted: false,
+          resultispublic: data.resultispublic,
+          canbeshared: data.canbeshared,
+          createdby: data.createdby,
+          options: data.options,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        });
   },
 
   getPollInfo: async (pollid) => {
     console.log('db.polldata.getPollInfo');
-    const polls = await mongodb().collection(dbtables.PollData)
+    const polls = await mongodb()
+        .collection(dbtables.PollData)
         .find({
           pollid: pollid,
-        }).toArray();
+        })
+        .toArray();
     return polls[0];
   },
 
   getPollInfoByPollIds: async (pollids) => {
     console.log('db.polldata.getPollInfoByPollIds');
-    return await mongodb().collection(dbtables.PollData)
+    return await mongodb()
+        .collection(dbtables.PollData)
         .find({pollid: {$in: pollids}})
         .toArray();
   },
 
   isCreator: async (userid, pollid) => {
     console.log('db.polldata.isCreator');
-    const isCreator = await mongodb().collection(dbtables.PollData)
+    const isCreator = await mongodb()
+        .collection(dbtables.PollData)
         .find({
           createdby: userid,
           pollid: pollid,
@@ -57,19 +63,23 @@ module.exports = {
     const date = new Date();
     const updatedAt = date.getTime();
 
-    await mongodb().collection(dbtables.PollData).updateOne(
-        {pollid: pollid},
-        {
-          $set: {
-            isdeleted: true,
-            updatedAt: updatedAt,
-          },
-        });
+    await mongodb()
+        .collection(dbtables.PollData)
+        .updateOne(
+            {pollid: pollid},
+            {
+              $set: {
+                isdeleted: true,
+                updatedAt: updatedAt,
+              },
+            }
+        );
   },
 
   isDeleted: async (pollid) => {
     console.log('db.polldata.isDeleted');
-    const isDeleted = await mongodb().collection(dbtables.PollData)
+    const isDeleted = await mongodb()
+        .collection(dbtables.PollData)
         .find({
           pollid: pollid,
           isdeleted: true,

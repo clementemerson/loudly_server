@@ -4,7 +4,6 @@ const dbtables = require('./dbtables');
 const redHelper = require('../redis/redhelper');
 
 module.exports = {
-
   create: async (data) => {
     console.log('db.pollresult.create');
     data.options.forEach((Itr) => {
@@ -15,12 +14,14 @@ module.exports = {
     const createdAt = data.time.getTime();
     const updatedAt = data.time.getTime();
 
-    await mongodb().collection(dbtables.PollResult).insertOne({
-      pollid: data.pollid,
-      options: data.options,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    });
+    await mongodb()
+        .collection(dbtables.PollResult)
+        .insertOne({
+          pollid: data.pollid,
+          options: data.options,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        });
 
     // await
   },
@@ -31,7 +32,8 @@ module.exports = {
     const updatedAt = date.getTime();
 
     if (data.secretvote == true) {
-      await mongodb().collection(dbtables.PollResult)
+      await mongodb()
+          .collection(dbtables.PollResult)
           .updateOne(
               {
                 'pollid': data.pollid,
@@ -40,10 +42,12 @@ module.exports = {
               {
                 $inc: {'options.$.secretvotes': 1},
                 $set: {updatedAt: updatedAt},
-              });
+              }
+          );
       await redHelper.updateSecretVoteResult(data.pollid, data.optionindex);
     } else {
-      await mongodb().collection(dbtables.PollResult)
+      await mongodb()
+          .collection(dbtables.PollResult)
           .updateOne(
               {
                 'pollid': data.pollid,
@@ -52,23 +56,30 @@ module.exports = {
               {
                 $inc: {'options.$.openvotes': 1},
                 $set: {updatedAt: updatedAt},
-              });
+              }
+          );
       await redHelper.updateOpenVoteResult(data.pollid, data.optionindex);
     }
   },
 
   getUpdatedPollResults: async (data) => {
     console.log('db.pollresult.syncPollResults');
-    return await mongodb().collection(dbtables.PollResult).find({
-      pollid: {$in: data.pollids},
-      updatedAt: {$gt: data.lastsynchedtime},
-    }).toArray();
+    return await mongodb()
+        .collection(dbtables.PollResult)
+        .find({
+          pollid: {$in: data.pollids},
+          updatedAt: {$gt: data.lastsynchedtime},
+        })
+        .toArray();
   },
 
   getPollResult: async (pollid) => {
     console.log('db.pollresult.getPollResult');
-    return await mongodb().collection(dbtables.PollResult).find({
-      pollid: pollid,
-    }).toArray();
+    return await mongodb()
+        .collection(dbtables.PollResult)
+        .find({
+          pollid: pollid,
+        })
+        .toArray();
   },
 };

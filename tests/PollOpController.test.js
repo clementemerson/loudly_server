@@ -392,18 +392,6 @@ describe('getUsersVotesByPoll', () => {
   });
 });
 
-describe('syncPollResults', () => {
-  test('should exist', () => {
-    // Expects
-    expect(PollOpController.syncPollResults).toBeDefined();
-  });
-
-  test('should be a function', () => {
-    // Expects
-    expect(typeof PollOpController.syncPollResults).toBe('function');
-  });
-});
-
 describe('getMyVotes', () => {
   test('should exist', () => {
     // Expects

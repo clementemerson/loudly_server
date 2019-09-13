@@ -348,9 +348,28 @@ describe('getUsersVotesByPoll', () => {
     }
   });
 
+  test('should fail if user did not vote yet', async () => {
+    // Mock
+    UserPolls.userHasPoll = jest.fn().mockImplementation(() => true);
+    redClient.sismember = jest.fn().mockImplementation(() => false);
+    expect.assertions(1);
+    try {
+      // Data
+      const userid = 2004;
+      const pollid = 1002;
+      const userids = [2010, 2015];
+      // Tests
+      await PollOpController.getUsersVotesByPoll(userid, pollid, userids);
+    } catch (err) {
+      // Expects
+      expect(err.message).toEqual(errors.errorUserNotVoted.message);
+    }
+  });
+
   test('should fail on error', async () => {
     // Mock
     UserPolls.userHasPoll = jest.fn().mockImplementation(() => true);
+    redClient.sismember = jest.fn().mockImplementation(() => true);
     PollVoteData.getUsersVotesByPoll = jest.fn().mockImplementation(() => {
       throw new Error('');
     });
@@ -374,6 +393,7 @@ describe('getUsersVotesByPoll', () => {
       data: 101,
     };
     UserPolls.userHasPoll = jest.fn().mockImplementation(() => true);
+    redClient.sismember = jest.fn().mockImplementation(() => true);
     PollVoteData.getUsersVotesByPoll = jest
         .fn()
         .mockImplementation(() => expectedResult);

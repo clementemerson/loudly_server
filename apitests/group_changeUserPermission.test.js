@@ -14,16 +14,16 @@ afterEach(() => { });
 
 afterAll(() => { });
 
-describe('addUser', () => {
-    test('should fail, if useridsToAdd is undefined', async () => {
+describe('changeUserPermission', () => {
+    test('should fail, if useridToUpdate is undefined', async () => {
 
     });
 
-    test('should fail, if useridsToAdd is null', async () => {
+    test('should fail, if useridToUpdate is null', async () => {
 
     });
 
-    test('should fail, if useridsToAdd array has string in it', async () => {
+    test('should fail, if useridToUpdate is string', async () => {
 
     });
 
@@ -59,23 +59,15 @@ describe('addUser', () => {
 
     });
 
+    test('should fail, if useridToUpdate is not a member of the group', async () => {
+
+    });
+
     test('should fail, and abort transaction on error', async () => {
 
     });
 
-    test('should add all users to the group in normal condition', async () => {
-
-    });
-
-    test('should filter users whose accounts are not exist', async () => {
-
-    });
-
-    test('should filter users who are already member of the group', async () => {
-
-    });
-
-    test('should fail, if no users need to be added to the group', async () => {
+    test('should change the user permission in normal condition', async () => {
 
     });
 });

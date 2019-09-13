@@ -62,17 +62,6 @@ module.exports = {
     }
   },
 
-  getUpdatedPollResults: async (data) => {
-    console.log('db.pollresult.syncPollResults');
-    return await mongodb()
-        .collection(dbtables.PollResult)
-        .find({
-          pollid: {$in: data.pollids},
-          updatedAt: {$gt: data.lastsynchedtime},
-        })
-        .toArray();
-  },
-
   getPollResult: async (pollid) => {
     console.log('db.pollresult.getPollResult');
     return await mongodb()

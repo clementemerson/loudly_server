@@ -22,7 +22,7 @@ initDB();
  *
  */
 function configRoutes() {
-  require('./routes/loginuers')(serverapp);
+  require('./routes/loginusers')(serverapp);
 }
 
 /**

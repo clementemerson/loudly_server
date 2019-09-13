@@ -43,6 +43,7 @@ wss.on('connection', async (wsClient, req) => {
     const validData = await jwtController.validateJwtData(req);
     if (validData == true) {
       wsClient.jwtDetails = req.jwtDetails;
+      console.log('Opening connection - ', wsClient.jwtDetails.user_id);
       connections.getConnections().set(wsClient.jwtDetails.user_id, wsClient);
     } else {
       console.log('Data not valid');
@@ -76,7 +77,7 @@ wss.on('connection', async (wsClient, req) => {
       data: 'something',
     },
   };
-  wsClient.send(JSON.stringify(data));
+  //wsClient.send(JSON.stringify(data));
 });
 
 setInterval(function ping() {
@@ -101,6 +102,7 @@ setInterval(function ping() {
  */
 async function toEvent(ws) {
   let message = null;
+  console.log(ws.data);
   try {
     if (checkMessageFormat(ws.data) == false) {
       const outMessage = {
@@ -120,6 +122,7 @@ async function toEvent(ws) {
     }
 
     message = JSON.parse(ws.data);
+    console.log(message);
     message.user_id = ws.target.jwtDetails.user_id;
     let reply;
     switch (message.module) {

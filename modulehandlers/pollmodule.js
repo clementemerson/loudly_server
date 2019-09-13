@@ -37,9 +37,6 @@ module.exports = {
       case 'getUsersVotesByPoll':
         reply = await getUsersVotesByPoll(message);
         break;
-      case 'syncPollResults':
-        reply = await PollOpController.syncPollResults(message);
-        break;
       case 'subscribeToPollResult':
         reply = await subscribeToPollResult(message);
         break;

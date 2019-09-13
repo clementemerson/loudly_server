@@ -11,6 +11,9 @@ const GroupPolls = require('../db/grouppolls');
 const UserPolls = require('../db/userpolls');
 const GroupUsers = require('../db/groupusers');
 
+const redClient = require('../redis/redclient');
+const keyPrefix = require('../redis/key_prefix');
+
 const ControllerHelper = require('./ControllerHelper');
 
 module.exports = {
@@ -139,8 +142,8 @@ module.exports = {
 
             // Check if the user has voted already
             const isUserVoted = await redClient.sismember(
-                keyPrefix.pollVotedUsers + data.pollid,
-                data.user_id
+                keyPrefix.pollVotedUsers + pollid,
+                userid
             );
             if (isUserVoted == false) {
                 throw new VError(errors.errorUserNotVoted.message);

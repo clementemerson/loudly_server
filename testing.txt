@@ -56,8 +56,6 @@ wss://loudly.loudspeakerdev.net:8080?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
 
 {"module":"polls", "event":"getUsersVotesByPoll", "messageid":1258, "data":{"user_ids":[2002], "pollid":1024}}
 
-{"module":"polls", "event":"syncPollResults", "messageid":8658, "data":{"lastsynchedtime":1562059405239}}
-
 {"module":"polls", "event":"subscribeToPollResult", "messageid":8658, "data":{"pollid":1026}}
 
 {"module":"polls", "event":"unSubscribeToPollResult", "messageid":8658, "data":{"pollid":1023}}

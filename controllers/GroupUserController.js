@@ -33,17 +33,22 @@ module.exports = {
      */
     addUser: async (userid, useridsToAdd, groupid, permission) => {
         console.log('GroupController.addUser');
-    assert.ok(check.number(userid),
-        'argument \'userid\' must be a number');
-    assert.ok(check.array.of.number(useridsToAdd),
-        'argument \'useridsToAdd\' must be a number[]');
-    assert.ok(check.number(groupid),
-        'argument \'groupid\' must be a number');
-    assert.ok(check.nonEmptyString(permission),
-        'argument \'permission\' must be a nonEmptyString');
+        assert.ok(check.number(userid),
+            'argument \'userid\' must be a number');
+        assert.ok(check.array.of.number(useridsToAdd),
+            'argument \'useridsToAdd\' must be a number[]');
+        assert.ok(check.number(groupid),
+            'argument \'groupid\' must be a number');
+        assert.ok(check.nonEmptyString(permission),
+            'argument \'permission\' must be a nonEmptyString');
 
         let dbsession = null;
         try {
+            // Permission can be ADMIN or USER. Cant be CREATOR
+            if (permission != 'ADMIN' && permission != 'USER') {
+                throw new VError(errors.errorInvalidPermission.message);
+            }
+
             // Check the 'user who made the request' is an ADMIN.
             //  If he is, then he can add user.
             const isAdmin = await GroupUsers.isAdmin(groupid, userid);
@@ -75,11 +80,9 @@ module.exports = {
 
             usersToRemove.forEach((userid) => {
                 const nIndex = useridsToAdd.indexOf(userid);
-                // CC: Else path not possible as
-                //  usersToRemove is a subset of useridsToAdd
-                if (nIndex >= 0) {
-                    useridsToAdd.splice(nIndex, 1);
-                }
+                // usersToRemove is a subset of useridsToAdd
+                // Hence 'nIndex >= 0' check is not needed
+                useridsToAdd.splice(nIndex, 1);
             });
 
             // Start transaction
@@ -229,12 +232,12 @@ module.exports = {
      */
     removeUser: async (userid, useridToRemove, groupid) => {
         console.log('GroupController.removeUser');
-    assert.ok(check.number(userid),
-        'argument \'userid\' must be a number');
-    assert.ok(check.number(useridToRemove),
-        'argument \'useridToRemove\' must be a number');
-    assert.ok(check.number(groupid),
-        'argument \'groupid\' must be a number');
+        assert.ok(check.number(userid),
+            'argument \'userid\' must be a number');
+        assert.ok(check.number(useridToRemove),
+            'argument \'useridToRemove\' must be a number');
+        assert.ok(check.number(groupid),
+            'argument \'groupid\' must be a number');
 
         let dbsession = null;
         try {
@@ -299,10 +302,10 @@ module.exports = {
      */
     getUsersOfGroup: async (userid, groupid) => {
         console.log('GroupController.getUsersOfGroups');
-    assert.ok(check.number(userid),
-        'argument \'userid\' must be a number');
-    assert.ok(check.number(groupid),
-        'argument \'groupid\' must be a number');
+        assert.ok(check.number(userid),
+            'argument \'userid\' must be a number');
+        assert.ok(check.number(groupid),
+            'argument \'groupid\' must be a number');
 
         try {
             // Check user in group. If he is, then he can get the requested info

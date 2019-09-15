@@ -17,7 +17,7 @@ module.exports = {
     let reply;
     switch (message.event) {
       case 'create':
-        await PollController.create(message);
+        reply = await PollController.create(message);
         break;
       case 'delete':
         reply = await handleDelete(message);
@@ -203,7 +203,7 @@ async function shareToGroup(message) {
             user_id: check.number,
             data: {
               pollid: check.number,
-              groupid: check.number,
+              groupids: check.array.of.number,
             },
           })
       ),
@@ -212,7 +212,7 @@ async function shareToGroup(message) {
   reply = await PollOpController.shareToGroup(
       message.user_id,
       message.data.pollid,
-      message.data.groupid
+      message.data.groupids
   );
   return reply;
 }

@@ -191,7 +191,7 @@ privateFunctions = {
 
     // create user secret and hash
     const userSecret = cryptoRandomString({length: 24, type: 'base64'});
-    const userSecretHashed = await bcrypt.hash(userSecret, 16);
+    const userSecretHashed = await bcrypt.hash(userSecret, 10);
 
     let userData;
     const phonenumber = req.body.phonenumber;

@@ -79,6 +79,7 @@ module.exports = {
 
             // Start transaction
             dbsession = await dbTransactions.start();
+            const sharedTime = (new Date()).getTime();
 
             for (const groupid of groupids) {
                 // Prepare data
@@ -86,6 +87,7 @@ module.exports = {
                     pollid: pollid,
                     groupid: groupid,
                     user_id: userid,
+                    time: sharedTime,
                 };
                 // Share to the group
                 await GroupPolls.shareToGroup(data);
@@ -99,6 +101,9 @@ module.exports = {
             ControllerHelper.informNewPollInGroup(groupids, pollid);
 
             const replyData = {
+                sharedToOK: groupids,
+                sharedToKO: groupsToRemove,
+                createdAt: sharedTime,
                 status: success.successPollShared,
             };
             return replyData;

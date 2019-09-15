@@ -77,7 +77,7 @@ wss.on('connection', async (wsClient, req) => {
       data: 'something',
     },
   };
-  //wsClient.send(JSON.stringify(data));
+  wsClient.send(JSON.stringify(data));
 });
 
 setInterval(function ping() {
@@ -140,12 +140,15 @@ async function toEvent(ws) {
     }
 
     const outMessage = await replyHelper.prepareSuccess(message, reply);
+    console.log(outMessage);
     connections
         .getConnections()
         .get(ws.target.jwtDetails.user_id)
         .send(JSON.stringify(outMessage));
   } catch (err) {
+      console.log(err);
     const outMessage = await replyHelper.prepareError(message, err.message);
+    console.log(outMessage);
     connections
         .getConnections()
         .get(ws.target.jwtDetails.user_id)

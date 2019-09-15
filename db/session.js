@@ -7,7 +7,7 @@ module.exports = {
     session.endSession();
   },
   abort: async (session) => {
-    if (!session) {
+    if (!session || session.inTransaction() === false) {
       return;
     }
 

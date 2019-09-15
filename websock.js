@@ -93,7 +93,7 @@ setInterval(function ping() {
     client.is_alive = true;
     client.ping();
   });
-}, 15000);
+}, 1000);
 
 /**
  * Websocket Message handling function

@@ -323,6 +323,7 @@ async function create(message) {
             data: {
               name: check.string,
               desc: check.string,
+              userids: check.array.of.number,
             },
           })
       ),
@@ -331,7 +332,8 @@ async function create(message) {
   reply = await GroupController.create(
       message.user_id,
       message.data.name,
-      message.data.desc
+      message.data.desc,
+      message.data.userids
   );
   return reply;
 }

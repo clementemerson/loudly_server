@@ -14,7 +14,7 @@ const UsersModuleHandlers = require('./modulehandlers/usermodule');
 const GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 const PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
-const localServer = false;
+const localServer = true;
 
 let server;
 if (localServer) {
@@ -81,7 +81,7 @@ wss.on('connection', async (wsClient, req) => {
 });
 
 setInterval(function ping() {
-  console.log(connections.getConnections().keys());
+//   console.log(connections.getConnections().keys());
 
   Array.from(connections.getConnections().values()).forEach(function each(
       client

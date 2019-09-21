@@ -80,6 +80,7 @@ module.exports = {
                 sharedby: message.user_id,
             };
             await UserPolls.shareWithUser(shareWithUser);
+            await redHelper.createPollResult(pollid, data.options, data.time, data.time);
             await dbTransactions.commit(dbsession);
 
             const replyData = {

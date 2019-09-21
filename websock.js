@@ -14,7 +14,7 @@ const UsersModuleHandlers = require('./modulehandlers/usermodule');
 const GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 const PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
-const localServer = true;
+const localServer = false;
 
 let server;
 if (localServer) {

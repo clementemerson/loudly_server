@@ -1,5 +1,5 @@
 const expect = require('expect');
-const testUtil = require('./testutil');
+const testUtil = require('../testutil/testUtil');
 
 const redClient = require('../redis/redclient');
 const mongo = require('../db/mongo');

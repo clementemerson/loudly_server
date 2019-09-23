@@ -1,4 +1,4 @@
-const testUtil = require('./testutil');
+const testUtil = require('../testutil/testUtil');
 
 const dbTransactions = require('../db/session');
 

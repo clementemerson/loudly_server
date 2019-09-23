@@ -5,6 +5,7 @@ const success = require('../helpers/successtousers');
 
 const webSocket = require('./websocket');
 const WSS = require('../websock');
+const mongo = require('../testutil/mongo_connection');
 
 // For Mocking
 const UserPolls = require('../db/userpolls');
@@ -14,7 +15,8 @@ let port = 9001;
 
 beforeAll(async (done) => {
     console.log = () => { };
-    let wss = await WSS.initMainServer(port, () => { });
+    await WSS.initMainServer(port, () => { });
+    await mongo.initDbConnection();
     // red = await testRedis.initTestRedis();
     // await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 5);
     done();

@@ -10,18 +10,20 @@ const clientUser = 'mongoclient';
 const pass = 'knvf532R85HF02SFD4G3YkjJlsFdvnKJeL9847F4F39fnjLi;kzcDvFsd96gPdsPfhRchgsdrfJte5tyGnTdfkgbd4f5nghdGfGjio62tj';
 const dbName = 'loudly';
 
+
+
 module.exports = {
   getDbConnection: () => {
     return mdb;
   },
-  initDbConnection: async () => {
-    const connectionUrl = 'mongodb://loudly.loudspeakerdev.net:27017';
+  initDbConnection: async (url, user, pass, dbName) => {
+    // const connectionUrl = 'mongodb://loudly.loudspeakerdev.net:27017';
     // Create the database connection
-    dbClient = await MongoClient.connect(connectionUrl, {
+    dbClient = await MongoClient.connect(url, {
       poolSize: 10,
       useNewUrlParser: true,
       auth: {
-          user: clientUser,
+          user: user,
           password: pass
       }
       // other options can go here

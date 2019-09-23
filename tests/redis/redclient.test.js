@@ -1,5 +1,6 @@
 const expect = require('expect');
-const testUtil = require('../testutil');
+const testUtil = require('../../testutil/testUtil');
+const testRedis = require('../../testutil/redis_connection');
 
 // Testing
 const redClient = require('../../redis/redclient');
@@ -8,32 +9,10 @@ const redClient = require('../../redis/redclient');
 const redis = require('redis');
 const bluebird = require('bluebird');
 bluebird.promisifyAll(redis);
-
 let red;
-const password = 'jbhfjahfje8243752bdsaBHFJ754KJGNJGDF8673BJGgijuhgjihuuit';
-
-async function initTestRedis() {
-    return new Promise((resolve, reject) => {
-        try {
-            red = redis.createClient(6379, 'loudly.loudspeakerdev.net', { db: 5 });
-            red.on('connect', function () {
-                red.auth(password, () => {
-                    resolve();
-                });
-            });
-
-            red.on('error', function (err) {
-                console.log('Something went wrong ' + err);
-            });
-        } catch (err) {
-            console.log(err);
-            reject(err);
-        }
-    });
-}
 
 beforeAll(async () => {
-    await initTestRedis();
+    red = await testRedis.initTestRedis();
     await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 5);
     console.log = () => { };
 });

@@ -1,21 +1,23 @@
 const expect = require('expect');
-const WebSocket = require('ws');
 
 const errors = require('../helpers/errorstousers');
 const success = require('../helpers/successtousers');
 
 const webSocket = require('./websocket');
+const WSS = require('../websock');
 
-let ws;
+// For Mocking
+const UserPolls = require('../db/userpolls');
 
-function onMessage(data) {
-    console.log(data);
-}
+// Port
+let port = 9001;
 
 beforeAll(async (done) => {
-    
+    console.log = () => { };
+    let wss = await WSS.initMainServer(port, () => { });
+    // red = await testRedis.initTestRedis();
+    // await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 5);
     done();
-    // console.log = () => { };
 });
 
 beforeEach(() => { });
@@ -23,43 +25,68 @@ beforeEach(() => { });
 afterEach(() => { });
 
 afterAll(async () => {
-    await webSocket.close();
+    // await webSocket.close();
 });
 
 describe('getPolls', () => {
     test('should fail, on error', async (done) => {
-        console.log('test1');
-        ws = await webSocket.init();
-        const messageid = 4641;
-        ws.send('{"module":"users", "event":"getsPolls", "messageid":4641}');
-        ws.on('message', function incoming(message) {
-            console.log('receiving messages');
-            console.log(message);
-            const data = JSON.parse(message);
-            if (data.Details.messageid === messageid) {
-                console.log('calling done');
-                done();
-            } else {
-                console.log('not done');
-            }
+        // Mocks
+        UserPolls.getPolls = jest.fn().mockImplementationOnce(() => {
+            throw new Error('');
         });
+        // Tests
+        const ws = await webSocket.init(port);
+        await newFunction(done);
+        // Test Function
+        async function newFunction(done) {
+            // Prepare data to server
+            const messageid = Math.floor(Math.random() * 10000);
+            const dataToServer = {
+                module: 'users',
+                event: 'getPolls',
+                messageid: messageid
+            };
+            ws.send(JSON.stringify(dataToServer));
+            // Wait for the result
+            ws.on('message', function incoming(message) {
+                console.log(message);
+                const data = JSON.parse(message);
+                // Expects
+                if (data.Details.messageid === messageid) {
+                    expect(data.Status).toEqual('Error');
+                    expect(data.Details.data.status).toContain(errors.internalError.message);
+                    ws.close();
+                    done();
+                }
+            });
+        }
     });
 
     test('should return all polls of the user', async (done) => {
-        console.log('test2');
-        ws = await webSocket.init();
-        const messageid = 4641;
-        ws.send('{"module":"users", "event":"getPolls", "messageid":4641}');
-        ws.on('message', function incoming(message) {
-            console.log('receiving messages');
-            console.log(message);
-            const data = JSON.parse(message);
-            if (data.Details.messageid === messageid) {
-                console.log('calling done');
-                done();
-            } else {
-                console.log('not done');
-            }
-        });
+        // Tests
+        const ws = await webSocket.init(port);
+        await newFunction(done);
+        // Test Function
+        async function newFunction(done) {
+            // Prepare data to server
+            const messageid = Math.floor(Math.random() * 10000);
+            const dataToServer = {
+                module: 'users',
+                event: 'getPolls',
+                messageid: messageid
+            };
+            ws.send(JSON.stringify(dataToServer));
+            // Wait for the result
+            ws.on('message', function incoming(message) {
+                console.log(message);
+                const data = JSON.parse(message);
+                // Expects
+                if (data.Details.messageid === messageid) {
+                    expect(data.Status).toEqual('Success');
+                    ws.close();
+                    done();
+                }
+            });
+        }
     });
 });

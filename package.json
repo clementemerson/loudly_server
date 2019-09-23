@@ -8,8 +8,9 @@
     "ws": "nodemon websock.js",
     "fanout": "nodemon fanout.js",
     "uttest": "jest tests --detectOpenHandles",
-    "cc": "jest --coverage --collectCoverageFrom=**/*.js",
-    "apitest": "jest apitests --detectOpenHandles"
+    "cc-ut": "jest tests --coverage --collectCoverageFrom=**/*.js",
+    "apitest": "jest apitests --detectOpenHandles",
+    "cc-api": "jest apitests --coverage --collectCoverageFrom=**/*.js"
   },
   "author": "",
   "license": "ISC",

@@ -169,7 +169,6 @@ module.exports = {
       // Change the msg
       await Users.changeStatusMsg(userid, statusmsg);
       await dbTransactions.commit(dbsession);
-      console.log('commited');
       const replyData = {
         status: success.userStatusChanged,
       };

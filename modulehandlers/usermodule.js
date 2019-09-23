@@ -7,36 +7,36 @@ const errors = require('../helpers/errorstousers');
 const UserController = require('../controllers/UserController');
 
 module.exports = {
-  handle: async (message) => {
-    if (!message) {
-      throw new Error('Invalid Arguments');
-    }
+    handle: async (message) => {
+        if (!message) {
+            throw new Error('Invalid Arguments');
+        }
 
-    let reply;
-    switch (message.event) {
-      case 'getUsersFromPhoneNumbers':
-        reply = await getUsersFromPhoneNumbers(message);
-        break;
-      case 'getGroups':
-        reply = await getGroups(message);
-        break;
-      case 'getPolls':
-        reply = await getPolls(message);
-        break;
-      case 'getInfo':
-        reply = await getInfo(message);
-        break;
-      case 'changeName':
-        reply = await changeName(message);
-        break;
-      case 'changeStatusMsg':
-        reply = await changeStatusMsg(message);
-        break;
-      default:
-        throw new VError(errors.unknownEvent.message);
-    }
-    return reply;
-  },
+        let reply;
+        switch (message.event) {
+            case 'getUsersFromPhoneNumbers':
+                reply = await getUsersFromPhoneNumbers(message);
+                break;
+            case 'getGroups':
+                reply = await getGroups(message);
+                break;
+            case 'getPolls':
+                reply = await getPolls(message);
+                break;
+            case 'getInfo':
+                reply = await getInfo(message);
+                break;
+            case 'changeName':
+                reply = await changeName(message);
+                break;
+            case 'changeStatusMsg':
+                reply = await changeStatusMsg(message);
+                break;
+            default:
+                throw new VError(errors.unknownEvent.message);
+        }
+        return reply;
+    },
 };
 
 /**
@@ -46,22 +46,22 @@ module.exports = {
  * @return {*}
  */
 async function changeStatusMsg(message) {
-  assert.ok(
-      check.all(
-          check.map(message, {
-            user_id: check.number,
-            data: {
-              statusmsg: check.string,
-            },
-          })
-      ),
-      'Invalid message'
-  );
-  reply = await UserController.changeStatusMsg(
-      message.user_id,
-      message.data.statusmsg
-  );
-  return reply;
+    assert.ok(
+        check.all(
+            check.map(message, {
+                user_id: check.number,
+                data: {
+                    statusmsg: check.string,
+                },
+            })
+        ),
+        'Invalid message'
+    );
+    reply = await UserController.changeStatusMsg(
+        message.user_id,
+        message.data.statusmsg
+    );
+    return reply;
 }
 
 /**
@@ -71,19 +71,19 @@ async function changeStatusMsg(message) {
  * @return {*}
  */
 async function changeName(message) {
-  assert.ok(
-      check.all(
-          check.map(message, {
-            user_id: check.number,
-            data: {
-              name: check.string,
-            },
-          })
-      ),
-      'Invalid message'
-  );
-  reply = await UserController.changeName(message.user_id, message.data.name);
-  return reply;
+    assert.ok(
+        check.all(
+            check.map(message, {
+                user_id: check.number,
+                data: {
+                    name: check.string,
+                },
+            })
+        ),
+        'Invalid message'
+    );
+    reply = await UserController.changeName(message.user_id, message.data.name);
+    return reply;
 }
 
 /**
@@ -93,18 +93,18 @@ async function changeName(message) {
  * @return {*}
  */
 async function getInfo(message) {
-  assert.ok(
-      check.all(
-          check.map(message, {
-            data: {
-              user_id: check.array.of.number,
-            },
-          })
-      ),
-      'Invalid message'
-  );
-  reply = await UserController.getInfo(message.data.userids);
-  return reply;
+    assert.ok(
+        check.all(
+            check.map(message, {
+                data: {
+                    userids: check.array.of.number,
+                },
+            })
+        ),
+        'Invalid message'
+    );
+    reply = await UserController.getInfo(message.data.userids);
+    return reply;
 }
 
 /**
@@ -114,16 +114,16 @@ async function getInfo(message) {
  * @return {*}
  */
 async function getPolls(message) {
-  assert.ok(
-      check.all(
-          check.map(message, {
-            user_id: check.number,
-          })
-      ),
-      'Invalid message'
-  );
-  reply = await UserController.getPolls(message.user_id);
-  return reply;
+    assert.ok(
+        check.all(
+            check.map(message, {
+                user_id: check.number,
+            })
+        ),
+        'Invalid message'
+    );
+    reply = await UserController.getPolls(message.user_id);
+    return reply;
 }
 
 /**
@@ -133,16 +133,16 @@ async function getPolls(message) {
  * @return {*}
  */
 async function getGroups(message) {
-  assert.ok(
-      check.all(
-          check.map(message, {
-            user_id: check.number,
-          })
-      ),
-      'Invalid message'
-  );
-  reply = await UserController.getGroups(message.user_id);
-  return reply;
+    assert.ok(
+        check.all(
+            check.map(message, {
+                user_id: check.number,
+            })
+        ),
+        'Invalid message'
+    );
+    reply = await UserController.getGroups(message.user_id);
+    return reply;
 }
 
 /**
@@ -152,20 +152,20 @@ async function getGroups(message) {
  * @return {*}
  */
 async function getUsersFromPhoneNumbers(message) {
-  assert.ok(
-      check.all(
-          check.map(message, {
-            user_id: check.number,
-            data: {
-              phoneNumbers: check.array.of.nonEmptyString,
-            },
-          })
-      ),
-      'Invalid message'
-  );
-  reply = await UserController.getUsersFromPhoneNumbers(
-      message.user_id,
-      message.data.phoneNumbers
-  );
-  return reply;
+    assert.ok(
+        check.all(
+            check.map(message, {
+                user_id: check.number,
+                data: {
+                    phoneNumbers: check.array.of.nonEmptyString,
+                },
+            })
+        ),
+        'Invalid message'
+    );
+    reply = await UserController.getUsersFromPhoneNumbers(
+        message.user_id,
+        message.data.phoneNumbers
+    );
+    return reply;
 }

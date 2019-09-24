@@ -26,15 +26,14 @@ module.exports = {
 
 function stopListening(done) {
     server.close((err) => {
-        if(err === undefined) {
+        if (err === undefined) {
             console.log('Stop listening');
             done();
         }
     });
 }
 
-async function initMainServer(port, done) {
-
+async function initMainServer(port, mongoSettings, redisSettings, done) {
     if (localServer) {
         const http = require('http');
         server = http.createServer();
@@ -52,7 +51,7 @@ async function initMainServer(port, done) {
     }
 
     const wss = new WebSocket.Server({ server });
-    await initDB(port);
+    await initDB(port, mongoSettings, redisSettings);
     initWS(wss);
     watchConnections();
     done(wss);
@@ -208,11 +207,20 @@ async function toEvent(ws) {
  * Init DB
  *
  */
-async function initDB(port) {
+async function initDB(port, mongoSettings, redisSettings) {
     // Init connection with DB
-    await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 0);
+    await redClient.initRedisClient(
+        redisSettings.url,
+        redisSettings.port,
+        redisSettings.db,
+        redisSettings.pwd);
     console.log('Redis connected');
-    await mongo.initDbConnection();
+    await mongo.initDbConnection(
+        mongoSettings.url,
+        mongoSettings.user,
+        mongoSettings.pwd,
+        mongoSettings.db
+    );
     console.log('Mongo connected');
     initServer(port);
 }

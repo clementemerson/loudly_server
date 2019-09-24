@@ -4,18 +4,17 @@ const check = require('check-types');
 
 const redis = require('redis');
 const bluebird = require('bluebird');
-const password = 'jbhfjahfje8243752bdsaBHFJ754KJGNJGDF8673BJGgijuhgjihuuit';
 
 bluebird.promisifyAll(redis);
 let red;
 
 module.exports = {
-    initRedisClient: async (host, port, db) => {
+    initRedisClient: async (host, port, db, pwd) => {
         return new Promise((resolve, reject) => {
             try {
                 red = redis.createClient(port, host, { db: db });
                 red.on('connect', function () {
-                    red.auth(password, () => {
+                    red.auth(pwd, () => {
                         resolve();
                     });
                 });

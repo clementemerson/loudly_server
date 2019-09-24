@@ -14,9 +14,7 @@ module.exports = {
 
   updatePollVoterList: async (data) => {
     console.log('db.pollvoteregister.updatePollVoterList');
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     return await mongodb()
         .collection(dbtables.PollVoteRegister)
@@ -24,8 +22,8 @@ module.exports = {
           pollid: data.pollid,
           user_id: data.user_id,
           votetype: data.secretvote == true ? 'secretvote' : 'openvote',
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: time,
+          updatedAt: time,
         });
   },
 

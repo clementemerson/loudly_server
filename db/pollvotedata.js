@@ -4,9 +4,7 @@ const dbtables = require('./dbtables');
 module.exports = {
   saveVote: async (data) => {
     console.log('db.pollvotedata.saveVote');
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.PollVoteData)
@@ -15,8 +13,8 @@ module.exports = {
           user_id: data.user_id,
           optionindex: data.optionindex,
           secretvote: data.secretvote,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: time,
+          updatedAt: time,
         });
   },
 

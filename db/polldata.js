@@ -4,8 +4,6 @@ const dbtables = require('./dbtables');
 module.exports = {
   create: async (data) => {
     console.log('db.polldata.create');
-    const createdAt = data.time.getTime();
-    const updatedAt = data.time.getTime();
 
     await mongodb()
         .collection(dbtables.PollData)
@@ -17,8 +15,8 @@ module.exports = {
           canbeshared: data.canbeshared,
           createdby: data.createdby,
           options: data.options,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: data.time,
+          updatedAt: data.time,
         });
   },
 
@@ -60,8 +58,7 @@ module.exports = {
 
   delete: async (pollid) => {
     console.log('db.polldata.delete');
-    const date = new Date();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.PollData)
@@ -70,7 +67,7 @@ module.exports = {
             {
               $set: {
                 isdeleted: true,
-                updatedAt: updatedAt,
+                updatedAt: time,
               },
             }
         );

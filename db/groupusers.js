@@ -7,9 +7,7 @@ const redClient = require('../redis/redclient');
 module.exports = {
   addUser: async (data) => {
     console.log('db.groupusers.addUser');
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.GroupUsers)
@@ -18,8 +16,8 @@ module.exports = {
           user_id: data.user_id,
           addedby: data.addedby,
           permission: data.permission,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: time,
+          updatedAt: time,
         });
 
     await redClient.sadd(keyPrefix.usersOfGroup + data.groupid, data.user_id);
@@ -28,8 +26,7 @@ module.exports = {
 
   changeUserPermission: async (data) => {
     console.log('db.groupusers.changeUserPermission');
-    const date = new Date();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.GroupUsers)
@@ -41,7 +38,7 @@ module.exports = {
             {
               $set: {
                 permission: data.permission,
-                updatedAt: updatedAt,
+                updatedAt: time,
               },
             }
         );

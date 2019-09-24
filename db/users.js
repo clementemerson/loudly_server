@@ -7,9 +7,7 @@ const redHelper = require('../redis/redhelper');
 module.exports = {
   insert: async (data) => {
     console.log('db.users.insert');
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.Users)
@@ -17,8 +15,8 @@ module.exports = {
           user_id: data.user_id,
           phonenumber: data.phonenumber,
           user_secret: data.user_secret_hashed,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: time,
+          updatedAt: time,
         });
 
     await redHelper.createUser(data.user_id, data.phonenumber);
@@ -26,9 +24,7 @@ module.exports = {
   // -------------------------------------------------------------------------
   insertInfo: async (data) => {
     console.log('db.users.insertInfo');
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     const existingUsers = await mongodb()
         .collection(dbtables.UsersInfo)
@@ -43,8 +39,8 @@ module.exports = {
             name: '~',
             statusmsg: 'I vote on Loudly',
             phonenumber: data.phonenumber,
-            createdAt: createdAt,
-            updatedAt: updatedAt,
+            createdAt: time,
+            updatedAt: time,
           });
     }
   },
@@ -102,8 +98,7 @@ module.exports = {
 
   changeName: async (userId, name) => {
     console.log('db.users.changeName');
-    const date = new Date();
-    const updatedAt = date.getTime();
+    const updatedAt = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.UsersInfo)
@@ -120,8 +115,7 @@ module.exports = {
 
   changeStatusMsg: async (userId, statusmsg) => {
     console.log('db.users.changeStatusMsg');
-    const date = new Date();
-    const updatedAt = date.getTime();
+    const updatedAt = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.UsersInfo)

@@ -4,9 +4,7 @@ const dbtables = require('./dbtables');
 
 module.exports = {
   insert: function(data) {
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     console.log('db.loginprocess.insert');
     mongodb()
@@ -14,8 +12,8 @@ module.exports = {
         .insertOne({
           session_id: data.session_id,
           phonenumber: data.phonenumber,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: time,
+          updatedAt: time,
         });
   },
   // -------------------------------------------------------------------------

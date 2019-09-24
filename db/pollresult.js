@@ -11,16 +11,13 @@ module.exports = {
       Itr.secretvotes = 0;
     });
 
-    const createdAt = data.time.getTime();
-    const updatedAt = data.time.getTime();
-
     await mongodb()
         .collection(dbtables.PollResult)
         .insertOne({
           pollid: data.pollid,
           options: data.options,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: data.time,
+          updatedAt: data.time,
         });
 
     // await

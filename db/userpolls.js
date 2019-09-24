@@ -4,9 +4,7 @@ const dbtables = require('./dbtables');
 module.exports = {
   shareWithUser: async (data) => {
     console.log('db.userpolls.shareWithUser');
-    const date = new Date();
-    const createdAt = date.getTime();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.UserPolls)
@@ -19,8 +17,8 @@ module.exports = {
               pollid: data.pollid,
               userid: data.user_id,
               sharedby: data.sharedby,
-              createdAt: createdAt,
-              updatedAt: updatedAt,
+              createdAt: time,
+              updatedAt: time,
             },
             {upsert: true}
         );
@@ -38,11 +36,11 @@ module.exports = {
     return polls[0];
   },
 
-  getPolls: async (userId) => {
+  getPolls: async (userid) => {
     console.log('db.userpolls.getPolls');
     return await mongodb()
         .collection(dbtables.UserPolls)
-        .find({userid: userId})
+        .find({userid: userid})
         .toArray();
   },
 };

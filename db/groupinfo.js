@@ -4,8 +4,6 @@ const dbtables = require('./dbtables');
 module.exports = {
   create: async (data) => {
     console.log('db.groupinfo.create');
-    const createdAt = data.time.getTime();
-    const updatedAt = data.time.getTime();
 
     await mongodb()
         .collection(dbtables.GroupInfo)
@@ -14,15 +12,14 @@ module.exports = {
           name: data.name,
           desc: data.desc,
           createdby: data.createdby,
-          createdAt: createdAt,
-          updatedAt: updatedAt,
+          createdAt: data.time,
+          updatedAt: data.time,
         });
   },
 
   changeTitle: async (data) => {
     console.log('db.groupinfo.changeTitle');
-    const date = new Date();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.GroupInfo)
@@ -31,7 +28,7 @@ module.exports = {
             {
               $set: {
                 name: data.name,
-                updatedAt: updatedAt,
+                updatedAt: time,
               },
             }
         );
@@ -39,8 +36,7 @@ module.exports = {
 
   changeDesc: async (data) => {
     console.log('db.groupinfo.changeDesc');
-    const date = new Date();
-    const updatedAt = date.getTime();
+    const time = (new Date()).getTime();
 
     await mongodb()
         .collection(dbtables.GroupInfo)
@@ -49,7 +45,7 @@ module.exports = {
             {
               $set: {
                 desc: data.desc,
-                updatedAt: updatedAt,
+                updatedAt: time,
               },
             }
         );

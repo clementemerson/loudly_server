@@ -6,6 +6,9 @@ const success = require('../helpers/successtousers');
 const webSocket = require('./websocket');
 const WSS = require('../websock');
 
+// Config
+const config = require('../config/apitest');
+
 // For Mocking
 const GroupUsers = require('../db/groupusers');
 
@@ -14,7 +17,7 @@ let port = 9002;
 
 beforeAll(async (done) => {
     console.log = () => { };
-    let wss = await WSS.initMainServer(port, () => { });
+    await WSS.initMainServer(port, config.mongoSettings, config.redisSettings, () => { });
     done();
 });
 

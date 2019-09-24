@@ -1,6 +1,7 @@
 const expect = require('expect');
 const testUtil = require('../../testutil/testUtil');
 const testRedis = require('../../testutil/redis_connection');
+const config = require('../../config/apitest');
 
 // Testing
 const redClient = require('../../redis/redclient');
@@ -13,7 +14,11 @@ let red;
 
 beforeAll(async () => {
     red = await testRedis.initTestRedis();
-    await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 5);
+    await redClient.initRedisClient(
+        config.redisSettings.url,
+        config.redisSettings.port,
+        config.redisSettings.db,
+        config.redisSettings.pwd);
     console.log = () => { };
 });
 
@@ -469,7 +474,7 @@ describe('smembers', () => {
     test('should return all members of the set', async () => {
         // Init Pre-condition
         const key = 'sname';
-        await red.delAsync(key);        
+        await red.delAsync(key);
         await red.saddAsync([key, 'value1']);
         await red.saddAsync([key, 'value2']);
         await red.saddAsync([key, 'value3']);
@@ -518,7 +523,7 @@ describe('sismember', () => {
     test('should return 1, if value exists', async () => {
         // Init Pre-condition
         const key = 'sname';
-        await red.delAsync(key);        
+        await red.delAsync(key);
         await red.saddAsync([key, 'value1']);
         await red.saddAsync([key, 'value2']);
         await red.saddAsync([key, 'value3']);
@@ -533,7 +538,7 @@ describe('sismember', () => {
     test('should return 0, if value does not exists', async () => {
         // Init Pre-condition
         const key = 'sname';
-        await red.delAsync(key);        
+        await red.delAsync(key);
         await red.saddAsync([key, 'value1']);
         await red.saddAsync([key, 'value2']);
         await red.saddAsync([key, 'value3']);

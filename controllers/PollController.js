@@ -67,7 +67,7 @@ module.exports = {
                 canbeshared: message.data.canbeshared,
                 options: message.data.options,
                 createdby: message.user_id,
-                time: new Date(),
+                time: (new Date()).getTime(),
             };
             // Create the poll
             await PollData.create(data);
@@ -85,7 +85,7 @@ module.exports = {
 
             const replyData = {
                 pollid: pollid,
-                createdAt: data.time.getTime(),
+                createdAt: data.time,
                 status: success.successPollCreated,
             };
             return replyData;

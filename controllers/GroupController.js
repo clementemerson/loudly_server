@@ -54,7 +54,7 @@ module.exports = {
         name: name,
         desc: desc,
         createdby: userid,
-        time: new Date(),
+        time: (new Date()).getTime(),
       };
       await GroupInfo.create(groupData);
 
@@ -81,7 +81,7 @@ module.exports = {
 
       const replyData = {
         groupid: groupid,
-        createdAt: groupData.time.getTime(),
+        createdAt: groupData.time,
         status: success.groupCreated,
       };
       return replyData;

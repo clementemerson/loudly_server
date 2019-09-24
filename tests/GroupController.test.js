@@ -195,7 +195,7 @@ describe('create', () => {
             name: name,
             desc: desc,
             createdby: userid,
-            time: new Date(), // Mock
+            time: (new Date()).getTime(),
         };
         expect(GroupInfo.create).toHaveBeenCalledWith(groupData);
         const adminData = {

@@ -17,7 +17,7 @@ const GroupPolls = require('../db/grouppolls');
 
 beforeAll(async () => {
     await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 5);
-    await mongo.initDbConnection();
+    // await mongo.initDbConnection();
     console.log = () => { };
 });
 

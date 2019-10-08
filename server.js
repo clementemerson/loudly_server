@@ -5,15 +5,14 @@ serverapp.use(express.json());
 const mongo = require('./db/mongo');
 const redClient = require('./redis/redclient');
 
-// config
-const listenPort = 8081;
+const config = require('./config/dev');
 
 // Initialize ALL routes including subfolders
 configRoutes();
 
 let server;
 // Init connection with DB and establish connection one by one
-initDB();
+initDB(8081, config.mongoSettings, config.redisSettings);
 
 // --------------------------------------------------------------------------------
 
@@ -29,20 +28,33 @@ function configRoutes() {
  * Init DB
  *
  */
-async function initDB() {
-  // Init connection with DB
-  await redClient.initRedisClient('loudly.loudspeakerdev.net', 6379, 0);
-  console.log('Redis connected');
-  await mongo.initDbConnection();
-  console.log('Mongo connected');
-  initServer();
+/**
+ * Init DB
+ *
+ */
+async function initDB(port, mongoSettings, redisSettings) {
+    // Init connection with DB
+    await redClient.initRedisClient(
+        redisSettings.url,
+        redisSettings.port,
+        redisSettings.db,
+        redisSettings.pwd);
+    console.log('Redis connected');
+    await mongo.initDbConnection(
+        mongoSettings.url,
+        mongoSettings.user,
+        mongoSettings.pwd,
+        mongoSettings.db
+    );
+    console.log('Mongo connected');
+    initServer(port);
 }
 
 /**
  * Listen to external clients
  *
  */
-function initServer() {
+function initServer(listenPort) {
   server = serverapp.listen(listenPort, function() {
     const host = server.address().address;
     const port = server.address().port;

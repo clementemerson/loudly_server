@@ -14,6 +14,9 @@ const UsersModuleHandlers = require('./modulehandlers/usermodule');
 const GroupsModuleHandlers = require('./modulehandlers/groupmodule');
 const PollsModuleHandlers = require('./modulehandlers/pollmodule');
 
+// Config
+const config = require('./config/dev');
+
 const localServer = true;
 let server;
 
@@ -22,7 +25,7 @@ module.exports = {
     stopListening
 }
 
-// initMainServer(8080, () => { });
+initMainServer(8080, config.mongoSettings, config.redisSettings, () => { });
 
 function stopListening(done) {
     server.close((err) => {
@@ -229,10 +232,10 @@ async function initDB(port, mongoSettings, redisSettings) {
  * Listen to external clients
  *
  */
-function initServer(port) {
-    const PORT = process.env.PORT || port;
-    server.listen(PORT, async () => {
-        console.log('Websocket Server started at', PORT);
-        // console.log = () => {};
+function initServer(listenPort) {
+    server.listen(listenPort, function() {
+      const host = server.address().address;
+      const port = server.address().port;
+      console.log('Example app listening at http://%s:%s', host, port);
     });
-}
+  }

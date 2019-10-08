@@ -53,12 +53,12 @@ module.exports = {
         return await multiCmd.execAsync();
     },
     scan: async (cursor, keyMatch) => {
-        if (check.number(cursor) === false)
-            throw new VError('argument \'cursor\' must be a number');
+        // if (check.number(cursor) === false)
+        //     throw new VError('argument \'cursor\' must be a number');
         if (check.string(keyMatch) === false)
             throw new VError('argument \'keyMatch\' must be a string');
 
-        return await red.scanAsync(cursor, 'MATCH', match);
+        return await red.scanAsync(cursor, 'MATCH', keyMatch);
     },
     del: async (key) => {
         if (check.string(key) === false) {
